@@ -1,0 +1,13 @@
+seaborn
+nbconvert<7
+matplotlib
+pandas
+numpy
+plotly
+tabulate
+itables==1.6.4
+python-highcharts
+jupyter
+pandas
+scikit-learn
+statsmodels
