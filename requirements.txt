@@ -11,3 +11,4 @@ jupyter
 pandas
 scikit-learn
 statsmodels
+pretty_jupyter==2.0.7
