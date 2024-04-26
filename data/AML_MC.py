@@ -17,7 +17,7 @@
 # %load_ext pretty_jupyter
 
 # %% [markdown]
-# # Introduction
+# ## Introduction
 #
 # In diesem Notebook wenden wir Applied Machine Learning (AML) Techniken an, um effektive Strategien für personalisierte Kreditkarten-Werbekampagnen zu entwickeln. Unser Ziel ist es, mithilfe von Kunden- und Transaktionsdaten präzise Modelle zu erstellen, die die Wahrscheinlichkeit des Kreditkartenkaufs vorhersagen.
 
@@ -475,6 +475,9 @@ for df_name, df in data_frames.items():
     print(df.isna().sum().sum())  # Sum of all missing values in the DataFrame
 
 
+# %% [markdown]
+# ## Merge the Dataframe['XXX'] for non transaction Data
+
 # %%
 # merge dataframes
 
@@ -609,6 +612,9 @@ num_accounts_after = len(non_transactional_data)
 num_junior_cards = num_accounts_before - num_accounts_after
 print(f"Number of junior cards removed: {num_junior_cards}")
 
+
+# %% [markdown]
+#
 
 # %% [markdown]
 # ## Convert the Notebook always to a py file and vis versa
