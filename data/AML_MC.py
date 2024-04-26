@@ -1,29 +1,29 @@
-# %%
-title:  AML Challenge 2024
-date: "Generated: {{ datetime.now().strftime('%Y-%m-%d') }}"
-author: Etienne Roulet Alex Sha
-output:
-    general:
-        input_jinja: true
-    html:
-        code_folding: hide
-        code_tools: true
-        theme: readable
+# %% [raw]
+# title:  AML Challenge 2024
+# date: "Generated: {{ datetime.now().strftime('%Y-%m-%d') }}"
+# author: Etienne Roulet Alex Sha
+# output:
+#     general:
+#         input_jinja: true
+#     html:
+#         code_folding: hide
+#         code_tools: true
+#         theme: readable
 
 # %%
-%pip install -r ../requirements.txt
+# %pip install -r ../requirements.txt
 
 # %%
-%load_ext pretty_jupyter
+# %load_ext pretty_jupyter
 
 # %% [markdown]
 # # Introduction
-# 
+#
 # In diesem Notebook wenden wir Applied Machine Learning (AML) Techniken an, um effektive Strategien für personalisierte Kreditkarten-Werbekampagnen zu entwickeln. Unser Ziel ist es, mithilfe von Kunden- und Transaktionsdaten präzise Modelle zu erstellen, die die Wahrscheinlichkeit des Kreditkartenkaufs vorhersagen.
 
 # %% [markdown]
 # ## Lib Importing
-# 
+#
 
 # %%
 import pandas as pd
@@ -37,13 +37,14 @@ from sklearn import metrics
 from sklearn.preprocessing import StandardScaler
 from itables import init_notebook_mode
 from datetime import datetime
+from IPython.display import display
 
 init_notebook_mode(all_interactive=True)
 
 # %% [markdown]
 # ## Load the Data
-# 
-# 
+#
+#
 
 # %%
 account = pd.read_csv("account.csv", sep=";", dtype={"date": "str"})
@@ -127,7 +128,7 @@ data_frames = {}
 
 # %% [markdown]
 # ### Account
-# 
+#
 
 # %%
 # Frequency Transformation
@@ -210,7 +211,7 @@ disp.sample(n=5)
 
 # %% [markdown]
 # ### District
-# 
+#
 
 # %% [markdown]
 # - A1 district_id/district code
@@ -341,7 +342,10 @@ loan.sample(n=100)
 
 # %% [markdown]
 # ### Order
-# 
+#
+
+# %%
+order
 
 # %%
 # Assuming 'order' and 'account' DataFrames are already loaded
@@ -349,53 +353,48 @@ loan.sample(n=100)
 # Correctly map and fill missing values in 'k_symbol' column
 order["k_symbol"] = (
     order["k_symbol"]
-    .map({"POJISTNE": "Insurance Payment", "SIPO": "Household", "UVER": "Loan Payment"})
-    .fillna("UNKNOWN")
+    .map(
+        {
+            "POJISTNE": "insurance_payment",
+            "SIPO": "household",
+            "UVER": "loan_payment",
+            "LEASING": "leasing",
+        }
+    )
+    .fillna("unknown")
 )
 
 # Merge with 'account_id_df' to ensure all accounts are represented
 order = pd.merge(account[["account_id"]], order, on="account_id", how="left")
 
 # After merging, fill missing values that may have been introduced
-order["k_symbol"] = order["k_symbol"].fillna("UNKNOWN")
+order["k_symbol"] = order["k_symbol"].fillna("unknown")
 order["amount"] = order["amount"].fillna(0)
 order["has_order"] = ~order.isna().any(axis=1)
 
-# Aggregate 'amount' information
-aggregated_amount = (
-    order.groupby("account_id")
-    .agg(
-        sum_amount=("amount", "sum"),
-        mean_amount=("amount", "mean"),
-        median_amount=("amount", "median"),
-        min_amount=("amount", "min"),
-        max_amount=("amount", "max"),
-        num_of_orders=("amount", lambda x: (x != 0).sum()),
-    )
-    .reset_index()
-)
-aggregated_amount["has_order"] = aggregated_amount["sum_amount"] != 0
-
-# Create dummies for 'k_symbol' and ensure aggregation by 'account_id'
-dummies_k_symbol = pd.get_dummies(
-    order[["account_id", "k_symbol"]], columns=["k_symbol"], prefix="", prefix_sep=""
-)
-dummies_k_symbol = dummies_k_symbol.groupby("account_id").sum().reset_index()
-
-# Merge 'aggregated_amount' and 'dummies_k_symbol'
-merged_order = pd.merge(
-    aggregated_amount, dummies_k_symbol, on="account_id", how="left"
+orders_pivot = order.pivot_table(
+    index="account_id", columns="k_symbol", values="amount", aggfunc="sum"
 )
 
+# Add prefix to column names
+orders_pivot.columns = orders_pivot.columns
+
+
+orders_pivot = orders_pivot.reset_index()
 # Assuming data_frames is a dictionary for storing DataFrames
-data_frames["order.csv"] = merged_order
+data_frames["order.csv"] = orders_pivot
 
+# NaN to 0
+data_frames["order.csv"] = data_frames["order.csv"].fillna(0)
 # Sample 5 random rows from the merged DataFrame
-merged_order.sample(n=5)
+data_frames["order.csv"].sample(n=10)
+
+# %%
+data_frames["order.csv"].columns
 
 # %% [markdown]
 # ### Trans
-# 
+#
 
 # %%
 # Convert 'date' from string to datetime
@@ -475,24 +474,174 @@ for df_name, df in data_frames.items():
     print(f"Missing values in {df_name}:")
     print(df.isna().sum().sum())  # Sum of all missing values in the DataFrame
 
+
+# %%
+# merge dataframes
+
+
+non_transactional_data = (
+    data_frames["disp.csv"]
+    .add_suffix("_disp")
+    .merge(
+        data_frames["account.csv"].add_suffix("_account"),
+        left_on="account_id_disp",
+        right_on="account_id_account",
+        how="left",
+    )
+    .merge(
+        data_frames["card.csv"].add_suffix("_card"),
+        left_on="disp_id_disp",
+        right_on="disp_id_card",
+        how="left",
+    )
+    .merge(
+        data_frames["loan.csv"].add_suffix("_loan"),
+        left_on="account_id_disp",
+        right_on="account_id_loan",
+        how="left",
+    )
+    .merge(
+        data_frames["order.csv"].add_suffix("_order"),
+        left_on="account_id_disp",
+        right_on="account_id_order",
+        how="left",
+    )
+)
+
+
+# %%
+non_transactional_data.columns
+
+# %% With the merge we got NaN values in the columns, we have to clean them
+cols_to_replace_na = [
+    "household_order",
+    "insurance_payment_order",
+    "loan_payment_order",
+    "leasing_order",
+    "unknown_order",
+]
+
+non_transactional_data[cols_to_replace_na] = non_transactional_data[
+    cols_to_replace_na
+].fillna(0)
+
+
+# %%
+# ## Dropping of Junior Cards that are not on the edge to a normal card Analyse
+#
+# join disctrict and client left join on district_id
+non_transactional_data = non_transactional_data.merge(
+    data_frames["district.csv"],
+    left_on="district_id_account",
+    right_on="district_id",
+    how="left",
+)
+
+# %%
+non_transactional_data
+
+# %%
+# merge client with suffix
+non_transactional_data = non_transactional_data.merge(
+    data_frames["client.csv"].add_suffix("_client"),
+    left_on="client_id_disp",
+    right_on="client_id_client",
+    how="left",
+)
+
+
+# %%
+non_transactional_data["has_card"] = ~non_transactional_data["card_id_card"].isna()
+
+# Filter rows where 'has_card' is True
+filtered_data = non_transactional_data[non_transactional_data["has_card"]]
+
+# Check if there are duplicated 'account_id' in the filtered data
+duplicated_account_id = filtered_data["account_id_account"].duplicated().sum()
+
+print(duplicated_account_id)
+
+
+
 # %% [markdown]
-# ## Dropping of Junior Cards that are not on the edge to a normal card
-# 
+# ### Junior Cards removal
 
 # %%
-data_frames.keys()
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
+display(non_transactional_data)
+
+# Filter rows where 'card_type' contains 'junior' (case insensitive)
+junior_cards = non_transactional_data[
+    non_transactional_data["type_card"].str.contains("junior", case=False, na=False)
+]
+
+display(junior_cards)
+
+# Calculate age at issue
+junior_cards["age_at_issue"] = (
+    junior_cards["issued_card"] - junior_cards["birth_day_client"]
+).dt.days // 365
+
+# Plot histogram
+plt.figure(figsize=(10, 6))
+sns.histplot(data=junior_cards, x="age_at_issue", bins=20)
+plt.title("Age distribution at issue date of junior cards")
+plt.xlabel("Age at issue date")
+plt.ylabel("Number of cards")
+plt.show()
+
+
+# %% [markdown]
+# In the advertising campaign, we do not want to promote children's/junior cards (for whatever reasons). First, I looked at the distribution of age at issuance. Here I see that there are not many junior cards, nor are the cards issued at a late age.
 
 # %%
-# join the dataframes
+num_accounts_before = len(non_transactional_data)
+# Filter rows where 'card_type' does not contain 'junior' (case insensitive)
+non_transactional_data = non_transactional_data[
+    ~non_transactional_data["type_card"].str.contains("junior", case=False, na=False)
+]
+num_accounts_after = len(non_transactional_data)
+num_junior_cards = num_accounts_before - num_accounts_after
+print(f"Number of junior cards removed: {num_junior_cards}")
 
+
+# %% [markdown]
+# ## Convert the Notebook always to a py file and vis versa
 
 # %%
-!jupytext --to notebook clean-tech-rag.py
-# commxand with os
-os.system("jupytext --to notebook AML_MC.py")
+import subprocess
+import pathlib
+
+
+try:
+    file_path = pathlib.Path(os.path.basename(__file__))
+except:
+    file_path = pathlib.Path("AML_MC.ipynb")
+
+# Check the file extension
+if file_path.suffix == ".py":
+    # If it's a Python script, convert it to a notebook
+    try:
+        subprocess.check_output(["jupytext", "--to", "notebook", str(file_path)])
+        print("Converted to notebook.")
+    except subprocess.CalledProcessError as e:
+        print("Conversion failed. Error message:", e.output)
+elif file_path.suffix == ".ipynb":
+    # If it's a notebook, convert it to a Python script with cell markers
+    try:
+        subprocess.check_output(["jupytext", "--to", "py:percent", str(file_path)])
+        print("Converted to Python script.")
+    except subprocess.CalledProcessError as e:
+        print("Conversion failed. Error message:", e.output)
+else:
+    print("Unsupported file type.")
 
 # %%
-!jupyter nbconvert --to html --template pj "clean-tech-rag.ipynb"
 # command with os
 os.system("jupyter nbconvert --to html --template pj AML_MC.ipynb")
 
