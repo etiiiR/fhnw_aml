@@ -1,4 +1,4 @@
-# + active=""
+# %% [raw]
 # title:  AML Challenge 2024
 # date: "Generated: {{ datetime.now().strftime('%Y-%m-%d') }}"
 # author: Etienne Roulet, Alexander Shanmugam
@@ -9,17 +9,20 @@
 #         code_folding: hide
 #         code_tools: true
 #         theme: readable
-# -
 
+# %% [markdown]
 # # Setup
+# Die folgenden Code-Blöcke können genutzt werden, um die benötigten Abhängigkeiten zu installieren und zu importieren.
 
+# %%
 # %%capture
 # %pip install -r ../requirements.txt
 
+# %%
 # %%capture
 # %load_ext pretty_jupyter
 
-# +
+# %%
 # %%capture
 # Laden der eingesetzten Libraries
 import pandas as pd
@@ -37,12 +40,13 @@ from IPython.display import display
 import sweetviz as sv
 
 init_notebook_mode(all_interactive=True)
-# -
 
+# %% [markdown]
 # # Aufgabenstellung
 # Inhalt der hier bearbeiteten und dokumentierten Mini-Challenge für das Modul «aml - Angewandtes Machine Learning» der FHNW ist die Entwicklung und Evaluierung von Aﬀinitätsmodellen für personalisierte Kreditkarten-Werbekampagnen im Auftrag einer Bank. Das Ziel der Authoren ist es also, mithilfe von Kunden- und Transaktionsdaten präzise Modelle zu erstellen, die die Wahrscheinlichkeit des Kreditkartenkaufs einer bestimmten Person vorhersagen.
 
-# +
+# %%
+# %%capture
 import pandas as pd
 import os
 import numpy as np
@@ -58,38 +62,25 @@ from IPython.display import display
 import sweetviz as sv
 
 init_notebook_mode(all_interactive=True)
-# -
 
-# ## Laden der zur Verfügung gestellten Daten
-# Zur Verfügung gestellt wurden 8 csv-Dateien von welchen die Beschreibung der erfassten Variablen unter dem folgenden Link eingesehen werden können: [PKDD'99 Discovery Challenge - Guide to the Financial Data Set](https://sorry.vse.cz/~berka/challenge/PAST/index.html). Nachfolgend werden diese csv-Dateien eingelesen.
+# %% [markdown]
+# # Laden der zur Verfügung gestellten Daten
+# [//]: # (-.- .tabset)
 #
+# Zur Verfügung gestellt wurden 8 csv-Dateien von welchen die Beschreibung der erfassten Variablen unter dem folgenden Link eingesehen werden können: [PKDD'99 Discovery Challenge - Guide to the Financial Data Set](https://sorry.vse.cz/~berka/challenge/PAST/index.html). Nachfolgend werden diese csv-Dateien eingelesen.
 
-# +
+
+# %%
 account = pd.read_csv("account.csv", sep=";", dtype={"date": "str"})
-account["date"] = pd.to_datetime(account["date"], format="%y%m%d")
-
 card = pd.read_csv("card.csv", sep=";", dtype={"issued": "str"})
-# Man kann die Zeit weglassen da immer 00:00:00
-card["issued"] = pd.to_datetime(card["issued"].str[:6], format="%y%m%d")
-
 client = pd.read_csv("client.csv", sep=";")
 disp = pd.read_csv("disp.csv", sep=";")
 district = pd.read_csv("district.csv", sep=";")
-
 loan = pd.read_csv("loan.csv", sep=";", dtype={"date": "str"})
-loan["date"] = pd.to_datetime(loan["date"], format="%y%m%d")
-
-
 order = pd.read_csv("order.csv", sep=";")
-
 trans = pd.read_csv("trans.csv", sep=";", dtype={"date": "str", "bank": "str"})
-trans["date"] = pd.to_datetime(trans["date"], format="%y%m%d")
-# -
 
-# # Explorative Datenanalyse
-# [//]: # (-.- .tabset)
-# In diesem Abschnitt wird mittels EDA ein Überblick über die eingelesenen Daten gewonnen. 
-
+# %% [markdown]
 # ## account.csv
 # Der Datensatz `accounts.csv` beinhaltet die folgenden Informationen über die Kontos der Bank:  
 # - `account_id`: die Kontonummer, 
@@ -97,12 +88,10 @@ trans["date"] = pd.to_datetime(trans["date"], format="%y%m%d")
 # - `issuance_statement_frequency`: die Frequenz der Ausstellung von Kontoauszügen (monatlich, wöchentlich, pro Transaktion) und 
 # - `date`: das Erstellungsdatum
 
+# %%
 account.info()
 
-# %%capture
-svReport_account = sv.analyze(account)
-svReport_account.show_html(filepath = "./reports/accounts.html", open_browser = False)
-
+# %% [markdown]
 # ## card.csv
 # Der Datensatz `card.csv` beinhaltet die folgenden Informationen über die von der Bank herausgegebenen Kreditkarten:  
 # - `card_id`: die Kartennummer, 
@@ -110,24 +99,20 @@ svReport_account.show_html(filepath = "./reports/accounts.html", open_browser = 
 # - `type`: die Art der Kreditkarte (junior, classic, gold) und 
 # - `issued`: das Ausstellungsdatum
 
+# %%
 card.info()
 
-# %%capture
-svReport_card = sv.analyze(card)
-svReport_card.show_html(filepath = "./reports/card.html", open_browser = False)
-
+# %% [markdown]
 # ## client.csv
 # Der Datensatz `client.csv` beinhaltet die folgenden Informationen über die Kunden der Bank:  
 # - `client_id`: die Kundennummer, 
 # - `birth_number`: eine Kombination aus Geburtsdatum und Geschlecht sowie
 # - `district_id`: die Adresse  
 
+# %%
 client.info()
 
-# %%capture
-svReport_client = sv.analyze(client)
-svReport_client.show_html(filepath = "./reports/client.html", open_browser = False)
-
+# %% [markdown]
 # ## disp.csv
 # Der Datensatz `disp.csv` beinhaltet die folgenden Informationen über die Dispositionen der Bank:  
 # - `disp_id`: der Identifikationsschlüssel der Disposition,
@@ -135,12 +120,10 @@ svReport_client.show_html(filepath = "./reports/client.html", open_browser = Fal
 # - `account_id`: die Kontonummer,
 # - `type`: die Art der Disposition (Inhaber, Benutzer)
 
+# %%
 disp.info()
 
-# %%capture
-svReport_disp = sv.analyze(disp)
-svReport_disp.show_html(filepath = "./reports/disp.html", open_browser = False)
-
+# %% [markdown]
 # ## district.csv
 # Der Datensatz `district.csv` beinhaltet die folgenden demografischen Informationen:  
 # - `A1`: die ID des Distrikts, 
@@ -160,12 +143,10 @@ svReport_disp.show_html(filepath = "./reports/disp.html", open_browser = False)
 # - `A15`: die Anzahl von begangenen Verbrechen im Jahr 95,
 # - `A16`: die Anzahl von begangenen Verbrechen im Jahr 96,
 
+# %%
 district.info()
 
-# %%capture
-svReport_district = sv.analyze(district)
-svReport_district.show_html(filepath = "./reports/district.html", open_browser = False)
-
+# %% [markdown]
 # ## loan.csv
 # Der Datensatz `loan.csv` beinhaltet die folgenden Informationen über die vergebenen Darlehen der Bank:  
 # - `loan_id`: ID des Darlehens,
@@ -176,12 +157,10 @@ svReport_district.show_html(filepath = "./reports/district.html", open_browser =
 # - `payments`: die höhe der monatlichen Zahlungen und
 # - `status`: der Rückzahlungsstatus (A: ausgeglichen, B: Vertrag abgelaufen aber nicht fertig bezahlt, C: laufender Vertrag und alles in Ordnung, D: laufender Vertrag und Kunde verschuldet)
 
+# %%
 loan.info()
 
-# %%capture
-svReport_loan = sv.analyze(loan)
-svReport_loan.show_html(filepath = "./reports/loan.html", open_browser = False)
-
+# %% [markdown]
 # ## order.csv
 # Der Datensatz `order.csv` beinhaltet die folgenden Informationen über die Daueraufträge eines Kontos:  
 # - `order_id`: die Nummer des Dauerauftrags,
@@ -191,12 +170,10 @@ svReport_loan.show_html(filepath = "./reports/loan.html", open_browser = False)
 # - `amount`: der Betrag,
 # - `k_symbol`: die Art des Auftrags (Versicherungszahlung, Haushalt, Leasing, Darlehen)
 
+# %%
 order.info()
 
-# %%capture
-svReport_order = sv.analyze(order)
-svReport_order.show_html(filepath = "./reports/order.html", open_browser = False)
-
+# %% [markdown]
 # ## trans.csv
 # Der Datensatz `trans.csv` beinhaltet die folgenden Informationen über die Transaktionen eines Kontos:  
 # - `trans_id`: die ID der Transaktion,
@@ -210,21 +187,23 @@ svReport_order.show_html(filepath = "./reports/order.html", open_browser = False
 # - `bank`: die empfangende Bank und 
 # - `account`: das empfangende Bankkonto
 
+# %%
 trans.info()
 
-# %%capture
-svReport_trans = sv.analyze(trans)
-svReport_trans.show_html(filepath = "./reports/trans.html", open_browser = False)
-
-# # Transformations
+# %% [markdown]
+# # Transformationen 
 # [//]: # (-.- .tabset)
+#
+# Im folgenden Abschnitt werden die geladenen Daten einzeln so transformiert, dass jede Zeile einer Observation und jede Spalte einer Variable im entsprechenden Datenformat entspricht.
 
+# %%
 data_frames = {}
 
+# %% [markdown]
 # ## Account
-#
 
-# +
+# %%
+account["date"] = pd.to_datetime(account["date"], format="%y%m%d")
 # Frequency Transformation
 account["frequency"] = account["frequency"].replace(
     {
@@ -245,17 +224,30 @@ data_frames["account.csv"] = account
 
 # Sample 5 random rows
 account.sample(n=5)
-# -
 
+# %%
+# %%capture
+svReport_account = sv.analyze(account)
+svReport_account.show_html(filepath = "./reports/accounts.html", open_browser = False)
+
+# %% [markdown]
 # ## Card
 
+# %%
+# Man kann die Zeit weglassen da immer 00:00:00
+card["issued"] = pd.to_datetime(card["issued"].str[:6], format="%y%m%d")
 card["issued"] = pd.to_datetime(card["issued"], format="mixed")
 data_frames["card.csv"] = card
 
+# %%
+# %%capture
+svReport_card = sv.analyze(card)
+svReport_card.show_html(filepath = "./reports/card.html", open_browser = False)
 
+# %% [markdown]
 # ## Client
 
-# +
+# %%
 # Funktion zur Bestimmung des Geschlechts und Berechnung des Geburtstags
 def parse_details(birth_number):
     birth_number_str = str(
@@ -292,20 +284,30 @@ data_frames["client.csv"] = client
 # Auswahl spezifischer Spalten für die finale DataFrame (optional, je nach Bedarf)
 # Sample 5 random rows
 client.sample(n=5)
-# -
 
+# %%
+# %%capture
+svReport_client = sv.analyze(client)
+svReport_client.show_html(filepath = "./reports/client.html", open_browser = False)
+
+# %% [markdown]
 # ## Disp
 
-# +
+# %%
 data_frames["disp.csv"] = disp
 
 # random sample
 disp.sample(n=5)
-# -
 
+# %%
+# %%capture
+svReport_disp = sv.analyze(disp)
+svReport_disp.show_html(filepath = "./reports/disp.html", open_browser = False)
+
+# %% [markdown]
 # ## District
 #
-
+#
 # - A1 district_id/district code
 # - A2 district name
 # - A3 region
@@ -322,11 +324,8 @@ disp.sample(n=5)
 # - A15 no. of commited crimes ’95
 # - A16 no. of commited crimes ’96
 
-# +
+# %%
 import pandas as pd
-
-# Assuming 'district' is your pandas DataFrame
-
 # Renaming and selecting columns
 district = district.rename(
     columns={
@@ -372,11 +371,12 @@ data_frames["district.csv"] = district
 
 district.sample(n=5)
 district
-# -
 
+# %%
 # find the ? in the district dataframe
 district[district.isin(["?"]).any(axis=1)]
 
+# %%
 # replace the ? with NaN
 district = district.replace("?", np.nan)
 
@@ -392,9 +392,16 @@ district["unemploy_rate95"] = district["unemploy_rate95"].fillna(
 # check if there are still NaN values in no_of_crimes95 and unemploy_rate95
 district[district.isin([np.nan]).any(axis=1)]
 
+# %%
+# %%capture
+svReport_district = sv.analyze(district)
+svReport_district.show_html(filepath = "./reports/district.html", open_browser = False)
+
+# %% [markdown]
 # ## Loan
 
-# +
+# %%
+loan["date"] = pd.to_datetime(loan["date"], format="%y%m%d")
 # Convert the 'date' column to datetime format
 loan["date"] = pd.to_datetime(loan["date"], format="mixed")
 
@@ -419,7 +426,7 @@ num_of_loan_df = (
 # Display the resulting DataFrame
 num_of_loan_df
 
-# +
+# %%
 # Perform an inner join between 'loan' and 'num_of_loan_df' on 'account_id'
 loan = pd.merge(loan, num_of_loan_df, on="account_id", how="inner")
 
@@ -428,14 +435,19 @@ data_frames["loan.csv"] = loan
 
 # Sample 5 random rows from the joined DataFrame
 loan.sample(n=100)
-# -
 
+# %%
+# %%capture
+svReport_loan = sv.analyze(loan)
+svReport_loan.show_html(filepath = "./reports/loan.html", open_browser = False)
+
+# %% [markdown]
 # ## Order
 #
-
+# %%
 order
 
-# +
+# %%
 # Assuming 'order' and 'account' DataFrames are already loaded
 
 # Correctly map and fill missing values in 'k_symbol' column
@@ -476,14 +488,21 @@ data_frames["order.csv"] = orders_pivot
 data_frames["order.csv"] = data_frames["order.csv"].fillna(0)
 # Sample 5 random rows from the merged DataFrame
 data_frames["order.csv"].sample(n=10)
-# -
 
+# %%
 data_frames["order.csv"].columns
 
+# %%
+# %%capture
+svReport_order = sv.analyze(order)
+svReport_order.show_html(filepath = "./reports/order.html", open_browser = False)
+
+# %% [markdown]
 # ## Trans
 #
 
-# +
+# %%
+trans["date"] = pd.to_datetime(trans["date"], format="%y%m%d")
 # Convert 'date' from string to datetime
 trans["date"] = pd.to_datetime(trans["date"])
 
@@ -525,7 +544,7 @@ data_frames["trans.csv"] = trans
 trans.sample(n=1000)
 trans
 
-# +
+# %%
 # Plot Zeitliche Entwicklung des Konto-Saldos für die Konto nummer 19
 account_19 = trans[trans["account_id"] == 19].copy()  # Create a copy of the DataFrame
 # Ensure the date column is in datetime format
@@ -540,8 +559,8 @@ plt.title("Time evolution of balance for account number 19")
 plt.xlabel("Date")
 plt.ylabel("Balance")
 plt.show()
-# -
 
+# %%
 # zoom the year 1995 of the plot
 account_19_1995 = account_19[account_19["date"].dt.year == 1995]
 # plot it
@@ -554,18 +573,29 @@ plt.show()
 
 # Wee see that there is a steep line in 1995-10 so there are two transactions, this we have to clean.
 
+# %%
+# %%capture
+svReport_trans = sv.analyze(trans)
+svReport_trans.show_html(filepath = "./reports/trans.html", open_browser = False)
+
+# %% [markdown]
+# # Explorative Datenanalyse
+# In diesem Abschnitt wird mittels EDA ein Überblick über die eingelesenen Daten gewonnen.
+
+# %% [markdown]
 # # D&Q
 
+# %%
 # Check for missing values in each DataFrame
 for df_name, df in data_frames.items():
     print(f"Missing values in {df_name}:")
     print(df.isna().sum().sum())  # Sum of all missing values in the DataFrame
 
+# %% [markdown]
 # # Merge the Dataframe['XXX'] for non transaction Data
 
-# +
+# %%
 # merge dataframes
-
 
 non_transactional_data = (
     data_frames["disp.csv"]
@@ -595,11 +625,11 @@ non_transactional_data = (
         how="left",
     )
 )
-# -
 
+# %%
 non_transactional_data.columns
 
-# +
+# %%
 cols_to_replace_na = [
     "household_order",
     "insurance_payment_order",
@@ -611,11 +641,13 @@ cols_to_replace_na = [
 non_transactional_data[cols_to_replace_na] = non_transactional_data[
     cols_to_replace_na
 ].fillna(0)
-# -
 
+# %% [markdown]
 # ## Dropping of Junior Cards that are not on the edge to a normal card Analyse
 #
-# join disctrict and client left join on district_id
+
+# %%
+# join district and client left join on district_id
 non_transactional_data = non_transactional_data.merge(
     data_frames["district.csv"],
     left_on="district_id_account",
@@ -625,6 +657,7 @@ non_transactional_data = non_transactional_data.merge(
 
 non_transactional_data
 
+# %%
 # merge client with suffix
 non_transactional_data = non_transactional_data.merge(
     data_frames["client.csv"].add_suffix("_client"),
@@ -633,7 +666,7 @@ non_transactional_data = non_transactional_data.merge(
     how="left",
 )
 
-# +
+# %%
 non_transactional_data["has_card"] = ~non_transactional_data["card_id_card"].isna()
 
 # Filter rows where 'has_card' is True
@@ -645,16 +678,14 @@ duplicated_account_id = filtered_data["account_id_account"].duplicated().sum()
 print(duplicated_account_id)
 
 
-# -
-
+# %% [markdown]
+#
 # ## Junior Cards removal
 
-# +
-import pandas as pd
+# %%
 import matplotlib.pyplot as plt
 import seaborn as sns
 from datetime import datetime
-from dateutil.relativedelta import relativedelta
 
 display(non_transactional_data)
 
@@ -677,8 +708,8 @@ plt.title("Age distribution at issue date of junior cards")
 plt.xlabel("Age at issue date")
 plt.ylabel("Number of cards")
 plt.show()
-# -
 
+# %%
 # In the advertising campaign, we do not want to promote children's/junior cards (for whatever reasons). First, I looked at the distribution of age at issuance. Here I see that there are not many junior cards, nor are the cards issued at a late age.
 
 num_accounts_before = len(non_transactional_data)
@@ -690,38 +721,38 @@ num_accounts_after = len(non_transactional_data)
 num_junior_cards = num_accounts_before - num_accounts_after
 print(f"Number of junior cards removed: {num_junior_cards}")
 
-#
 
+# %% [markdown]
 # # Convert the Notebook always to a py file and vice versa
 
-# +
-# import subprocess
-# import pathlib
+# %%
+import subprocess
+import pathlib
 
 
-# try:
-#     file_path = pathlib.Path(os.path.basename(__file__))
-# except:
-#     file_path = pathlib.Path("AML_MC.ipynb")
+try:
+    file_path = pathlib.Path(os.path.basename(__file__))
+except:
+    file_path = pathlib.Path("AML_MC.ipynb")
 
 # Check the file extension
-# if file_path.suffix == ".py":
-#     # If it's a Python script, convert it to a notebook
-#    try:
-#         subprocess.check_output(["jupytext", "--to", "notebook", str(file_path)])
-#         print("Converted to notebook.")
-#     except subprocess.CalledProcessError as e:
-#         print("Conversion failed. Error message:", e.output)
-# elif file_path.suffix == ".ipynb":
-#     # If it's a notebook, convert it to a Python script with cell markers
-#     try:
-#         subprocess.check_output(["jupytext", "--to", "py:percent", str(file_path)])
-#         print("Converted to Python script.")
-#     except subprocess.CalledProcessError as e:
-#         print("Conversion failed. Error message:", e.output)
-# else:
-#     print("Unsupported file type.")
+if file_path.suffix == ".py":
+    # If it's a Python script, convert it to a notebook
+    try:
+        subprocess.check_output(["jupytext", "--to", "notebook", str(file_path)])
+        print("Converted to notebook.")
+    except subprocess.CalledProcessError as e:
+        print("Conversion failed. Error message:", e.output)
+elif file_path.suffix == ".ipynb":
+    # If it's a notebook, convert it to a Python script with cell markers
+    try:
+        subprocess.check_output(["jupytext", "--to", "py:percent", str(file_path)])
+        print("Converted to Python script.")
+    except subprocess.CalledProcessError as e:
+        print("Conversion failed. Error message:", e.output)
+else:
+    print("Unsupported file type.")
 
-# +
-# command with os
-# os.system("jupyter nbconvert --to html --template pj AML_MC.ipynb")
+# %%
+# Update html output
+os.system("jupyter nbconvert --to html --template pj AML_MC.ipynb")
