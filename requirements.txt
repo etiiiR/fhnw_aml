@@ -12,5 +12,5 @@ pandas
 scikit-learn
 statsmodels
 pretty_jupyter==2.0.7
-lxml[html_clean]==0.1.1
+lxml[html_clean]
 jupytext==1.16.1
