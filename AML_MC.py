@@ -24,44 +24,49 @@
 
 # %%
 # %%capture
+import os
+from datetime import datetime
+
+import matplotlib.pyplot as plt
+import numpy as np
 # Laden der eingesetzten Libraries
 import pandas as pd
-import os
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-from sklearn import metrics
-from sklearn.preprocessing import StandardScaler
-from itables import init_notebook_mode
-from datetime import datetime
-from IPython.display import display
 import sweetviz as sv
+from IPython.display import display
+from itables import init_notebook_mode
 
 init_notebook_mode(all_interactive=True)
+
+
+# %%
+# Funktion zur Bestimmung des Geschlechts und Berechnung des Geburtstags
+def parse_details(birth_number):
+    birth_number_str = str(
+        birth_number
+    )  # Konvertiere birth_number zu einem String, falls notwendig
+    year_prefix = "19"
+    month = int(birth_number_str[2:4])
+    gender = "female" if month > 12 else "male"
+    if gender == "female":
+        month -= 50
+    year = int(year_prefix + birth_number_str[:2])
+    day = int(birth_number_str[4:6])
+    birth_day = datetime(year, month, day)
+    return gender, birth_day
+
+
+# Berechnung des Alters basierend auf einem Basisjahr
+def calculate_age(birth_date, base_date=datetime(1999, 12, 31)):
+    return (
+            base_date.year
+            - birth_date.year
+            - ((base_date.month, base_date.day) < (birth_date.month, birth_date.day))
+    )
+
 
 # %% [markdown]
 # # Aufgabenstellung
 # Inhalt der hier bearbeiteten und dokumentierten Mini-Challenge für das Modul «aml - Angewandtes Machine Learning» der FHNW ist die Entwicklung und Evaluierung von Aﬀinitätsmodellen für personalisierte Kreditkarten-Werbekampagnen im Auftrag einer Bank. Das Ziel der Authoren ist es also, mithilfe von Kunden- und Transaktionsdaten präzise Modelle zu erstellen, die die Wahrscheinlichkeit des Kreditkartenkaufs einer bestimmten Person vorhersagen.
-
-# %%
-# %%capture
-import pandas as pd
-import os
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-from sklearn import metrics
-from sklearn.preprocessing import StandardScaler
-from itables import init_notebook_mode
-from datetime import datetime
-from IPython.display import display
-import sweetviz as sv
-
-init_notebook_mode(all_interactive=True)
 
 # %% [markdown]
 # # Laden der zur Verfügung gestellten Daten
@@ -84,7 +89,7 @@ trans = pd.read_csv("./data/trans.csv", sep=";", dtype={"date": "str", "bank": "
 # Der Datensatz `accounts.csv` beinhaltet die folgenden Informationen über die Kontos der Bank:  
 # - `account_id`: die Kontonummer, 
 # - `district_id`: den Standort der entsprechenden Bankfiliale,
-# - `issuance_statement_frequency`: die Frequenz der Ausstellung von Kontoauszügen (monatlich, wöchentlich, pro Transaktion) und 
+# - `frequency`: die Frequenz der Ausstellung von Kontoauszügen (monatlich, wöchentlich, pro Transaktion) und 
 # - `date`: das Erstellungsdatum
 
 # %%
@@ -200,100 +205,83 @@ data_frames = {}
 
 # %% [markdown]
 # ## Account
+# Nachfolgend wird die `date` Spalte des `account.csv`-Datensatzes in ein entsprechendes Datenformat geparsed und die Levels der Kategorie `frequency`
 
 # %%
+# parse date
 account["date"] = pd.to_datetime(account["date"], format="%y%m%d")
-# Frequency Transformation
+# translate categories
 account["frequency"] = account["frequency"].replace(
     {
-        "POPLATEK MESICNE": "monthly issuance",
-        "POPLATEK TYDNE": "weekly issuance",
-        "POPLATEK PO OBRATU": "issuance after transaction",
+        "POPLATEK MESICNE": "monthly",
+        "POPLATEK TYDNE": "weekly",
+        "POPLATEK PO OBRATU": "transactional",
     }
 )
 
-# Rename Column
-account = account.rename(columns={"frequency": "issuance_statement_frequency"})
+# convert column frequency to categorical
+account["frequency"] = account["frequency"].astype("category")
 
-# Convert Date Column to datetime format
-account["date"] = pd.to_datetime(account["date"])
-
-# Assuming 'data_frames' is a dictionary of DataFrames
+# append account data to dataframe collection
 data_frames["account.csv"] = account
 
-# Sample 5 random rows
+# sample 5 random rows
 account.sample(n=5)
 
 # %%
 # %%capture
+# generate sweetviz report
 svReport_account = sv.analyze(account)
-svReport_account.show_html(filepath = "./reports/accounts.html", open_browser = False)
+svReport_account.show_html(filepath="./reports/accounts.html", open_browser=False)
 
 # %% [markdown]
 # ## Card
 
 # %%
-# Man kann die Zeit weglassen da immer 00:00:00
+# parse date
 card["issued"] = pd.to_datetime(card["issued"].str[:6], format="%y%m%d")
-card["issued"] = pd.to_datetime(card["issued"], format="mixed")
+# convert type to categorical
+card["type"] = card["type"].astype("category")
+# append to dataframes collection
 data_frames["card.csv"] = card
 
 # %%
 # %%capture
+# generate sweetviz report
 svReport_card = sv.analyze(card)
-svReport_card.show_html(filepath = "./reports/card.html", open_browser = False)
-
+svReport_card.show_html(filepath="./reports/card.html", open_browser=False)
 
 # %% [markdown]
 # ## Client
 
 # %%
-# Funktion zur Bestimmung des Geschlechts und Berechnung des Geburtstags
-def parse_details(birth_number):
-    birth_number_str = str(
-        birth_number
-    )  # Konvertiere birth_number zu einem String, falls notwendig
-    year_prefix = "19"
-    month = int(birth_number_str[2:4])
-    gender = "female" if month > 12 else "male"
-    if gender == "female":
-        month -= 50
-    year = int(year_prefix + birth_number_str[:2])
-    day = int(birth_number_str[4:6])
-    birth_day = datetime(year, month, day)
-    return gender, birth_day
-
-
-# Berechnung des Alters basierend auf einem Basisjahr
-def calculate_age(birth_date, base_date=datetime(1999, 12, 31)):
-    return (
-        base_date.year
-        - birth_date.year
-        - ((base_date.month, base_date.day) < (birth_date.month, birth_date.day))
-    )
-
-
-# Anwenden der Funktionen und Erstellen neuer Spalten
+# Geburtstag & Geschlecht aus birth_number extrahieren
 client["gender"], client["birth_day"] = zip(
     *client["birth_number"].apply(parse_details)
 )
+client["gender"] = client["gender"].astype("category")
+# Alter berechnen
 client["age"] = client["birth_day"].apply(calculate_age)
 
 data_frames["client.csv"] = client
 
-# Auswahl spezifischer Spalten für die finale DataFrame (optional, je nach Bedarf)
+# Spalte birth_number entfernen
+client = client.drop(columns=["birth_number"])
 # Sample 5 random rows
 client.sample(n=5)
 
 # %%
 # %%capture
 svReport_client = sv.analyze(client)
-svReport_client.show_html(filepath = "./reports/client.html", open_browser = False)
+svReport_client.show_html(filepath="./reports/client.html", open_browser=False)
 
 # %% [markdown]
 # ## Disp
 
 # %%
+# Spalte type als Kategorie speichern 
+disp["type"] = disp["type"].astype("category")
+
 data_frames["disp.csv"] = disp
 
 # random sample
@@ -302,31 +290,14 @@ disp.sample(n=5)
 # %%
 # %%capture
 svReport_disp = sv.analyze(disp)
-svReport_disp.show_html(filepath = "./reports/disp.html", open_browser = False)
+svReport_disp.show_html(filepath="./reports/disp.html", open_browser=False)
 
 # %% [markdown]
 # ## District
 #
-#
-# - A1 district_id/district code
-# - A2 district name
-# - A3 region
-# - A4 no. of inhabitants
-# - A5 no. of municipalities with inhabitants < 499
-# - A6 no. of municipalities with inhabitants 500-1999 A7 no. of municipalities with inhabitants 2000-9999
-# - A8 no. of municipalities with inhabitants >10000
-# - A9 no. of cities
-# - A10 ratio of urban inhabitants
-# - A11 average salary
-# - A12 unemploymant rate ’95
-# - A13 unemploymant rate ’96
-# - A14 no. of enterpreneurs per 1000 inhabitants
-# - A15 no. of commited crimes ’95
-# - A16 no. of commited crimes ’96
 
 # %%
-import pandas as pd
-# Renaming and selecting columns
+# Spalten umbenennen
 district = district.rename(
     columns={
         "A1": "district_id",
@@ -367,10 +338,9 @@ district = district.rename(
     ]
 ]
 
-data_frames["district.csv"] = district
+district["region"] = district["region"].astype("category")
 
 district.sample(n=5)
-district
 
 # %%
 # find the ? in the district dataframe
@@ -383,6 +353,8 @@ district = district.replace("?", np.nan)
 # replace the NaN with the mean of the column no_of_crimes95 and unemploy_rate95
 district["no_of_crimes95"] = district["no_of_crimes95"].astype(float)
 district["unemploy_rate95"] = district["unemploy_rate95"].astype(float)
+
+#TODO fill na with linreg and prove/analyze
 district["no_of_crimes95"] = district["no_of_crimes95"].fillna(
     district["no_of_crimes95"].mean()
 )
@@ -395,15 +367,13 @@ district[district.isin([np.nan]).any(axis=1)]
 # %%
 # %%capture
 svReport_district = sv.analyze(district)
-svReport_district.show_html(filepath = "./reports/district.html", open_browser = False)
+svReport_district.show_html(filepath="./reports/district.html", open_browser=False)
 
 # %% [markdown]
 # ## Loan
 
 # %%
 loan["date"] = pd.to_datetime(loan["date"], format="%y%m%d")
-# Convert the 'date' column to datetime format
-loan["date"] = pd.to_datetime(loan["date"], format="mixed")
 
 # Mutate the 'status' column based on conditions
 loan["status"] = loan["status"].map(
@@ -414,6 +384,8 @@ loan["status"] = loan["status"].map(
         "D": "client in debt",
     }
 )
+
+loan["status"] = loan["status"].astype("category")
 
 # Group by 'account_id', calculate the number of loans, and sort the results
 num_of_loan_df = (
@@ -439,7 +411,7 @@ loan.sample(n=100)
 # %%
 # %%capture
 svReport_loan = sv.analyze(loan)
-svReport_loan.show_html(filepath = "./reports/loan.html", open_browser = False)
+svReport_loan.show_html(filepath="./reports/loan.html", open_browser=False)
 
 # %% [markdown]
 # ## Order
@@ -480,7 +452,6 @@ orders_pivot = order.pivot_table(
 # Add prefix to column names
 orders_pivot.columns = orders_pivot.columns
 
-
 orders_pivot = orders_pivot.reset_index()
 # Assuming data_frames is a dictionary for storing DataFrames
 data_frames["order.csv"] = orders_pivot
@@ -496,7 +467,7 @@ data_frames["order.csv"].columns
 # %%
 # %%capture
 svReport_order = sv.analyze(order)
-svReport_order.show_html(filepath = "./reports/order.html", open_browser = False)
+svReport_order.show_html(filepath="./reports/order.html", open_browser=False)
 
 # %% [markdown]
 # ## Trans
@@ -577,7 +548,7 @@ plt.show()
 # %%
 # %%capture
 svReport_trans = sv.analyze(trans)
-svReport_trans.show_html(filepath = "./reports/trans.html", open_browser = False)
+svReport_trans.show_html(filepath="./reports/trans.html", open_browser=False)
 
 # %% [markdown]
 # # Explorative Datenanalyse
@@ -597,7 +568,6 @@ for df_name, df in data_frames.items():
 
 # %%
 # merge dataframes
-
 non_transactional_data = (
     data_frames["disp.csv"]
     .add_suffix("_disp")
@@ -698,8 +668,8 @@ display(junior_cards)
 
 # Calculate age at issue
 junior_cards["age_at_issue"] = (
-    junior_cards["issued_card"] - junior_cards["birth_day_client"]
-).dt.days // 365
+                                       junior_cards["issued_card"] - junior_cards["birth_day_client"]
+                               ).dt.days // 365
 
 # Plot histogram
 plt.figure(figsize=(10, 6))
@@ -726,7 +696,6 @@ print(f"Number of junior cards removed: {num_junior_cards}")
 # %%capture
 import subprocess
 import pathlib
-
 
 try:
     file_path = pathlib.Path(os.path.basename(__file__))
