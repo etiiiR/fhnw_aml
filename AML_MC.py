@@ -69,16 +69,15 @@ init_notebook_mode(all_interactive=True)
 #
 # Zur Verfügung gestellt wurden 8 csv-Dateien von welchen die Beschreibung der erfassten Variablen unter dem folgenden Link eingesehen werden können: [PKDD'99 Discovery Challenge - Guide to the Financial Data Set](https://sorry.vse.cz/~berka/challenge/PAST/index.html). Nachfolgend werden diese csv-Dateien eingelesen.
 
-
 # %%
-account = pd.read_csv("data/account.csv", sep=";", dtype={"date": "str"})
-card = pd.read_csv("data/card.csv", sep=";", dtype={"issued": "str"})
-client = pd.read_csv("data/client.csv", sep=";")
-disp = pd.read_csv("data/disp.csv", sep=";")
-district = pd.read_csv("data/district.csv", sep=";")
-loan = pd.read_csv("data/loan.csv", sep=";", dtype={"date": "str"})
-order = pd.read_csv("data/order.csv", sep=";")
-trans = pd.read_csv("data/trans.csv", sep=";", dtype={"date": "str", "bank": "str"})
+account = pd.read_csv("./data/account.csv", sep=";", dtype={"date": "str"})
+card = pd.read_csv("./data/card.csv", sep=";", dtype={"issued": "str"})
+client = pd.read_csv("./data/client.csv", sep=";")
+disp = pd.read_csv("./data/disp.csv", sep=";")
+district = pd.read_csv("./data/district.csv", sep=";")
+loan = pd.read_csv("./data/loan.csv", sep=";", dtype={"date": "str"})
+order = pd.read_csv("./data/order.csv", sep=";")
+trans = pd.read_csv("./data/trans.csv", sep=";", dtype={"date": "str", "bank": "str"})
 
 # %% [markdown]
 # ## account.csv
@@ -228,7 +227,7 @@ account.sample(n=5)
 # %%
 # %%capture
 svReport_account = sv.analyze(account)
-svReport_account.show_html(filepath ="reports/accounts.html", open_browser = False)
+svReport_account.show_html(filepath = "./reports/accounts.html", open_browser = False)
 
 # %% [markdown]
 # ## Card
@@ -242,7 +241,8 @@ data_frames["card.csv"] = card
 # %%
 # %%capture
 svReport_card = sv.analyze(card)
-svReport_card.show_html(filepath ="reports/card.html", open_browser = False)
+svReport_card.show_html(filepath = "./reports/card.html", open_browser = False)
+
 
 # %% [markdown]
 # ## Client
@@ -288,7 +288,7 @@ client.sample(n=5)
 # %%
 # %%capture
 svReport_client = sv.analyze(client)
-svReport_client.show_html(filepath ="reports/client.html", open_browser = False)
+svReport_client.show_html(filepath = "./reports/client.html", open_browser = False)
 
 # %% [markdown]
 # ## Disp
@@ -302,7 +302,7 @@ disp.sample(n=5)
 # %%
 # %%capture
 svReport_disp = sv.analyze(disp)
-svReport_disp.show_html(filepath ="reports/disp.html", open_browser = False)
+svReport_disp.show_html(filepath = "./reports/disp.html", open_browser = False)
 
 # %% [markdown]
 # ## District
@@ -395,7 +395,7 @@ district[district.isin([np.nan]).any(axis=1)]
 # %%
 # %%capture
 svReport_district = sv.analyze(district)
-svReport_district.show_html(filepath ="reports/district.html", open_browser = False)
+svReport_district.show_html(filepath = "./reports/district.html", open_browser = False)
 
 # %% [markdown]
 # ## Loan
@@ -439,7 +439,7 @@ loan.sample(n=100)
 # %%
 # %%capture
 svReport_loan = sv.analyze(loan)
-svReport_loan.show_html(filepath ="reports/loan.html", open_browser = False)
+svReport_loan.show_html(filepath = "./reports/loan.html", open_browser = False)
 
 # %% [markdown]
 # ## Order
@@ -496,7 +496,7 @@ data_frames["order.csv"].columns
 # %%
 # %%capture
 svReport_order = sv.analyze(order)
-svReport_order.show_html(filepath ="reports/order.html", open_browser = False)
+svReport_order.show_html(filepath = "./reports/order.html", open_browser = False)
 
 # %% [markdown]
 # ## Trans
@@ -577,7 +577,7 @@ plt.show()
 # %%
 # %%capture
 svReport_trans = sv.analyze(trans)
-svReport_trans.show_html(filepath ="reports/trans.html", open_browser = False)
+svReport_trans.show_html(filepath = "./reports/trans.html", open_browser = False)
 
 # %% [markdown]
 # # Explorative Datenanalyse
@@ -722,10 +722,8 @@ num_accounts_after = len(non_transactional_data)
 num_junior_cards = num_accounts_before - num_accounts_after
 print(f"Number of junior cards removed: {num_junior_cards}")
 
-# %% [markdown]
-# # Convert the Notebook always to a py file and vice versa
-
 # %%
+# %%capture
 import subprocess
 import pathlib
 
@@ -755,4 +753,6 @@ else:
 
 # %%
 # Update html output
-os.system("jupyter nbconvert --to html --template pj AML_MC.ipynb")
+# jupyter nbconvert --to html --template pj AML_MC.ipynb
+
+# %%
