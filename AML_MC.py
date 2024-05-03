@@ -191,7 +191,7 @@ plt.show()
 
 # %% [markdown]
 # ### Korrelation & weitere Informationen
-# Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/account.html) entnommen werden. 
+# Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/accounts.html) entnommen werden. 
 
 # %% [markdown]
 # ## Card
@@ -257,7 +257,8 @@ plt.ylabel("Anzahl")
 plt.show()
 
 # %% [markdown]
-# Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/account.html) entnommen werden.
+# ### Korrelation & weitere Informationen
+# Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/card.html) entnommen werden.
 
 # %% [markdown]
 # ## Client
@@ -903,10 +904,20 @@ plt.show()
 
 # %% [markdown]
 # # Datenaufbereitung
-#
+# Im nachfolgenden Abschnitt werden die Daten zu statischen (Kunden-) Daten und transaktionellen (Bankdienstleistungs-) Daten kombiniert um diese anschliessend zusammenzufügen.  
+#  
 # ## Statische Daten
+# Hier zusammengefügt wurden die Daten aus 
+# - `disp.csv`
+# - `account.csv`
+# - `client.csv`
+# - `card.csv`
+# - `loan.csv` 
+# - `order.csv`
+# - `districts.csv`
 
 # %%
+#TODO 
 # merge dataframes
 static_data = (
     data_frames["disp.csv"]
