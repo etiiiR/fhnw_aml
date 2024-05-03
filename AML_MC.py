@@ -24,16 +24,18 @@
 
 # %%
 # %%capture
+# Laden der eingesetzten Libraries
 import os
 from datetime import datetime
 
 import matplotlib.pyplot as plt
 import numpy as np
-# Laden der eingesetzten Libraries
 import pandas as pd
+import sklearn.metrics as metrics
 import sweetviz as sv
 from IPython.display import display
 from itables import init_notebook_mode
+from sklearn.linear_model import LinearRegression
 
 init_notebook_mode(all_interactive=True)
 
@@ -62,6 +64,17 @@ def calculate_age(birth_date, base_date=datetime(1999, 12, 31)):
             - birth_date.year
             - ((base_date.month, base_date.day) < (birth_date.month, birth_date.day))
     )
+
+
+def regression_results(y_true, y_pred):
+    # Regression metrics
+
+    print('explained_variance: ', round(metrics.explained_variance_score(y_true, y_pred), 4))
+    print('mean_squared_log_error: ', round(metrics.mean_squared_log_error(y_true, y_pred), 4))
+    print('r2: ', round(metrics.r2_score(y_true, y_pred), 4))
+    print('MAE: ', round(metrics.mean_absolute_error(y_true, y_pred), 4))
+    print('MSE: ', round(metrics.mean_squared_error(y_true, y_pred), 4))
+    print('RMSE: ', round(np.sqrt(metrics.mean_squared_error(y_true, y_pred)), 4))
 
 
 # %% [markdown]
@@ -205,7 +218,7 @@ data_frames = {}
 
 # %% [markdown]
 # ## Account
-# Nachfolgend wird die `date` Spalte des `account.csv`-Datensatzes in ein entsprechendes Datenformat geparsed und die Levels der Kategorie `frequency`
+# Nachfolgend wird die `date` Spalte des `account.csv`-Datensatzes in das entsprechende Datenformat geparsed und die Werte von `frequency` übersetzt und als Levels einer Kategorie definiert.
 
 # %%
 # parse date
@@ -235,7 +248,11 @@ svReport_account = sv.analyze(account)
 svReport_account.show_html(filepath="./reports/accounts.html", open_browser=False)
 
 # %% [markdown]
+# #TODO eda Beschreib
+
+# %% [markdown]
 # ## Card
+# Auch bei diesem Datensatz (`card.csv`) werden zunächst die Datentypen korrigiert um anschliessend die Inhalte entsprechend beschreiben zu können 
 
 # %%
 # parse date
@@ -252,7 +269,11 @@ svReport_card = sv.analyze(card)
 svReport_card.show_html(filepath="./reports/card.html", open_browser=False)
 
 # %% [markdown]
+# #TODO eda
+
+# %% [markdown]
 # ## Client
+# Die Spalte `birth_number` des `client.csv`-Datensatzes codiert 3 Features der Bankkunden: Geschlecht, Geburtsdatum und damit auch das Alter. Diese Informationen werden mithilfe der zuvor definierten Funktionen `parse_details()` und `calculate_age` extrahiert.  
 
 # %%
 # Geburtstag & Geschlecht aus birth_number extrahieren
@@ -276,7 +297,11 @@ svReport_client = sv.analyze(client)
 svReport_client.show_html(filepath="./reports/client.html", open_browser=False)
 
 # %% [markdown]
+# #TODO eda
+
+# %% [markdown]
 # ## Disp
+# Auch die Variablen des Datensatzes `disp.csv` werden in die korrekten Datentypen übertragen. 
 
 # %%
 # Spalte type als Kategorie speichern 
@@ -293,8 +318,12 @@ svReport_disp = sv.analyze(disp)
 svReport_disp.show_html(filepath="./reports/disp.html", open_browser=False)
 
 # %% [markdown]
+# #TODO eda
+
+# %% [markdown]
 # ## District
-#
+# Auffällig ist, dass nebst den Spalten `A2` (dem Namen) und `A3` (der Region) die Spalten `A12` und `A15` den Datentyp `object` erhalten. Das ist, weil jeweils ein fehlender Wert vorhanden ist, welcher mit einem `?` gekennzeichnet ist. 
+# Zunächst benennen wir die Spaltennamen in sprechendere um. 
 
 # %%
 # Spalten umbenennen
@@ -339,30 +368,79 @@ district = district.rename(
 ]
 
 district["region"] = district["region"].astype("category")
+district["district_name"] = district["district_name"].astype("category")
 
 district.sample(n=5)
 
 # %%
-# find the ? in the district dataframe
+# die fehlenden Werte anzeigen
 district[district.isin(["?"]).any(axis=1)]
 
+# %% [markdown]
+# Wir gehen davon aus, dass es sich hier um effektiv fehlende Werte handelt und nicht um zensierte Daten, also Werte, für welche der exakte Wert fehlt, aber trotzdem Informationen vorhanden sind. In diesem Fall, wenn die Variable mit den fehlenden Werten eine hohe Korrelation mit anderen Prediktoren aufweist, bietet es sich an, KNN oder eine einfache lineare Regression für die Imputation anzuwenden. [1] 
+#
+# Die Korrelationsmatrix des [SweetViz Reports](./reports/district.html) zeigt, dass `unemploy_rate95` stark mit `unemploy_rate96` und `no_of_crimes95` mit `no_of_crimes96` korreliert. 
+
 # %%
-# replace the ? with NaN
+# die ? ersetzen mit NaN
 district = district.replace("?", np.nan)
 
-# replace the NaN with the mean of the column no_of_crimes95 and unemploy_rate95
+# Datentyp korrigieren
 district["no_of_crimes95"] = district["no_of_crimes95"].astype(float)
 district["unemploy_rate95"] = district["unemploy_rate95"].astype(float)
 
-#TODO fill na with linreg and prove/analyze
-district["no_of_crimes95"] = district["no_of_crimes95"].fillna(
-    district["no_of_crimes95"].mean()
+# %%
+# Korrelation zwischen Arbeitslosenquote 95 und 96
+district[["unemploy_rate95", "unemploy_rate96"]].corr()
+
+# %%
+# Korrelation zwischen Anzahl Verbrechen 95 und 96
+district[["no_of_crimes95", "no_of_crimes96"]].corr()
+
+# %%
+# Zeilen filtern, sodass keine fehlenden Werte vorhanden sind
+district_no_na = district[district["unemploy_rate95"].notnull()]
+
+# Lineares regressions Modell erstellen 
+lin_reg_unemploy = LinearRegression()
+
+# Modell fitten
+lin_reg_unemploy.fit(
+    district_no_na["unemploy_rate96"].values.reshape(-1, 1),
+    district_no_na["unemploy_rate95"].values,
 )
-district["unemploy_rate95"] = district["unemploy_rate95"].fillna(
-    district["unemploy_rate95"].mean()
+
+# Modell evaluieren
+regression_results(district_no_na["unemploy_rate95"],
+                   lin_reg_unemploy.predict(district_no_na["unemploy_rate96"].values.reshape(-1, 1)))
+
+# %%
+# Lineares regressions Modell erstellen 
+lin_reg_crime = LinearRegression()
+
+# Modell fitten
+lin_reg_crime.fit(
+    district_no_na["no_of_crimes96"].values.reshape(-1, 1),
+    district_no_na["no_of_crimes95"].values,
 )
-# check if there are still NaN values in no_of_crimes95 and unemploy_rate95
-district[district.isin([np.nan]).any(axis=1)]
+
+# Modell evaluieren
+regression_results(district_no_na["no_of_crimes95"],
+                   lin_reg_unemploy.predict(district_no_na["no_of_crimes96"].values.reshape(-1, 1)))
+
+# %%
+# Vorhersage der fehlenden Werte
+district.loc[district["no_of_crimes95"].isnull(), "no_of_crimes95"] = lin_reg_unemploy.predict(
+    district[district["no_of_crimes95"].isnull()]["no_of_crimes96"].values.reshape(-1, 1)
+)
+
+district.loc[district["unemploy_rate95"].isnull(), "unemploy_rate95"] = lin_reg_crime.predict(
+    district[district["unemploy_rate95"].isnull()]["unemploy_rate96"].values.reshape(-1, 1)
+)
+
+# %%
+# Anzahl der Zeilen mit fehlenden Werten zählen
+sum(district[district.isin([np.nan]).any(axis=1)].count())
 
 # %%
 # %%capture
@@ -724,4 +802,6 @@ else:
 # Update html output
 # jupyter nbconvert --to html --template pj AML_MC.ipynb
 
-# %%
+# %% [markdown]
+# # Referenzen
+# - [1] http://link.springer.com/10.1007/978-1-4614-6849-3
