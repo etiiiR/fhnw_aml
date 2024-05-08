@@ -25,7 +25,6 @@
 # %%
 # %%capture
 # Laden der eingesetzten Libraries
-import os
 from datetime import datetime
 
 import matplotlib.pyplot as plt
@@ -97,7 +96,7 @@ order = pd.read_csv("./data/order.csv", sep=";")
 trans = pd.read_csv("./data/trans.csv", sep=";", dtype={"date": "str", "bank": "str"})
 
 # %% [markdown]
-# # Transformationen & Explorative Datenanalyse
+# # Datenaufbereitung & Explorative Datenanalyse
 # Im folgenden Abschnitt werden die geladenen Daten separat so transformiert, dass jede Zeile einer Observation und jede Spalte einer Variable im entsprechenden Datenformat entspricht, also ins Tidy-Format gebracht.
 
 # %%
@@ -120,7 +119,7 @@ print("Anzahl fehlender Werte:", sum(account.isnull().sum()))
 print("Anzahl duplizierter Einträge:", account.duplicated().sum())
 
 # %% [markdown]
-# ### Transformation
+# ### Aufbereitung
 # Nachfolgend wird die `date` Spalte des `account.csv`-Datensatzes in das entsprechende Datenformat geparsed und die Werte von `frequency` übersetzt und als Levels einer Kategorie definiert.
 
 # %%
@@ -138,17 +137,8 @@ account["frequency"] = account["frequency"].replace(
 # convert column frequency to categorical
 account["frequency"] = account["frequency"].astype("category")
 
-# append account data to dataframe collection
-data_frames["account.csv"] = account
-
 # sample 5 random rows
 account.sample(n=5)
-
-# %%
-# %%capture
-# generate sweetviz report
-svReport_account = sv.analyze(account)
-svReport_account.show_html(filepath="./reports/accounts.html", open_browser=False)
 
 # %% [markdown]
 # ### Distrikt
@@ -193,6 +183,16 @@ plt.show()
 # ### Korrelation & weitere Informationen
 # Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/accounts.html) entnommen werden. 
 
+# %%
+# append account data to dataframe collection
+data_frames["account.csv"] = account
+
+# %%
+# %%capture
+# generate sweetviz report
+svReport_account = sv.analyze(account)
+svReport_account.show_html(filepath="./reports/accounts.html", open_browser=False)
+
 # %% [markdown]
 # ## Card
 # [//]: # (-.- .tabset)
@@ -211,7 +211,7 @@ print("Anzahl fehlender Werte:", sum(card.isnull().sum()))
 print("Anzahl duplizierter Einträge:", card.duplicated().sum())
 
 # %% [markdown]
-# ### Transformation
+# ### Aufbereitung
 # Auch bei diesem Datensatz (`card.csv`) werden zunächst die Datentypen korrigiert um anschliessend die Inhalte entsprechend beschreiben zu können
 
 # %%
@@ -219,16 +219,8 @@ print("Anzahl duplizierter Einträge:", card.duplicated().sum())
 card["issued"] = pd.to_datetime(card["issued"].str[:6], format="%y%m%d")
 # convert type to categorical
 card["type"] = card["type"].astype("category")
-# append to dataframes collection
-data_frames["card.csv"] = card
 
 card.sample(n=5)
-
-# %%
-# %%capture
-# generate sweetviz report
-svReport_card = sv.analyze(card)
-svReport_card.show_html(filepath="./reports/card.html", open_browser=False)
 
 # %% [markdown]
 # ### Kartentyp
@@ -260,6 +252,16 @@ plt.show()
 # ### Korrelation & weitere Informationen
 # Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/card.html) entnommen werden.
 
+# %%
+# append to dataframes collection
+data_frames["card.csv"] = card
+
+# %%
+# %%capture
+# generate sweetviz report
+svReport_card = sv.analyze(card)
+svReport_card.show_html(filepath="./reports/card.html", open_browser=False)
+
 # %% [markdown]
 # ## Client
 # [//]: # (-.- .tabset)
@@ -277,7 +279,7 @@ print("Anzahl fehlender Werte:", sum(client.isnull().sum()))
 print("Anzahl duplizierter Einträge:", client.duplicated().sum())
 
 # %% [markdown]
-# ### Transformation
+# ### Aufbereitung
 # Die Spalte `birth_number` des `client.csv`-Datensatzes codiert 3 Features der Bankkunden: Geschlecht, Geburtsdatum und damit auch das Alter. Diese Informationen werden mithilfe der zuvor definierten Funktionen `parse_details()` und `calculate_age` extrahiert.
 
 # %%
@@ -292,15 +294,8 @@ client["age"] = client["birth_day"].apply(calculate_age)
 # Spalte birth_number entfernen
 client = client.drop(columns=["birth_number"])
 
-data_frames["client.csv"] = client
-
 # Sample 5 random rows
 client.sample(n=5)
-
-# %%
-# %%capture
-svReport_client = sv.analyze(client)
-svReport_client.show_html(filepath="./reports/client.html", open_browser=False)
 
 # %% [markdown]
 # ### Geschlecht
@@ -332,6 +327,14 @@ plt.show()
 # ### Korrelation & weitere Informationen
 # Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/client.html) entnommen werden.
 
+# %%
+data_frames["client.csv"] = client
+
+# %%
+# %%capture
+svReport_client = sv.analyze(client)
+svReport_client.show_html(filepath="./reports/client.html", open_browser=False)
+
 # %% [markdown]
 # ## Disp
 # [//]: # (-.- .tabset)
@@ -350,22 +353,15 @@ print("Anzahl fehlender Werte:", sum(disp.isnull().sum()))
 print("Anzahl duplizierter Einträge:", disp.duplicated().sum())
 
 # %% [markdown]
-# ### Transformation
+# ### Aufbereitung
 # Auch die Variablen des Datensatzes `disp.csv` werden in die korrekten Datentypen übertragen. 
 
 # %%
 # Spalte type als Kategorie speichern 
 disp["type"] = disp["type"].astype("category")
 
-data_frames["disp.csv"] = disp
-
 # random sample
 disp.sample(n=5)
-
-# %%
-# %%capture
-svReport_disp = sv.analyze(disp)
-svReport_disp.show_html(filepath="./reports/disp.html", open_browser=False)
 
 # %% [markdown]
 # ### Typ der Disposition
@@ -387,6 +383,14 @@ disp = disp[disp["type"] == "OWNER"]
 # %% [markdown]
 # ### Korrelation & weitere Informationen
 # Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/disp.html) entnommen werden.
+
+# %%
+data_frames["disp.csv"] = disp
+
+# %%
+# %%capture
+svReport_disp = sv.analyze(disp)
+svReport_disp.show_html(filepath="./reports/disp.html", open_browser=False)
 
 # %% [markdown]
 # ## District
@@ -418,7 +422,7 @@ print("Anzahl fehlender Werte:", sum(district.isnull().sum()))
 print("Anzahl duplizierter Einträge:", district.duplicated().sum())
 
 # %% [markdown]
-# ### Transformation
+# ### Aufbereitung
 # Zunächst werden die Spaltennamen in sprechendere übersetzt.
 
 # %%
@@ -545,8 +549,6 @@ district.loc[district["unemploy_rate95"].isnull(), "unemploy_rate95"] = lin_reg_
 )
 
 # %%
-data_frames["district.csv"] = district
-
 district.sample(n=5)
 
 # %%
@@ -555,6 +557,9 @@ district.isnull().sum()
 # %% [markdown]
 # ### EDA
 # Es gibt keine Duplikate und somit 77 unterschiedliche Namen der Distrikte. Diese sind auf 8 Regionen verteilt, wobei die meisten in south Moravia und die wenigsten in Prague liegen. Der Distrikt mit den wenigsten Einwohnern zählt 42821, im Vergleich zu demjenigen mit den meisten: 1204953, wobei die nächst kleinere Ortschaft 102609 Einwohner zählt. Weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/district.html) entnommen werden. 
+
+# %%
+data_frames["district.csv"] = district
 
 # %%
 # %%capture
@@ -583,7 +588,7 @@ print("Anzahl fehlender Werte:", sum(loan.isnull().sum()))
 print("Anzahl duplizierter Einträge:", loan.duplicated().sum())
 
 # %% [markdown]
-# ### Transformation
+# ### Aufbereitung
 # Auch für den `loan.csv` Datensatz werden zunächst Datenformate korrigiert und Kategorien übersetzt. Anschliessend wird überprüft, ob ein Bankkonto mehrere Darlehen besitzt.  
 
 # %%
@@ -619,16 +624,8 @@ num_of_loan_df["num_of_loan"].value_counts()
 # Von allen Bankkontos, die ein Darlehen aufgenommen haben, hat jedes Konto genau ein Darlehen zugewiesen.
 
 # %%
-# Assign the resulting DataFrame to a dictionary for storage
-data_frames["loan.csv"] = loan
-
 # Sample 5 random rows from the joined DataFrame
 display(loan.sample(n=5))
-
-# %%
-# %%capture
-svReport_loan = sv.analyze(loan)
-svReport_loan.show_html(filepath="./reports/loan.html", open_browser=False)
 
 # %% [markdown]
 # ### Ausstellungsdatum
@@ -699,6 +696,15 @@ plt.show()
 # ### Korrelation & weitere Informationen
 # Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/loan.html) entnommen werden.
 
+# %%
+# Assign the resulting DataFrame to a dictionary for storage
+data_frames["loan.csv"] = loan
+
+# %%
+# %%capture
+svReport_loan = sv.analyze(loan)
+svReport_loan.show_html(filepath="./reports/loan.html", open_browser=False)
+
 # %% [markdown]
 # ## Order
 # [//]: # (-.- .tabset)
@@ -720,7 +726,7 @@ print("Anzahl fehlender Werte:", sum(order.isnull().sum()))
 print("Anzahl duplizierter Einträge:", order.duplicated().sum())
 
 # %% [markdown]
-# ### Transformation
+# ### Aufbereitung
 # Auch für `order.csv` werden die Kategorien zunächst übersetzt und fehlende Werte mit der Kategorie `unknown` ersetzt. Es bestehen deutlich mehr Daueraufträge als Bankkontos, was darauf hindeutet, dass ein Bankkonto mehrere Daueraufträge eingerichtet haben kann. Zur weiteren Verarbeitung der Daten wird das Format so geändert, dass pro Konto ein `order`-Eintrag existiert.  
 
 # %%
@@ -757,18 +763,11 @@ orders_pivot = order.pivot_table(
 orders_pivot.columns = orders_pivot.columns
 
 orders_pivot = orders_pivot.reset_index()
-# Assuming data_frames is a dictionary for storing DataFrames
-data_frames["order.csv"] = orders_pivot
 
 # NaN to 0
-data_frames["order.csv"] = data_frames["order.csv"].fillna(0)
+orders_pivot = orders_pivot.fillna(0)
 # Sample 5 random rows from the merged DataFrame
-data_frames["order.csv"].sample(n=5)
-
-# %%
-# %%capture
-svReport_order = sv.analyze(order)
-svReport_order.show_html(filepath="./reports/order.html", open_browser=False)
+orders_pivot.sample(n=5)
 
 # %% [markdown]
 # ### Empfangende Bank
@@ -789,6 +788,15 @@ svReport_order.show_html(filepath="./reports/order.html", open_browser=False)
 # %% [markdown]
 # ### Korrelation & weitere Informationen
 # Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/order.html) entnommen werden.
+
+# %%
+# Assuming data_frames is a dictionary for storing DataFrames
+data_frames["order.csv"] = orders_pivot
+
+# %%
+# %%capture
+svReport_order = sv.analyze(order)
+svReport_order.show_html(filepath="./reports/order.html", open_browser=False)
 
 # %% [markdown]
 # ## Trans
@@ -815,14 +823,14 @@ print("Anzahl fehlender Werte:", sum(trans.isnull().sum()))
 print("Anzahl duplizierter Einträge:", trans.duplicated().sum())
 
 # %% [markdown]
-# ### Transformation
+# ### Aufbereitung
 # Die Kategorien für `type`, `operation` und `k_symbol` wurden übersetzt und die Datentypen korrigiert.  
 
 # %%
 trans["date"] = pd.to_datetime(trans["date"], format="%y%m%d")
 
 # Update 'type' column
-trans["type"] = trans["type"].replace({"PRIJEM": "credit", "VYDAJ": "withdrawal"})
+trans["type"] = trans["type"].replace({"PRIJEM": "credit", "VYDAJ": "withdrawal", "VYBER": "withdrawal"})
 trans["type"] = trans["type"].astype("category")
 
 # Update 'operation' column
@@ -852,19 +860,11 @@ trans["k_symbol"] = trans["k_symbol"].replace(
 trans["k_symbol"] = trans["k_symbol"].astype("category")
 
 # negate the amount if type is credit
-trans.loc[trans['type'] == 'credit', 'amount'] = trans.loc[trans['type'] == 'credit', 'amount'] * (-1)
+trans.loc[trans['type'] == 'withdrawal', 'amount'] = trans.loc[trans['type'] == 'withdrawal', 'amount'] * (-1)
 
 # %%
-# Assign to a dictionary if needed (similar to list assignment in R)
-data_frames["trans.csv"] = trans
-
 # Sample 5 random rows from the DataFrame
 trans.sample(n=5)
-
-# %%
-# %%capture
-svReport_trans = sv.analyze(trans)
-svReport_trans.show_html(filepath="./reports/trans.html", open_browser=False)
 
 # %% [markdown]
 # ### Zeitliche Entwicklung eines Kontos
@@ -902,12 +902,21 @@ plt.show()
 # ### Korrelation & weitere Informationen
 # Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/trans.html) entnommen werden.
 
+# %%
+# Assign to a dictionary if needed (similar to list assignment in R)
+data_frames["trans.csv"] = trans
+
+# %%
+# %%capture
+svReport_trans = sv.analyze(trans)
+svReport_trans.show_html(filepath="./reports/trans.html", open_browser=False)
+
 # %% [markdown]
-# # Datenaufbereitung
-# Im nachfolgenden Abschnitt werden die Daten zu statischen (Kunden-) Daten und transaktionellen (Bankdienstleistungs-) Daten kombiniert um diese anschliessend zusammenzufügen.  
+# # Kombinieren der Daten zu einem Modellierungsdatensatz
+# Im nachfolgenden Abschnitt werden die Daten zu statischen (Kunden-) Daten und transaktionellen (Bankdienstleistungs-) Daten kombiniert um diese anschliessend zu einem Datensatz für die Modellierung zusammenzufügen.  
 #  
-# ## Statische Daten
-# Hier zusammengefügt wurden die Daten aus 
+# ## Stammdaten
+# Die aufbereiteten Stammdaten aus den Dateien 
 # - `disp.csv`
 # - `account.csv`
 # - `client.csv`
@@ -915,136 +924,180 @@ plt.show()
 # - `loan.csv` 
 # - `order.csv`
 # - `districts.csv`
+#
+# werden nachfolgend zu einem Datensatz kombiniert. 
 
 # %%
-#TODO 
 # merge dataframes
 static_data = (
     data_frames["disp.csv"]
-    .add_suffix("_disp")
     .merge(
-        data_frames["account.csv"].add_suffix("_account"),
-        left_on="account_id_disp",
-        right_on="account_id_account",
-        how="left",
+        data_frames["account.csv"],
+        on="account_id",
+        validate="1:1",
+        how="left"
     )
     .merge(
-        data_frames["card.csv"].add_suffix("_card"),
-        left_on="disp_id_disp",
-        right_on="disp_id_card",
-        how="left",
+        data_frames["client.csv"],
+        on="client_id",
+        validate="1:1",
+        suffixes=("_account", "_client"),
+        how="left"
     )
     .merge(
-        data_frames["loan.csv"].add_suffix("_loan"),
-        left_on="account_id_disp",
-        right_on="account_id_loan",
-        how="left",
+        data_frames["card.csv"],
+        on="disp_id",
+        validate="1:1",
+        suffixes=("_disp", "_card"),
+        how="left"
     )
     .merge(
-        data_frames["order.csv"].add_suffix("_order"),
-        left_on="account_id_disp",
-        right_on="account_id_order",
-        how="left",
+        data_frames["loan.csv"],
+        on="account_id",
+        suffixes=("_account", "_loan"),
+        validate="1:1",
+        how="left"
+    )
+    .merge(
+        data_frames["order.csv"],
+        on="account_id",
+        validate="1:1",
+        how="left"
+    )
+    .merge(
+        data_frames["district.csv"].add_suffix("_account"),
+        left_on="district_id_account",
+        right_on="district_id_account",
+        validate="m:1",
+        how="left"
+    )
+    .merge(
+        data_frames["district.csv"].add_suffix("_client"),
+        left_on="district_id_client",
+        right_on="district_id_client",
+        validate="m:1",
+        how="left"
     )
 )
 
 # %%
-static_data.columns
+static_data["has_card"] = ~static_data["card_id"].isna()
 
 # %%
-cols_to_replace_na = [
-    "household_order",
-    "insurance_payment_order",
-    "loan_payment_order",
-    "leasing_order",
-    "unknown_order",
-]
-
-static_data[cols_to_replace_na] = static_data[
-    cols_to_replace_na
-].fillna(0)
-
-# %% [markdown]
-# ## Dropping of Junior Cards that are not on the edge to a normal card Analyse
-#
+static_data.info()
 
 # %%
-# join district and client left join on district_id
-static_data = static_data.merge(
-    data_frames["district.csv"],
-    left_on="district_id_account",
-    right_on="district_id",
-    how="left",
-)
-
-static_data
+print("Anzahl duplizierter Einträge:", static_data.duplicated().sum())
 
 # %%
-# merge client with suffix
-static_data = static_data.merge(
-    data_frames["client.csv"].add_suffix("_client"),
-    left_on="client_id_disp",
-    right_on="client_id_client",
-    how="left",
-)
-
-# %%
-static_data["has_card"] = ~static_data["card_id_card"].isna()
-
-# Filter rows where 'has_card' is True
-filtered_data = static_data[static_data["has_card"]]
-
-# Check if there are duplicated 'account_id' in the filtered data
-duplicated_account_id = filtered_data["account_id_account"].duplicated().sum()
-
-print(duplicated_account_id)
-
-# %% [markdown]
-#
-# ## Junior Cards removal
-
-# %%
-import matplotlib.pyplot as plt
-import seaborn as sns
-from datetime import datetime
-
-display(static_data)
-
-# Filter rows where 'card_type' contains 'junior' (case insensitive)
-junior_cards = static_data[
-    static_data["type_card"].str.contains("junior", case=False, na=False)
-]
-
-display(junior_cards)
-
-# Calculate age at issue
-junior_cards["age_at_issue"] = (
-                                       junior_cards["issued_card"] - junior_cards["birth_day_client"]
-                               ).dt.days // 365
-
-# Plot histogram
-plt.figure(figsize=(10, 6))
-sns.histplot(data=junior_cards, x="age_at_issue", bins=20)
-plt.title("Age distribution at issue date of junior cards")
-plt.xlabel("Age at issue date")
-plt.ylabel("Number of cards")
-plt.show()
-
-# %% [markdown]
+## Junior Cards removal
 # In the advertising campaign, we do not want to promote children's/junior cards (for whatever reasons). First, I looked at the distribution of age at issuance. Here I see that there are not many junior cards, nor are the cards issued at a late age.
+# # Filter rows where 'card_type' contains 'junior' (case insensitive)
+# junior_cards = static_data[
+#     static_data["type_card"].str.contains("junior", case=False, na=False)
+# ]
+# 
+# display(junior_cards)
+# 
+# # Calculate age at issue
+# junior_cards["age_at_issue"] = (
+#                                        junior_cards["issued_card"] - junior_cards["birth_day_client"]
+#                                ).dt.days // 365
+# 
+# # Plot histogram
+# plt.figure(figsize=(10, 6))
+# sns.histplot(data=junior_cards, x="age_at_issue", bins=20)
+# plt.title("Age distribution at issue date of junior cards")
+# plt.xlabel("Age at issue date")
+# plt.ylabel("Number of cards")
+# plt.show()
 
 # %%
-num_accounts_before = len(static_data)
-# Filter rows where 'card_type' does not contain 'junior' (case insensitive)
-non_transactional_data = static_data[
-    ~static_data["type_card"].str.contains("junior", case=False, na=False)
-]
-num_accounts_after = len(non_transactional_data)
-num_junior_cards = num_accounts_before - num_accounts_after
-print(f"Number of junior cards removed: {num_junior_cards}")
+# num_accounts_before = len(static_data)
+# # Filter rows where 'card_type' does not contain 'junior' (case insensitive)
+# non_transactional_data = static_data[
+#     ~static_data["type_card"].str.contains("junior", case=False, na=False)
+# ]
+# num_accounts_after = len(non_transactional_data)
+# num_junior_cards = num_accounts_before - num_accounts_after
+# print(f"Number of junior cards removed: {num_junior_cards}")
 
 # %% [markdown]
-# ## Transaktionen
+# ## Bewegungsdaten
+
+# %%
+# select all transactions from trans from date 1995-03-16 and account_id 150
+trans[(trans['date'] == '1995-03-16') & (trans['account_id'] == 150)]
+
+# %%
+# sort dataframe trans by account_id and date
+first_row_per_account = trans.groupby('account_id')
+
+# select rows where amount == balance
+first_row_per_account = first_row_per_account.apply(lambda x: x[x['amount'] == x['balance']].iloc[0],
+                                                    include_groups=False).reset_index()
+
+# %%
+# show that there's one row per unique account_id in trans
+first_row_per_account['account_id'].nunique() == trans['account_id'].nunique()
+
+# %%
+first_row_per_account.query("amount != balance")
+
+# %%
+# Extract year and month from date to a new column 'year_month'
+trans['year_month'] = trans['date'].dt.to_period('M')
+
+# Group by 'account_id' and 'month', and calculate the sum of 'amount', 'credit', 'withdrawal' and 'n_transactions'
+transactions_monthly = trans.groupby(['account_id', 'year_month']).agg(
+    volume=('amount', 'sum'),
+    credit=('amount', lambda x: x[x > 0].sum()),
+    withdrawal=('amount', lambda x: x[x < 0].sum()),
+    n_transactions=('amount', 'count')
+).reset_index()
+
+# Fill missing months for each account
+transactions_monthly = transactions_monthly.set_index(['year_month', 'account_id']).unstack(
+    fill_value=0).stack(future_stack=True).reset_index()
+
+# Calculate cumulative sum of 'volume' for each account
+transactions_monthly['balance'] = transactions_monthly.groupby('account_id')['volume'].cumsum()
+
+
+# %%
+def rollup_credit_card(trans_monthly, account_card_issue_dates):
+    # Ensure the 'issued' column in account_card_issue_dates is in datetime format
+    account_card_issue_dates['issued'] = pd.to_datetime(account_card_issue_dates['issued'])
+
+    # Add issue date and calculate months since card issue
+    trans_monthly = pd.merge(trans_monthly, account_card_issue_dates, on='account_id')
+    trans_monthly['months_before_card_issue'] = (trans_monthly['year_month'].dt.to_timestamp() -
+                                                 trans_monthly['issued']).dt.days // 30
+
+    # Select eligible account_ids (with 13 months history)
+    trans_monthly = trans_monthly[(trans_monthly['months_before_card_issue'] > 0) & (
+            trans_monthly['months_before_card_issue'] <= 13)]
+
+    # Filter out account_ids that do not have 13 months of history
+    trans_monthly = trans_monthly[
+        trans_monthly.groupby('account_id')['account_id'].transform('count') == 13]
+
+    # Pivot wider
+    trans_monthly = trans_monthly.pivot_table(index='account_id',
+                                              columns='months_before_card_issue',
+                                              values=['volume',
+                                                      'credit',
+                                                      'withdrawal',
+                                                      'n_transactions',
+                                                      'balance'])
+
+    return trans_monthly
+
+
+# %%
+card_issue_date = static_data[static_data['has_card']].loc[:, ['account_id', 'issued']]
+
+transactions_monthly_card_buyers_rolled_up = rollup_credit_card(transactions_monthly, card_issue_date)
 
 # %% [markdown]
 # ## Zusammenfügen der Daten
