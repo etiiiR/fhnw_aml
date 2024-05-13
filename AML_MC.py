@@ -35,11 +35,12 @@ from IPython.display import display
 from itables import init_notebook_mode
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics.pairwise import cosine_similarity
+
 # set theme ggplot for plots
-plt.style.use('ggplot')
+plt.style.use("ggplot")
 # set display options
-pd.set_option('display.max_columns', None)
-pd.set_option('display.max_rows', None)
+pd.set_option("display.max_columns", None)
+pd.set_option("display.max_rows", None)
 init_notebook_mode()
 
 
@@ -63,20 +64,26 @@ def parse_details(birth_number):
 # Berechnung des Alters basierend auf einem Basisjahr
 def calculate_age(birth_date, base_date=datetime(1999, 12, 31)):
     return (
-            base_date.year
-            - birth_date.year
-            - ((base_date.month, base_date.day) < (birth_date.month, birth_date.day))
+        base_date.year
+        - birth_date.year
+        - ((base_date.month, base_date.day) < (birth_date.month, birth_date.day))
     )
 
 
 # Regression metrics
 def regression_results(y_true, y_pred):
-    print('explained_variance: ', round(metrics.explained_variance_score(y_true, y_pred), 4))
-    print('mean_squared_log_error: ', round(metrics.mean_squared_log_error(y_true, y_pred), 4))
-    print('r2: ', round(metrics.r2_score(y_true, y_pred), 4))
-    print('MAE: ', round(metrics.mean_absolute_error(y_true, y_pred), 4))
-    print('MSE: ', round(metrics.mean_squared_error(y_true, y_pred), 4))
-    print('RMSE: ', round(np.sqrt(metrics.mean_squared_error(y_true, y_pred)), 4))
+    print(
+        "explained_variance: ",
+        round(metrics.explained_variance_score(y_true, y_pred), 4),
+    )
+    print(
+        "mean_squared_log_error: ",
+        round(metrics.mean_squared_log_error(y_true, y_pred), 4),
+    )
+    print("r2: ", round(metrics.r2_score(y_true, y_pred), 4))
+    print("MAE: ", round(metrics.mean_absolute_error(y_true, y_pred), 4))
+    print("MSE: ", round(metrics.mean_squared_error(y_true, y_pred), 4))
+    print("RMSE: ", round(np.sqrt(metrics.mean_squared_error(y_true, y_pred)), 4))
 
 
 # %% [markdown]
@@ -221,7 +228,7 @@ print("Anzahl duplizierter Einträge:", card.duplicated().sum())
 # %%
 # parse date
 card["issued"] = pd.to_datetime(card["issued"].str[:6], format="%y%m%d")
-card["issued"] = card["issued"].dt.to_period('M')
+card["issued"] = card["issued"].dt.to_period("M")
 # convert type to categorical
 card["type"] = card["type"].astype("category")
 
@@ -309,10 +316,10 @@ client.sample(n=5)
 # %%
 # plot distribution of gender
 plt.figure(figsize=(10, 6))
-gender_distribution = client['gender'].value_counts().plot(kind='bar')
-plt.title('Verteilung des Geschlechts der Bankkunden')
-plt.xlabel('Geschlecht')
-plt.ylabel('Anzahl')
+gender_distribution = client["gender"].value_counts().plot(kind="bar")
+plt.title("Verteilung des Geschlechts der Bankkunden")
+plt.xlabel("Geschlecht")
+plt.ylabel("Anzahl")
 plt.show()
 
 # %% [markdown]
@@ -362,7 +369,7 @@ print("Anzahl duplizierter Einträge:", disp.duplicated().sum())
 # Auch die Variablen des Datensatzes `disp.csv` werden in die korrekten Datentypen übertragen. 
 
 # %%
-# Spalte type als Kategorie speichern 
+# Spalte type als Kategorie speichern
 disp["type"] = disp["type"].astype("category")
 
 # random sample
@@ -510,7 +517,7 @@ district[["no_of_crimes95", "no_of_crimes96"]].corr()
 # Zeilen filtern, sodass keine fehlenden Werte vorhanden sind
 district_no_na = district[district["unemploy_rate95"].notnull()]
 
-# Lineares regressions Modell erstellen 
+# Lineares regressions Modell erstellen
 lin_reg_unemploy = LinearRegression()
 
 # Modell fitten
@@ -520,14 +527,16 @@ lin_reg_unemploy.fit(
 )
 
 # Modell evaluieren
-regression_results(district_no_na["unemploy_rate95"],
-                   lin_reg_unemploy.predict(district_no_na["unemploy_rate96"].values.reshape(-1, 1)))
+regression_results(
+    district_no_na["unemploy_rate95"],
+    lin_reg_unemploy.predict(district_no_na["unemploy_rate96"].values.reshape(-1, 1)),
+)
 
 # %% [markdown]
 # Der $R^2$ Wert von $0.9634$ versichert, damit ein stabiles Modell für die Imputation erreicht zu haben. 
 
 # %%
-# Lineares regressions Modell erstellen 
+# Lineares regressions Modell erstellen
 lin_reg_crime = LinearRegression()
 
 # Modell fitten
@@ -537,20 +546,30 @@ lin_reg_crime.fit(
 )
 
 # Modell evaluieren
-regression_results(district_no_na["no_of_crimes95"],
-                   lin_reg_crime.predict(district_no_na["no_of_crimes96"].values.reshape(-1, 1)))
+regression_results(
+    district_no_na["no_of_crimes95"],
+    lin_reg_crime.predict(district_no_na["no_of_crimes96"].values.reshape(-1, 1)),
+)
 
 # %% [markdown]
 # Auch hier mit einem $R^2$ Wert von $0.9969$ gehen wir davon aus, damit ein stabiles Modell für die Imputation erreicht zu haben. Somit werden nachfolgend die beiden Modelle genutzt, um die fehlenden Werte einzufüllen.
 
 # %%
 # Vorhersage der fehlenden Werte
-district.loc[district["no_of_crimes95"].isnull(), "no_of_crimes95"] = lin_reg_crime.predict(
-    district[district["no_of_crimes95"].isnull()]["no_of_crimes96"].values.reshape(-1, 1)
+district.loc[district["no_of_crimes95"].isnull(), "no_of_crimes95"] = (
+    lin_reg_crime.predict(
+        district[district["no_of_crimes95"].isnull()]["no_of_crimes96"].values.reshape(
+            -1, 1
+        )
+    )
 )
 
-district.loc[district["unemploy_rate95"].isnull(), "unemploy_rate95"] = lin_reg_unemploy.predict(
-    district[district["unemploy_rate95"].isnull()]["unemploy_rate96"].values.reshape(-1, 1)
+district.loc[district["unemploy_rate95"].isnull(), "unemploy_rate95"] = (
+    lin_reg_unemploy.predict(
+        district[district["unemploy_rate95"].isnull()][
+            "unemploy_rate96"
+        ].values.reshape(-1, 1)
+    )
 )
 
 # %%
@@ -761,7 +780,11 @@ order["amount"] = order["amount"].fillna(0)
 order["has_order"] = ~order.isna().any(axis=1)
 
 orders_pivot = order.pivot_table(
-    index="account_id", columns="k_symbol", values="amount", aggfunc="sum", observed=False
+    index="account_id",
+    columns="k_symbol",
+    values="amount",
+    aggfunc="sum",
+    observed=False,
 )
 
 # Add prefix to column names
@@ -835,7 +858,9 @@ print("Anzahl duplizierter Einträge:", trans.duplicated().sum())
 trans["date"] = pd.to_datetime(trans["date"], format="%y%m%d")
 
 # Update 'type' column
-trans["type"] = trans["type"].replace({"PRIJEM": "credit", "VYDAJ": "withdrawal", "VYBER": "withdrawal"})
+trans["type"] = trans["type"].replace(
+    {"PRIJEM": "credit", "VYDAJ": "withdrawal", "VYBER": "withdrawal"}
+)
 trans["type"] = trans["type"].astype("category")
 
 # Update 'operation' column
@@ -865,7 +890,9 @@ trans["k_symbol"] = trans["k_symbol"].replace(
 trans["k_symbol"] = trans["k_symbol"].astype("category")
 
 # negate the amount if type is credit
-trans.loc[trans['type'] == 'withdrawal', 'amount'] = trans.loc[trans['type'] == 'withdrawal', 'amount'] * (-1)
+trans.loc[trans["type"] == "withdrawal", "amount"] = trans.loc[
+    trans["type"] == "withdrawal", "amount"
+] * (-1)
 
 # %%
 # Sample 5 random rows from the DataFrame
@@ -936,52 +963,42 @@ data_frames["trans.csv"] = trans
 # merge dataframes
 static_data = (
     data_frames["disp.csv"]
-    .merge(
-        data_frames["account.csv"],
-        on="account_id",
-        validate="1:1",
-        how="left"
-    )
+    .merge(data_frames["account.csv"], on="account_id", validate="1:1", how="left")
     .merge(
         data_frames["client.csv"],
         on="client_id",
         validate="1:1",
         suffixes=("_account", "_client"),
-        how="left"
+        how="left",
     )
     .merge(
         data_frames["card.csv"],
         on="disp_id",
         validate="1:1",
         suffixes=("_disp", "_card"),
-        how="left"
+        how="left",
     )
     .merge(
         data_frames["loan.csv"],
         on="account_id",
         suffixes=("_account", "_loan"),
         validate="1:1",
-        how="left"
+        how="left",
     )
-    .merge(
-        data_frames["order.csv"],
-        on="account_id",
-        validate="1:1",
-        how="left"
-    )
+    .merge(data_frames["order.csv"], on="account_id", validate="1:1", how="left")
     .merge(
         data_frames["district.csv"].add_suffix("_account"),
         left_on="district_id_account",
         right_on="district_id_account",
         validate="m:1",
-        how="left"
+        how="left",
     )
     .merge(
         data_frames["district.csv"].add_suffix("_client"),
         left_on="district_id_client",
         right_on="district_id_client",
         validate="m:1",
-        how="left"
+        how="left",
     )
 )
 
@@ -1001,14 +1018,14 @@ print("Anzahl duplizierter Einträge:", static_data.duplicated().sum())
 # junior_cards = static_data[
 #     static_data["type_card"].str.contains("junior", case=False, na=False)
 # ]
-# 
+#
 # display(junior_cards)
-# 
+#
 # # Calculate age at issue
 # junior_cards["age_at_issue"] = (
 #                                        junior_cards["issued_card"] - junior_cards["birth_day_client"]
 #                                ).dt.days // 365
-# 
+#
 # # Plot histogram
 # plt.figure(figsize=(10, 6))
 # sns.histplot(data=junior_cards, x="age_at_issue", bins=20)
@@ -1021,8 +1038,8 @@ print("Anzahl duplizierter Einträge:", static_data.duplicated().sum())
 num_accounts_before = len(static_data)
 # # Filter rows where 'card_type' does not contain 'junior' (case insensitive)
 static_data = static_data[
-     ~static_data["type_card"].str.contains("junior", case=False, na=False)
- ]
+    ~static_data["type_card"].str.contains("junior", case=False, na=False)
+]
 num_accounts_after = len(static_data)
 num_junior_cards = num_accounts_before - num_accounts_after
 print(f"Number of junior cards removed: {num_junior_cards}")
@@ -1034,77 +1051,92 @@ print(f"Number of junior cards removed: {num_junior_cards}")
 
 # %%
 # select all transactions from trans from date 1995-03-16 and account_id 150
-trans[(trans['date'] == '1995-03-16') & (trans['account_id'] == 150)]
+trans[(trans["date"] == "1995-03-16") & (trans["account_id"] == 150)]
 
 # %%
 # sort dataframe trans by account_id and date
-first_row_per_account = trans.groupby('account_id')
+first_row_per_account = trans.groupby("account_id")
 
 # select rows where amount == balance
-first_row_per_account = first_row_per_account.apply(lambda x: x[x['amount'] == x['balance']].iloc[0],
-                                                    include_groups=False).reset_index()
+first_row_per_account = first_row_per_account.apply(
+    lambda x: x[x["amount"] == x["balance"]].iloc[0], include_groups=False
+).reset_index()
 
 # %%
 # show that there's one row per unique account_id in trans
-first_row_per_account['account_id'].nunique() == trans['account_id'].nunique()
+first_row_per_account["account_id"].nunique() == trans["account_id"].nunique()
 
 # %%
 first_row_per_account.query("amount != balance")
 
 # %%
 # Extract year and month from date to a new column 'year_month'
-trans['year_month'] = trans['date'].dt.to_period('M')
+trans["year_month"] = trans["date"].dt.to_period("M")
 
 # Group by 'account_id' and 'month', and calculate the sum of 'amount', 'credit', 'withdrawal' and 'n_transactions'
-transactions_monthly = trans.groupby(['account_id', 'year_month']).agg(
-    volume=('amount', 'sum'),
-    credit=('amount', lambda x: x[x > 0].sum()),
-    withdrawal=('amount', lambda x: x[x < 0].sum()),
-    n_transactions=('amount', 'count')
-).reset_index()
+transactions_monthly = (
+    trans.groupby(["account_id", "year_month"])
+    .agg(
+        volume=("amount", "sum"),
+        credit=("amount", lambda x: x[x > 0].sum()),
+        withdrawal=("amount", lambda x: x[x < 0].sum()),
+        n_transactions=("amount", "count"),
+    )
+    .reset_index()
+)
 
 # # Fill missing months for each account
 # transactions_monthly = transactions_monthly.set_index(['year_month', 'account_id']).unstack(
 #     fill_value=0).stack(future_stack=True).reset_index()
 
 # Calculate cumulative sum of 'volume' for each account
-transactions_monthly['balance'] = transactions_monthly.groupby('account_id')['volume'].cumsum()
+transactions_monthly["balance"] = transactions_monthly.groupby("account_id")[
+    "volume"
+].cumsum()
 
 
 # %%
 def rollup_credit_card(trans_monthly, account_card_issue_dates):
     # Add issue date and calculate months since card issue
-    trans_monthly = pd.merge(trans_monthly, account_card_issue_dates, on='account_id')
+    trans_monthly = pd.merge(trans_monthly, account_card_issue_dates, on="account_id")
 
-    trans_monthly['months_before_card_issue'] = [(issued - year_month).n for issued, year_month in
-                                                 zip(trans_monthly['issued'], trans_monthly['year_month'])]
+    trans_monthly["months_before_card_issue"] = [
+        (issued - year_month).n
+        for issued, year_month in zip(
+            trans_monthly["issued"], trans_monthly["year_month"]
+        )
+    ]
 
     # select only where  months_before_card_issue >0 and <= 13
     trans_monthly = trans_monthly[
-        (trans_monthly['months_before_card_issue'] > 0) & (trans_monthly['months_before_card_issue'] <= 13)]
+        (trans_monthly["months_before_card_issue"] > 0)
+        & (trans_monthly["months_before_card_issue"] <= 13)
+    ]
 
-    trans_monthly = trans_monthly.groupby('account_id').filter(lambda x: len(x) == 13)
+    trans_monthly = trans_monthly.groupby("account_id").filter(lambda x: len(x) == 13)
 
     # Pivot wider
-    trans_monthly = trans_monthly.pivot_table(index='account_id',
-                                              columns='months_before_card_issue',
-                                              values=['volume',
-                                                      'credit',
-                                                      'withdrawal',
-                                                      'n_transactions',
-                                                      'balance'])
+    trans_monthly = trans_monthly.pivot_table(
+        index="account_id",
+        columns="months_before_card_issue",
+        values=["volume", "credit", "withdrawal", "n_transactions", "balance"],
+    )
     trans_monthly.reset_index(inplace=True)
-    trans_monthly.columns = ['_'.join(str(i) for i in col) for col in trans_monthly.columns]
+    trans_monthly.columns = [
+        "_".join(str(i) for i in col) for col in trans_monthly.columns
+    ]
     # rename account_id_ to account_id
-    trans_monthly = trans_monthly.rename(columns={'account_id_': 'account_id'})
+    trans_monthly = trans_monthly.rename(columns={"account_id_": "account_id"})
 
     return trans_monthly
 
 
 # %%
-buyers = static_data[static_data['has_card']]
+buyers = static_data[static_data["has_card"]]
 
-transactions_rolled_up_buyers = rollup_credit_card(transactions_monthly, buyers.loc[:, ['account_id', 'issued']])
+transactions_rolled_up_buyers = rollup_credit_card(
+    transactions_monthly, buyers.loc[:, ["account_id", "issued"]]
+)
 
 
 # %% [markdown]
@@ -1115,13 +1147,15 @@ transactions_rolled_up_buyers = rollup_credit_card(transactions_monthly, buyers.
 # model top-n similarity of districts
 def calculate_district_similarity():
     data = data_frames["district.csv"]
-    data = data.drop(columns=['region', 'district_name'])
+    data = data.drop(columns=["region", "district_name"])
 
     # Calculate the similarity matrix
     similarity_matrix = cosine_similarity(data)
 
     # Create a DataFrame from the similarity matrix
-    similarity_df = pd.DataFrame(similarity_matrix, index=data.index, columns=data.index)
+    similarity_df = pd.DataFrame(
+        similarity_matrix, index=data.index, columns=data.index
+    )
 
     # Create a mask to exclude the diagonal
     mask = np.eye(len(similarity_df), dtype=bool)
@@ -1147,74 +1181,89 @@ def top_n_similarity(district_id, n, similarity_df):
 
 
 # %%
-# find similar non-buyers 
+# find similar non-buyers
 def find_similar_non_buyers(buyers, non_buyers):
-    similar_non_buyers = pd.DataFrame(columns=['account_id', 'issued'])  #TODO better way? right now warning?!
+    similar_non_buyers = pd.DataFrame(
+        columns=["account_id", "issued"]
+    )  # TODO better way? right now warning?!
     no_similar_found = []
     district_similarities = calculate_district_similarity()
 
     for _, buyer in buyers.iterrows():
         # exclude already found similar_non_buyers from non_buyer's list
-        non_buyers = non_buyers[~non_buyers['account_id'].isin(similar_non_buyers['account_id'])]
+        non_buyers = non_buyers[
+            ~non_buyers["account_id"].isin(similar_non_buyers["account_id"])
+        ]
         # find top n similar districts
-        top_n_similar = top_n_similarity(buyer['district_id_client'], 2, district_similarities)
+        top_n_similar = top_n_similarity(
+            buyer["district_id_client"], 2, district_similarities
+        )
 
         # Find non-buyers with similar age, sex, and district
         similar = non_buyers[
-            (non_buyers['age'] >= buyer['age'] - 3) &
-            (non_buyers['age'] <= buyer['age'] + 3) &
-            (non_buyers['gender'] == buyer['gender']) &
-            (non_buyers['district_id_account'].isin(top_n_similar))
-            ]
+            (non_buyers["age"] >= buyer["age"] - 3)
+            & (non_buyers["age"] <= buyer["age"] + 3)
+            & (non_buyers["gender"] == buyer["gender"])
+            & (non_buyers["district_id_account"].isin(top_n_similar))
+        ]
 
         # join transaction data to similar
-        similar = pd.merge(similar, transactions_monthly, on='account_id')
+        similar = pd.merge(similar, transactions_monthly, on="account_id")
 
-        similar['issued'] = buyer['issued']
-        similar['months_before_card_issue'] = [(issued - year_month).n for issued, year_month in
-                                               zip(similar['issued'], similar['year_month'])]
+        similar["issued"] = buyer["issued"]
+        similar["months_before_card_issue"] = [
+            (issued - year_month).n
+            for issued, year_month in zip(similar["issued"], similar["year_month"])
+        ]
 
         # select only where months_before_card_issue > 0 and <= 13
         similar = similar[
-            (similar['months_before_card_issue'] > 0) & (similar['months_before_card_issue'] <= 13)]
+            (similar["months_before_card_issue"] > 0)
+            & (similar["months_before_card_issue"] <= 13)
+        ]
 
         # make sure there's 13 rows per account_id and drop account_ids for which that's not true
-        similar = similar.groupby('account_id').filter(lambda x: len(x) == 13)
+        similar = similar.groupby("account_id").filter(lambda x: len(x) == 13)
 
         # next if similar is empty
         if similar.empty:
-            no_similar_found.append(buyer['account_id'])
+            no_similar_found.append(buyer["account_id"])
             continue
 
         # drop duplicates
-        similar = similar.drop_duplicates(subset=['account_id'])
+        similar = similar.drop_duplicates(subset=["account_id"])
 
         # Append similar similar['account_id'] and similar['nb_issued'] to similar_non_buyers
-        similar_non_buyers = pd.concat([similar_non_buyers, similar[['account_id', 'issued']]])
+        similar_non_buyers = pd.concat(
+            [similar_non_buyers, similar[["account_id", "issued"]]]
+        )
 
     return similar_non_buyers, no_similar_found
 
 
-
 # %%
-non_buyers = static_data[~static_data['has_card']]
+non_buyers = static_data[~static_data["has_card"]]
 similar_non_buyers, none_found = find_similar_non_buyers(buyers, non_buyers)
 
 # %%
-len(non_buyers[~non_buyers['account_id'].isin(similar_non_buyers['account_id'])])
+len(non_buyers[~non_buyers["account_id"].isin(similar_non_buyers["account_id"])])
 
 # %%
-transactions_rolled_up_non_buyers = rollup_credit_card(transactions_monthly, similar_non_buyers)
+transactions_rolled_up_non_buyers = rollup_credit_card(
+    transactions_monthly, similar_non_buyers
+)
 
 # %% [markdown]
 # ## Zusammenfügen der Daten
 
 # %%
-transactions_rolled_up = pd.concat([transactions_rolled_up_buyers, transactions_rolled_up_non_buyers])
+transactions_rolled_up = pd.concat(
+    [transactions_rolled_up_buyers, transactions_rolled_up_non_buyers]
+)
 
 # %%
 # merge transactions_rolled_up and static data
-X = pd.merge(static_data, transactions_rolled_up, on='account_id')
+X = pd.merge(static_data, transactions_rolled_up, on="account_id")
 
 # %% [markdown]
 # ## Visualize
@@ -1231,7 +1280,6 @@ plt.xlabel("Kartenbesitzer")
 plt.ylabel("Anzahl")
 plt.show()
 
-
 # %%
 ## plot distribution of card_type
 plt.figure(figsize=(10, 6))
@@ -1241,43 +1289,46 @@ plt.xlabel("Kartentyp")
 plt.ylabel("Anzahl")
 plt.show()
 
-
 # %%
 # Filter the data for accounts 14 and 18
-account_data = X[X['account_id'].isin([14, 18])]
+account_data = X[X["account_id"].isin([14, 18])]
 # Reshape the DataFrame for easier plotting
 months = [f"Month {i}" for i in range(1, 14)]
 balances = [f"balance_{i}" for i in range(1, 14)]
 volumes = [f"volume_{i}" for i in range(1, 14)]
 
 # Melt the DataFrame for balances and volumes
-balance_data = account_data.melt(id_vars='account_id', value_vars=balances, var_name='Month', value_name='Balance')
-volume_data = account_data.melt(id_vars='account_id', value_vars=volumes, var_name='Month', value_name='Volume')
+balance_data = account_data.melt(
+    id_vars="account_id", value_vars=balances, var_name="Month", value_name="Balance"
+)
+volume_data = account_data.melt(
+    id_vars="account_id", value_vars=volumes, var_name="Month", value_name="Volume"
+)
 
 # Convert 'Month' from string to integer for proper sorting
-balance_data['Month'] = balance_data['Month'].str.extract('(\d+)').astype(int)
-volume_data['Month'] = volume_data['Month'].str.extract('(\d+)').astype(int)
+balance_data["Month"] = balance_data["Month"].str.extract("(\d+)").astype(int)
+volume_data["Month"] = volume_data["Month"].str.extract("(\d+)").astype(int)
 
 # Sort data by account and month
-balance_data = balance_data.sort_values(by=['account_id', 'Month'])
-volume_data = volume_data.sort_values(by=['account_id', 'Month'])
+balance_data = balance_data.sort_values(by=["account_id", "Month"])
+volume_data = volume_data.sort_values(by=["account_id", "Month"])
 # Plotting balance data
 plt.figure(figsize=(14, 7))
-for key, grp in balance_data.groupby('account_id'):
-    plt.plot(grp['Month'], grp['Balance'], label=f'Account {key} Balances')
-plt.title('Monthly Balances for Accounts 14 and 18')
-plt.xlabel('Month')
-plt.ylabel('Balance')
+for key, grp in balance_data.groupby("account_id"):
+    plt.plot(grp["Month"], grp["Balance"], label=f"Account {key} Balances")
+plt.title("Monthly Balances for Accounts 14 and 18")
+plt.xlabel("Month")
+plt.ylabel("Balance")
 plt.legend()
 plt.show()
 
 # Plotting volume data
 plt.figure(figsize=(14, 7))
-for key, grp in volume_data.groupby('account_id'):
-    plt.plot(grp['Month'], grp['Volume'], label=f'Account {key} Volumes')
-plt.title('Monthly Transaction Volumes for Accounts 14 and 18')
-plt.xlabel('Month')
-plt.ylabel('Volume')
+for key, grp in volume_data.groupby("account_id"):
+    plt.plot(grp["Month"], grp["Volume"], label=f"Account {key} Volumes")
+plt.title("Monthly Transaction Volumes for Accounts 14 and 18")
+plt.xlabel("Month")
+plt.ylabel("Volume")
 plt.legend()
 plt.show()
 
@@ -1285,11 +1336,65 @@ plt.show()
 # ## Preprocessing
 
 # %%
-# print data type of X
-print(X.dtypes)
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.impute import SimpleImputer
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LogisticRegression
+
+# Assuming 'X' is your DataFrame and 'has_card' is the target variable
+y = X['has_card']
+X = X.drop(columns=['has_card'])
+
+# Define categorical and numeric columns
+categorical_cols = X.select_dtypes(include=['category', 'object']).columns
+numeric_cols = X.select_dtypes(include=['int64', 'float64']).columns
+
+# Create transformers for numeric and categorical data
+numeric_transformer = Pipeline(steps=[
+    ('imputer', SimpleImputer(strategy='median')),  # or mean, most_frequent
+    ('scaler', StandardScaler())
+])
+
+categorical_transformer = Pipeline(steps=[
+    ('imputer', SimpleImputer(strategy='constant', fill_value='missing')),
+    ('onehot', OneHotEncoder(handle_unknown='ignore'))
+])
+
+# Combine transformers into a preprocessor with ColumnTransformer
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('num', numeric_transformer, numeric_cols),
+        ('cat', categorical_transformer, categorical_cols)
+    ])
+
+
+
+
+# %% [markdown]
+# ## Test-Train-Split
+
+# %%
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # %% [markdown]
 # ## Baseline
+
+# %%
+# Create a full pipeline with Logistic Regression
+model = Pipeline(steps=[
+    ('preprocessor', preprocessor),
+    ('classifier', LogisticRegression(solver='liblinear'))
+])
+
+# Fit the model
+model.fit(X_train, y_train)
+
+# Now the model can be used to predict or evaluate on the test set
+model.predict(X_test)
 
 # %%
 # %%capture
