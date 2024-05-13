@@ -35,7 +35,11 @@ from IPython.display import display
 from itables import init_notebook_mode
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics.pairwise import cosine_similarity
-
+# set theme ggplot for plots
+plt.style.use('ggplot')
+# set display options
+pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', None)
 init_notebook_mode()
 
 
@@ -1014,14 +1018,14 @@ print("Anzahl duplizierter Einträge:", static_data.duplicated().sum())
 # plt.show()
 
 # %%
-# num_accounts_before = len(static_data)
+num_accounts_before = len(static_data)
 # # Filter rows where 'card_type' does not contain 'junior' (case insensitive)
-# non_transactional_data = static_data[
-#     ~static_data["type_card"].str.contains("junior", case=False, na=False)
-# ]
-# num_accounts_after = len(non_transactional_data)
-# num_junior_cards = num_accounts_before - num_accounts_after
-# print(f"Number of junior cards removed: {num_junior_cards}")
+static_data = static_data[
+     ~static_data["type_card"].str.contains("junior", case=False, na=False)
+ ]
+num_accounts_after = len(static_data)
+num_junior_cards = num_accounts_before - num_accounts_after
+print(f"Number of junior cards removed: {num_junior_cards}")
 
 # %% [markdown]
 # ## Bewegungsdaten
@@ -1211,6 +1215,81 @@ transactions_rolled_up = pd.concat([transactions_rolled_up_buyers, transactions_
 # %%
 # merge transactions_rolled_up and static data
 X = pd.merge(static_data, transactions_rolled_up, on='account_id')
+
+# %% [markdown]
+# ## Visualize
+
+# %%
+X.dtypes
+
+# %%
+# plot distribution of has_card
+plt.figure(figsize=(10, 6))
+X["has_card"].value_counts().plot(kind="bar")
+plt.title("Verteilung der Kartenbesitzer")
+plt.xlabel("Kartenbesitzer")
+plt.ylabel("Anzahl")
+plt.show()
+
+
+# %%
+## plot distribution of card_type
+plt.figure(figsize=(10, 6))
+X["type_card"].value_counts(dropna=False).plot(kind="bar")
+plt.title("Verteilung der Kartentypen")
+plt.xlabel("Kartentyp")
+plt.ylabel("Anzahl")
+plt.show()
+
+
+# %%
+# Filter the data for accounts 14 and 18
+account_data = X[X['account_id'].isin([14, 18])]
+# Reshape the DataFrame for easier plotting
+months = [f"Month {i}" for i in range(1, 14)]
+balances = [f"balance_{i}" for i in range(1, 14)]
+volumes = [f"volume_{i}" for i in range(1, 14)]
+
+# Melt the DataFrame for balances and volumes
+balance_data = account_data.melt(id_vars='account_id', value_vars=balances, var_name='Month', value_name='Balance')
+volume_data = account_data.melt(id_vars='account_id', value_vars=volumes, var_name='Month', value_name='Volume')
+
+# Convert 'Month' from string to integer for proper sorting
+balance_data['Month'] = balance_data['Month'].str.extract('(\d+)').astype(int)
+volume_data['Month'] = volume_data['Month'].str.extract('(\d+)').astype(int)
+
+# Sort data by account and month
+balance_data = balance_data.sort_values(by=['account_id', 'Month'])
+volume_data = volume_data.sort_values(by=['account_id', 'Month'])
+# Plotting balance data
+plt.figure(figsize=(14, 7))
+for key, grp in balance_data.groupby('account_id'):
+    plt.plot(grp['Month'], grp['Balance'], label=f'Account {key} Balances')
+plt.title('Monthly Balances for Accounts 14 and 18')
+plt.xlabel('Month')
+plt.ylabel('Balance')
+plt.legend()
+plt.show()
+
+# Plotting volume data
+plt.figure(figsize=(14, 7))
+for key, grp in volume_data.groupby('account_id'):
+    plt.plot(grp['Month'], grp['Volume'], label=f'Account {key} Volumes')
+plt.title('Monthly Transaction Volumes for Accounts 14 and 18')
+plt.xlabel('Month')
+plt.ylabel('Volume')
+plt.legend()
+plt.show()
+
+# %% [markdown]
+# ## Preprocessing
+
+# %%
+# print data type of X
+print(X.dtypes)
+
+# %% [markdown]
+# ## Baseline
 
 # %%
 # %%capture
