@@ -1266,10 +1266,13 @@ transactions_rolled_up = pd.concat(
 X = pd.merge(static_data, transactions_rolled_up, on="account_id")
 
 # %% [markdown]
-# ## Visualize
+# ## Remove Data
 
 # %%
-X.dtypes
+# print underage accounts
+
+# %% [markdown]
+# ## Visualize
 
 # %%
 # plot distribution of has_card
@@ -1288,6 +1291,10 @@ plt.title("Verteilung der Kartentypen")
 plt.xlabel("Kartentyp")
 plt.ylabel("Anzahl")
 plt.show()
+
+# %%
+# print data type of each column
+X.dtypes
 
 # %%
 # Filter the data for accounts 14 and 18
@@ -1346,11 +1353,13 @@ from sklearn.linear_model import LogisticRegression
 
 # Assuming 'X' is your DataFrame and 'has_card' is the target variable
 y = X['has_card']
-X = X.drop(columns=['has_card'])
+XX = X.drop(columns=['has_card'])
+selected_fields = ['age', 'gender', 'district_name_account'] + [f'volume_{i}' for i in range(1, 14)] + [f'balance_{i}' for i in range(1, 14)]
+XX = X[selected_fields]
 
 # Define categorical and numeric columns
-categorical_cols = X.select_dtypes(include=['category', 'object']).columns
-numeric_cols = X.select_dtypes(include=['int64', 'float64']).columns
+categorical_cols = XX.select_dtypes(include=['category', 'object']).columns
+numeric_cols = XX.select_dtypes(include=['int64', 'float64']).columns
 
 # Create transformers for numeric and categorical data
 numeric_transformer = Pipeline(steps=[
@@ -1378,7 +1387,7 @@ preprocessor = ColumnTransformer(
 
 # %%
 # Split data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(XX, y, test_size=0.2, random_state=42)
 
 # %% [markdown]
 # ## Baseline
