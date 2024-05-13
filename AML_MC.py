@@ -1339,6 +1339,9 @@ plt.ylabel("Volume")
 plt.legend()
 plt.show()
 
+# %%
+X.columns
+
 # %% [markdown]
 # ## Preprocessing
 
