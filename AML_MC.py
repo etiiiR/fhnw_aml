@@ -1451,7 +1451,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 
 class ModelEvaluator:
-    def __init__(self, models, param_grid, X, y):
+    def __init__(self, models, param_grid, X, y, selected_fields=None):
         """
         Initialize the evaluator with models, their parameter grids, and data.
 
@@ -1462,7 +1462,8 @@ class ModelEvaluator:
         """
         self.models = models
         self.param_grid = param_grid
-        self.X_preprocessed, self.y = self.preprocess_data(X, y)
+        self.X = X[selected_fields]
+        self.X_preprocessed, self.y = self.preprocess_data(self.X, y)
 
     def preprocess_data(self, X, y):
         """
@@ -1555,12 +1556,6 @@ class ModelEvaluator:
         plt.ylabel("Frequency")
         plt.show()
 
-# Example of initializing and using the class:
-# models = {'LogReg': LogisticRegression(), 'SVC': SVC(probability=True)}
-# param_grid = {'LogReg': {'C': [0.1, 1, 10]}, 'SVC': {'C': [0.1, 1, 10], 'kernel': ['linear', 'rbf']}}
-# evaluator = ModelEvaluator(models, param_grid, X_data, y_data)
-# results = evaluator.evaluate_models()
-
 
 
 # %%
@@ -1579,8 +1574,13 @@ param_grid = {
 }
 
 
-evaluator = ModelEvaluator(models, param_grid, X, y)
-# Assuming X and y are defined
+selected_fields = (
+    ["age", "gender", "region_client"]
+    + [f"volume_{i}" for i in range(1, 14)]
+    + [f"balance_{i}" for i in range(1, 14)]
+)
+
+evaluator = ModelEvaluator(models, param_grid, X, y, selected_fields=selected_fields)
 results = evaluator.evaluate_models()
 evaluator.plot_roc_curves()
 best_lr = evaluator.optimize_model("Logistic Regression")
