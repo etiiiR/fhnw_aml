@@ -1420,6 +1420,178 @@ model.fit(X_train, y_train)
 # Now the model can be used to predict or evaluate on the test set
 model.predict(X_test)
 
+
+# %% [markdown]
+# ## Drop Featrues
+
+# %%
+def clean_data(df):
+    # Define unnecessary columns
+    unnecessary_cols = [
+        "disp_id", "client_id", "account_id", "card_id", "loan_id",
+        "district_id_account", "district_id_client"
+    ]
+    # Drop these columns if they exist in the dataframe
+    df_cleaned = df.drop(columns=[col for col in unnecessary_cols if col in df.columns])
+    return df_cleaned
+
+X = clean_data(X)
+
+# %% [markdown]
+# ## Models
+
+# %%
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import cross_val_score, GridSearchCV, StratifiedKFold
+from sklearn.metrics import roc_curve, auc, precision_score, roc_auc_score
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+
+class ModelEvaluator:
+    def __init__(self, models, param_grid, X, y):
+        """
+        Initialize the evaluator with models, their parameter grids, and data.
+
+        :param models: dict of (name, model) pairs
+        :param param_grid: dict of (name, param_grid) pairs for GridSearch
+        :param X: Feature matrix
+        :param y: Target vector
+        """
+        self.models = models
+        self.param_grid = param_grid
+        self.X_preprocessed, self.y = self.preprocess_data(X, y)
+
+    def preprocess_data(self, X, y):
+        """
+        Preprocess the data once and use it for all operations.
+
+        :param X: DataFrame to derive preprocessing steps from
+        :param y: Target vector
+        :return: Tuple of preprocessed X and y
+        """
+        categorical_cols = X.select_dtypes(include=["category", "object"]).columns
+        numeric_cols = X.select_dtypes(include=["int64", "float64"]).columns
+
+        numeric_transformer = Pipeline([
+            ("imputer", SimpleImputer(strategy="median")),
+            ("scaler", StandardScaler())
+        ])
+
+        categorical_transformer = Pipeline([
+            ("imputer", SimpleImputer(strategy="constant", fill_value="missing")),
+            ("onehot", OneHotEncoder(handle_unknown="ignore"))
+        ])
+
+        preprocessor = ColumnTransformer([
+            ("num", numeric_transformer, numeric_cols),
+            ("cat", categorical_transformer, categorical_cols),
+        ])
+
+        X_preprocessed = preprocessor.fit_transform(X)
+        return X_preprocessed, y
+
+    def evaluate_models(self):
+        """
+        Evaluate each model using 10-fold cross-validation and report AUC and Precision.
+        """
+        results = {}
+        for name, model in self.models.items():
+            cv = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
+            roc_auc = cross_val_score(model, self.X_preprocessed, self.y, cv=cv, scoring="roc_auc")
+            precision = cross_val_score(model, self.X_preprocessed, self.y, cv=cv, scoring="precision")
+            results[name] = {
+                "ROC AUC": np.mean(roc_auc),
+                "Precision": np.mean(precision),
+            }
+            print(f"{name}: ROC AUC = {np.mean(roc_auc):.2f}, Precision = {np.mean(precision):.2f}")
+        return results
+
+    def plot_roc_curves(self):
+        """
+        Plot ROC curves for each model after preprocessing the data.
+        """
+        plt.figure(figsize=(10, 8))
+        for name, model in self.models.items():
+            model.fit(self.X_preprocessed, self.y)
+            y_scores = model.predict_proba(self.X_preprocessed)[:, 1]
+            fpr, tpr, _ = roc_curve(self.y, y_scores)
+            roc_auc = auc(fpr, tpr)
+            plt.plot(fpr, tpr, label=f"{name} (area = {roc_auc:.2f})")
+
+        plt.plot([0, 1], [0, 1], "k--")
+        plt.xlabel("False Positive Rate")
+        plt.ylabel("True Positive Rate")
+        plt.title("ROC Curves")
+        plt.legend(loc="lower right")
+        plt.show()
+
+    def optimize_model(self, model_name):
+        """
+        Perform GridSearchCV for a specific model to find the best hyperparameters.
+        """
+        model = self.models[model_name]
+        grid_search = GridSearchCV(
+            model, self.param_grid[model_name], cv=5, scoring="roc_auc"
+        )
+        grid_search.fit(self.X_preprocessed, self.y)
+        print(f"Best parameters for {model_name}: {grid_search.best_params_}")
+        return grid_search.best_estimator_
+
+    def compare_top_n_customers(self, model, n=100):
+        """
+        Plot histogram of the top N scored customers.
+        """
+        model.fit(self.X_preprocessed, self.y)
+        probabilities = model.predict_proba(self.X_preprocessed)[:, 1]
+        top_n_indices = np.argsort(probabilities)[::-1][:n]
+
+        plt.figure()
+        plt.hist(probabilities[top_n_indices], bins=20, alpha=0.75)
+        plt.title(f"Histogram of top {n} customers' probabilities")
+        plt.xlabel("Probability")
+        plt.ylabel("Frequency")
+        plt.show()
+
+# Example of initializing and using the class:
+# models = {'LogReg': LogisticRegression(), 'SVC': SVC(probability=True)}
+# param_grid = {'LogReg': {'C': [0.1, 1, 10]}, 'SVC': {'C': [0.1, 1, 10], 'kernel': ['linear', 'rbf']}}
+# evaluator = ModelEvaluator(models, param_grid, X_data, y_data)
+# results = evaluator.evaluate_models()
+
+
+
+# %%
+# Example usage:
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+
+# Define models and their parameter grids
+models = {
+    "Logistic Regression": LogisticRegression(solver="liblinear"),
+    "Random Forest": RandomForestClassifier(),
+}
+param_grid = {
+    "Logistic Regression": {"C": [0.01, 0.1, 1, 10]},
+    "Random Forest": {"n_estimators": [100, 200], "max_features": ["auto", "sqrt"]},
+}
+
+
+evaluator = ModelEvaluator(models, param_grid, X, y)
+# Assuming X and y are defined
+results = evaluator.evaluate_models()
+evaluator.plot_roc_curves()
+best_lr = evaluator.optimize_model("Logistic Regression")
+evaluator.compare_top_n_customers(best_lr, n=100)
+
+# Assuming X and y are defined
+#
+
+# %% [markdown]
+# ## Feature Engineering
+
 # %%
 # %%capture
 import subprocess
