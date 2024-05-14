@@ -1034,6 +1034,9 @@ print("Anzahl duplizierter Einträge:", static_data.duplicated().sum())
 # plt.ylabel("Number of cards")
 # plt.show()
 
+# %% [markdown]
+# ## Junior Cards Removal
+
 # %%
 num_accounts_before = len(static_data)
 # # Filter rows where 'card_type' does not contain 'junior' (case insensitive)
@@ -1293,10 +1296,6 @@ plt.ylabel("Anzahl")
 plt.show()
 
 # %%
-# print data type of each column
-X.dtypes
-
-# %%
 # Filter the data for accounts 14 and 18
 account_data = X[X["account_id"].isin([14, 18])]
 # Reshape the DataFrame for easier plotting
@@ -1340,6 +1339,9 @@ plt.legend()
 plt.show()
 
 # %%
+print(X.dtypes)
+
+# %%
 X.columns
 
 # %% [markdown]
@@ -1355,52 +1357,62 @@ from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression
 
 # Assuming 'X' is your DataFrame and 'has_card' is the target variable
-y = X['has_card']
-XX = X.drop(columns=['has_card'])
-selected_fields = ['age', 'gender', 'district_name_account'] + [f'volume_{i}' for i in range(1, 14)] + [f'balance_{i}' for i in range(1, 14)]
+y = X["has_card"]
+XX = X.drop(columns=["has_card"])
+selected_fields = (
+    ["age", "gender", "region_client"]
+    + [f"volume_{i}" for i in range(1, 14)]
+    + [f"balance_{i}" for i in range(1, 14)]
+)
 XX = X[selected_fields]
 
 # Define categorical and numeric columns
-categorical_cols = XX.select_dtypes(include=['category', 'object']).columns
-numeric_cols = XX.select_dtypes(include=['int64', 'float64']).columns
+categorical_cols = XX.select_dtypes(include=["category", "object"]).columns
+numeric_cols = XX.select_dtypes(include=["int64", "float64"]).columns
 
 # Create transformers for numeric and categorical data
-numeric_transformer = Pipeline(steps=[
-    ('imputer', SimpleImputer(strategy='median')),  # or mean, most_frequent
-    ('scaler', StandardScaler())
-])
+numeric_transformer = Pipeline(
+    steps=[
+        ("imputer", SimpleImputer(strategy="median")),  # or mean, most_frequent
+        ("scaler", StandardScaler()),
+    ]
+)
 
-categorical_transformer = Pipeline(steps=[
-    ('imputer', SimpleImputer(strategy='constant', fill_value='missing')),
-    ('onehot', OneHotEncoder(handle_unknown='ignore'))
-])
+categorical_transformer = Pipeline(
+    steps=[
+        ("imputer", SimpleImputer(strategy="constant", fill_value="missing")),
+        ("onehot", OneHotEncoder(handle_unknown="ignore")),
+    ]
+)
 
 # Combine transformers into a preprocessor with ColumnTransformer
 preprocessor = ColumnTransformer(
     transformers=[
-        ('num', numeric_transformer, numeric_cols),
-        ('cat', categorical_transformer, categorical_cols)
-    ])
-
-
-
+        ("num", numeric_transformer, numeric_cols),
+        ("cat", categorical_transformer, categorical_cols),
+    ]
+)
 
 # %% [markdown]
 # ## Test-Train-Split
 
 # %%
 # Split data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(XX, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(
+    XX, y, test_size=0.2, random_state=42, stratify=y
+)
 
 # %% [markdown]
 # ## Baseline
 
 # %%
 # Create a full pipeline with Logistic Regression
-model = Pipeline(steps=[
-    ('preprocessor', preprocessor),
-    ('classifier', LogisticRegression(solver='liblinear'))
-])
+model = Pipeline(
+    steps=[
+        ("preprocessor", preprocessor),
+        ("classifier", LogisticRegression(solver="liblinear")),
+    ]
+)
 
 # Fit the model
 model.fit(X_train, y_train)
@@ -1412,6 +1424,7 @@ model.predict(X_test)
 # %%capture
 import subprocess
 import pathlib
+import os
 
 try:
     file_path = pathlib.Path(os.path.basename(__file__))
