@@ -1428,14 +1428,72 @@ model.predict(X_test)
 def clean_data(df):
     # Define unnecessary columns
     unnecessary_cols = [
-        "disp_id", "client_id", "account_id", "card_id", "loan_id",
-        "district_id_account", "district_id_client"
+        "disp_id",
+        "client_id",
+        "account_id",
+        "card_id",
+        "loan_id",
+        "district_id_account",
+        "district_id_client",
     ]
     # Drop these columns if they exist in the dataframe
     df_cleaned = df.drop(columns=[col for col in unnecessary_cols if col in df.columns])
     return df_cleaned
 
+
 X = clean_data(X)
+
+# %%
+print(X.columns)
+
+# %% [markdown]
+# ## Feature Engineering for Logistic Regression
+
+# %%
+df = X.copy()
+
+
+# Function to calculate features
+def calculate_features(df, prefix):
+    monthly_values = df[[f"{prefix}_{i}" for i in range(1, 13)]]
+
+    features = {
+        f"{prefix}_mean": monthly_values.mean(axis=1),
+        f"{prefix}_min": monthly_values.min(axis=1),
+        f"{prefix}_max": monthly_values.max(axis=1),
+        f"{prefix}_mad": monthly_values.sub(monthly_values.mean(axis=1), axis=0)
+        .abs()
+        .mean(axis=1),
+        f"{prefix}_mean_ratio_last3_first3": (
+            monthly_values[[f"{prefix}_{i}" for i in range(10, 13)]].mean(axis=1)
+            / monthly_values[[f"{prefix}_{i}" for i in range(1, 4)]].mean(axis=1)
+        ),
+    }
+
+    if prefix in ["credit", "withdrawal"]:
+        features[f"{prefix}_sum"] = monthly_values.sum(axis=1)
+    if prefix in ["balance", "credit"]:
+        features[f"{prefix}_std"] = monthly_values.std(axis=1)
+
+    return features
+
+
+# List of column prefixes for required calculations
+columns_to_process = ["balance", "credit", "n_transactions", "withdrawal"]
+
+# Generating features for each prefix and merging them
+all_features = {}
+for prefix in columns_to_process:
+    all_features.update(calculate_features(df, prefix))
+
+# Creating the final dataframe with new features
+df_features = pd.DataFrame(all_features)
+
+
+display(df_features.head(5))
+X_feature_engineered = pd.concat([X, df_features], axis=1)
+display(X_feature_engineered.head(5))
+
 
 # %% [markdown]
 # ## Models
@@ -1450,6 +1508,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 
+
 class ModelEvaluator:
     def __init__(self, models, param_grid, X, y, selected_fields=None):
         """
@@ -1459,66 +1518,52 @@ class ModelEvaluator:
         :param param_grid: dict of (name, param_grid) pairs for GridSearch
         :param X: Feature matrix
         :param y: Target vector
+        :param selected_fields: Fields selected for training
         """
+        self.benchmark_results = {}
         self.models = models
         self.param_grid = param_grid
         self.X = X[selected_fields]
-        self.X_preprocessed, self.y = self.preprocess_data(self.X, y)
-
-    def preprocess_data(self, X, y):
-        """
-        Preprocess the data once and use it for all operations.
-
-        :param X: DataFrame to derive preprocessing steps from
-        :param y: Target vector
-        :return: Tuple of preprocessed X and y
-        """
-        categorical_cols = X.select_dtypes(include=["category", "object"]).columns
-        numeric_cols = X.select_dtypes(include=["int64", "float64"]).columns
-
-        numeric_transformer = Pipeline([
-            ("imputer", SimpleImputer(strategy="median")),
-            ("scaler", StandardScaler())
-        ])
-
-        categorical_transformer = Pipeline([
-            ("imputer", SimpleImputer(strategy="constant", fill_value="missing")),
-            ("onehot", OneHotEncoder(handle_unknown="ignore"))
-        ])
-
-        preprocessor = ColumnTransformer([
-            ("num", numeric_transformer, numeric_cols),
-            ("cat", categorical_transformer, categorical_cols),
-        ])
-
-        X_preprocessed = preprocessor.fit_transform(X)
-        return X_preprocessed, y
+        self.y = y
+    
+    def get_benchmark_results(self):
+        return self.benchmark_results
 
     def evaluate_models(self):
-        """
-        Evaluate each model using 10-fold cross-validation and report AUC and Precision.
-        """
         results = {}
         for name, model in self.models.items():
+            pipeline = self.create_pipeline(model)
             cv = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
-            roc_auc = cross_val_score(model, self.X_preprocessed, self.y, cv=cv, scoring="roc_auc")
-            precision = cross_val_score(model, self.X_preprocessed, self.y, cv=cv, scoring="precision")
+            roc_auc = cross_val_score(
+                pipeline, self.X, self.y, cv=cv, scoring="roc_auc"
+            )
+            precision = cross_val_score(
+                pipeline, self.X, self.y, cv=cv, scoring="precision"
+            )
             results[name] = {
                 "ROC AUC": np.mean(roc_auc),
                 "Precision": np.mean(precision),
             }
-            print(f"{name}: ROC AUC = {np.mean(roc_auc):.2f}, Precision = {np.mean(precision):.2f}")
+            print(
+                f"{name}: ROC AUC = {np.mean(roc_auc):.2f}, Precision = {np.mean(precision):.2f}"
+            )
+            self.benchmark_results[name] = {
+                "ROC AUC": np.mean(roc_auc),
+                "Precision": np.mean(precision),
+            }
         return results
+    
 
     def plot_roc_curves(self):
-        """
-        Plot ROC curves for each model after preprocessing the data.
-        """
         plt.figure(figsize=(10, 8))
+        X_train, X_test, y_train, y_test = train_test_split(
+            self.X, self.y, test_size=0.2, random_state=42
+        )
         for name, model in self.models.items():
-            model.fit(self.X_preprocessed, self.y)
-            y_scores = model.predict_proba(self.X_preprocessed)[:, 1]
-            fpr, tpr, _ = roc_curve(self.y, y_scores)
+            pipeline = self.create_pipeline(model)
+            pipeline.fit(X_train, y_train)
+            y_scores = pipeline.predict_proba(X_test)[:, 1]
+            fpr, tpr, _ = roc_curve(y_test, y_scores)
             roc_auc = auc(fpr, tpr)
             plt.plot(fpr, tpr, label=f"{name} (area = {roc_auc:.2f})")
 
@@ -1528,25 +1573,53 @@ class ModelEvaluator:
         plt.title("ROC Curves")
         plt.legend(loc="lower right")
         plt.show()
+        
+
+    def create_pipeline(self, model):
+        categorical_cols = self.X.select_dtypes(include=["category", "object"]).columns
+        numeric_cols = self.X.select_dtypes(include=["int64", "float64"]).columns
+
+        numeric_transformer = Pipeline(
+            [
+                ("imputer", SimpleImputer(strategy="median")),
+                ("scaler", StandardScaler()),
+            ]
+        )
+
+        categorical_transformer = Pipeline(
+            [
+                ("imputer", SimpleImputer(strategy="constant", fill_value="missing")),
+                ("onehot", OneHotEncoder(handle_unknown="ignore")),
+            ]
+        )
+
+        preprocessor = ColumnTransformer(
+            [
+                ("num", numeric_transformer, numeric_cols),
+                ("cat", categorical_transformer, categorical_cols),
+            ]
+        )
+
+        return Pipeline([("preprocessor", preprocessor), ("model", model)])
 
     def optimize_model(self, model_name):
-        """
-        Perform GridSearchCV for a specific model to find the best hyperparameters.
-        """
         model = self.models[model_name]
+        pipeline = self.create_pipeline(model)
         grid_search = GridSearchCV(
-            model, self.param_grid[model_name], cv=5, scoring="roc_auc"
+            pipeline, self.param_grid[model_name], cv=5, scoring="roc_auc"
         )
-        grid_search.fit(self.X_preprocessed, self.y)
+        grid_search.fit(self.X, self.y)
         print(f"Best parameters for {model_name}: {grid_search.best_params_}")
         return grid_search.best_estimator_
 
     def compare_top_n_customers(self, model, n=100):
         """
-        Plot histogram of the top N scored customers.
+        Plot histogram of the top N scored customers using the fitted model pipeline.
         """
-        model.fit(self.X_preprocessed, self.y)
-        probabilities = model.predict_proba(self.X_preprocessed)[:, 1]
+        # Fit the pipeline with the entire data; assuming `model` here is already a pipeline object
+        # returned from `optimize_model`
+        model.fit(self.X, self.y)
+        probabilities = model.predict_proba(self.X)[:, 1]
         top_n_indices = np.argsort(probabilities)[::-1][:n]
 
         plt.figure()
@@ -1555,22 +1628,56 @@ class ModelEvaluator:
         plt.xlabel("Probability")
         plt.ylabel("Frequency")
         plt.show()
+        
+class MetricsBenchmarker:
+    def __init__(self):
+        """
+        Initialize the benchmarker with models and data.
 
+        :param models: dict of (name, model) pairs
+        :param X: Feature matrix
+        :param y: Target vector
+        :param selected_fields: Fields selected for training
+        """
+        self.benchmark_results = {}
+        self.evals = []
+        
+    def add_evaluator(self, evaluator: ModelEvaluator):
+        self.evals.append(evaluator)
+    
+    def set_benchmark_results(self):
+        for eval in self.evals:
+            self.benchmark_results.update(eval.get_benchmark_results())
+    
+    def display_benchmark_results_table(self):
+        """
+        Display a table of benchmark results.
+        """
+        results_df = pd.DataFrame(self.benchmark_results).T
+        display(results_df)
+        
+    def plot_benchmark_results_bar_chart(self):
+        """
+        Plot a bar chart of benchmark results.
+        """
+        results_df = pd.DataFrame(self.benchmark_results).T
+        results_df.plot(kind="bar", figsize=(10, 6))
+        plt.title("Benchmark Results")
+        plt.ylabel("Score")
+        plt.show()
 
 
 # %%
 # Example usage:
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
+
 
 # Define models and their parameter grids
 models = {
-    "Logistic Regression": LogisticRegression(solver="liblinear"),
-    "Random Forest": RandomForestClassifier(),
+    "Baseline Logistic Regression": LogisticRegression(solver="liblinear"),
 }
 param_grid = {
-    "Logistic Regression": {"C": [0.01, 0.1, 1, 10]},
-    "Random Forest": {"n_estimators": [100, 200], "max_features": ["auto", "sqrt"]},
+    "Baseline Logistic Regression": {"model__C": [0.01, 0.1, 1, 10]},
 }
 
 
@@ -1580,17 +1687,74 @@ selected_fields = (
     + [f"balance_{i}" for i in range(1, 14)]
 )
 
-evaluator = ModelEvaluator(models, param_grid, X, y, selected_fields=selected_fields)
+evaluator_baseline = ModelEvaluator(models, param_grid, X, y, selected_fields=selected_fields)
+results = evaluator_baseline.evaluate_models()
+evaluator_baseline.plot_roc_curves()
+best_lr = evaluator_baseline.optimize_model("Baseline Logistic Regression")
+evaluator_baseline.compare_top_n_customers(best_lr, n=100)
+
+# Assuming X and y are defined
+#
+
+# %%
+
+# Define models and their parameter grids
+models = {
+    "Logistic Regression Features added": LogisticRegression(solver="liblinear"),
+}
+param_grid = {
+    "Logistic Regression Features added": {"model__C": [0.001, 0.01, 0.1, 1, 10]},
+}
+
+
+# check if there are any missing values
+print(X_feature_engineered.isnull().sum())
+
+
+# todo do something with the missing values
+
+selected_fields = (
+    ["age", "gender", "region_client", ]
+    + [f"volume_{i}" for i in range(1, 14)]
+    + [f"balance_{i}" for i in range(1, 14)]
+)
+
+# selected_fields add the new features of df_features
+selected_fields = selected_fields + ["balance_mean", "credit_mean", "n_transactions_mean"]
+
+evaluator = ModelEvaluator(
+    models, param_grid, X_feature_engineered, y, selected_fields=selected_fields
+)
 results = evaluator.evaluate_models()
 evaluator.plot_roc_curves()
-best_lr = evaluator.optimize_model("Logistic Regression")
+best_lr = evaluator.optimize_model("Logistic Regression Features added")
 evaluator.compare_top_n_customers(best_lr, n=100)
 
 # Assuming X and y are defined
 #
 
+
 # %% [markdown]
-# ## Feature Engineering
+# ## Results Comparision
+
+# %%
+benchmark = MetricsBenchmarker()
+benchmark.add_evaluator(evaluator_baseline)
+benchmark.add_evaluator(evaluator)
+benchmark.set_benchmark_results()
+benchmark.display_benchmark_results_table()
+benchmark.plot_benchmark_results_bar_chart()
+
+
+# %% [markdown]
+# ### Todos
+# - Feature Engineerd has NaNs remove them.
+# - Clean Variables from X to not have dataleakage if we use all variables precison 1.00 and roc 1.00 --> leakage of y
+# - No Cosine in Preprocessing 
+# - Add Models (Tree, Random Forest, Boosted Trees, Logistic Regression with Lasso and Ridge L1/L2)
+
+# %% [markdown]
+# ### Convert Notebook
 
 # %%
 # %%capture
