@@ -11,6 +11,13 @@
 #         theme: readable
 
 # %% [markdown]
+# ### Todos
+# - Feature Engineerd has NaNs remove them.
+# - Clean Variables from X to not have dataleakage if we use all variables precison 1.00 and roc 1.00 --> leakage of y
+# - No Cosine in Preprocessing 
+# - Add Models (Tree, Random Forest, Boosted Trees, Logistic Regression with Lasso and Ridge L1/L2)
+
+# %% [markdown]
 # # Setup
 # Die folgenden Code-Blöcke können genutzt werden, um die benötigten Abhängigkeiten zu installieren und zu importieren.
 
@@ -1447,7 +1454,7 @@ X = clean_data(X)
 print(X.columns)
 
 # %% [markdown]
-# ## Feature Engineering for Logistic Regression
+# ## Feature Engineering fuer Logistic Regression
 
 # %%
 df = X.copy()
@@ -1525,7 +1532,7 @@ class ModelEvaluator:
         self.param_grid = param_grid
         self.X = X[selected_fields]
         self.y = y
-    
+
     def get_benchmark_results(self):
         return self.benchmark_results
 
@@ -1552,7 +1559,6 @@ class ModelEvaluator:
                 "Precision": np.mean(precision),
             }
         return results
-    
 
     def plot_roc_curves(self):
         plt.figure(figsize=(10, 8))
@@ -1573,7 +1579,6 @@ class ModelEvaluator:
         plt.title("ROC Curves")
         plt.legend(loc="lower right")
         plt.show()
-        
 
     def create_pipeline(self, model):
         categorical_cols = self.X.select_dtypes(include=["category", "object"]).columns
@@ -1628,7 +1633,8 @@ class ModelEvaluator:
         plt.xlabel("Probability")
         plt.ylabel("Frequency")
         plt.show()
-        
+
+
 class MetricsBenchmarker:
     def __init__(self):
         """
@@ -1641,21 +1647,21 @@ class MetricsBenchmarker:
         """
         self.benchmark_results = {}
         self.evals = []
-        
+
     def add_evaluator(self, evaluator: ModelEvaluator):
         self.evals.append(evaluator)
-    
+
     def set_benchmark_results(self):
         for eval in self.evals:
             self.benchmark_results.update(eval.get_benchmark_results())
-    
+
     def display_benchmark_results_table(self):
         """
         Display a table of benchmark results.
         """
         results_df = pd.DataFrame(self.benchmark_results).T
         display(results_df)
-        
+
     def plot_benchmark_results_bar_chart(self):
         """
         Plot a bar chart of benchmark results.
@@ -1687,7 +1693,9 @@ selected_fields = (
     + [f"balance_{i}" for i in range(1, 14)]
 )
 
-evaluator_baseline = ModelEvaluator(models, param_grid, X, y, selected_fields=selected_fields)
+evaluator_baseline = ModelEvaluator(
+    models, param_grid, X, y, selected_fields=selected_fields
+)
 results = evaluator_baseline.evaluate_models()
 evaluator_baseline.plot_roc_curves()
 best_lr = evaluator_baseline.optimize_model("Baseline Logistic Regression")
@@ -1697,7 +1705,6 @@ evaluator_baseline.compare_top_n_customers(best_lr, n=100)
 #
 
 # %%
-
 # Define models and their parameter grids
 models = {
     "Logistic Regression Features added": LogisticRegression(solver="liblinear"),
@@ -1714,13 +1721,21 @@ print(X_feature_engineered.isnull().sum())
 # todo do something with the missing values
 
 selected_fields = (
-    ["age", "gender", "region_client", ]
+    [
+        "age",
+        "gender",
+        "region_client",
+    ]
     + [f"volume_{i}" for i in range(1, 14)]
     + [f"balance_{i}" for i in range(1, 14)]
 )
 
 # selected_fields add the new features of df_features
-selected_fields = selected_fields + ["balance_mean", "credit_mean", "n_transactions_mean"]
+selected_fields = selected_fields + [
+    "balance_mean",
+    "credit_mean",
+    "n_transactions_mean",
+]
 
 evaluator = ModelEvaluator(
     models, param_grid, X_feature_engineered, y, selected_fields=selected_fields
@@ -1747,11 +1762,7 @@ benchmark.plot_benchmark_results_bar_chart()
 
 
 # %% [markdown]
-# ### Todos
-# - Feature Engineerd has NaNs remove them.
-# - Clean Variables from X to not have dataleakage if we use all variables precison 1.00 and roc 1.00 --> leakage of y
-# - No Cosine in Preprocessing 
-# - Add Models (Tree, Random Forest, Boosted Trees, Logistic Regression with Lasso and Ridge L1/L2)
+# ## Interpretation von den Resultaten
 
 # %% [markdown]
 # ### Convert Notebook
