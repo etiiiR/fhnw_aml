@@ -1427,9 +1427,12 @@ model.fit(X_train, y_train)
 # Now the model can be used to predict or evaluate on the test set
 model.predict(X_test)
 
-
 # %% [markdown]
 # ## Drop Featrues
+
+# %%
+X.head(5)
+
 
 # %%
 def clean_data(df):
@@ -1438,6 +1441,7 @@ def clean_data(df):
         "disp_id",
         "client_id",
         "account_id",
+        "type_card",
         "card_id",
         "loan_id",
         "district_id_account",
@@ -1500,7 +1504,6 @@ df_features = pd.DataFrame(all_features)
 display(df_features.head(5))
 X_feature_engineered = pd.concat([X, df_features], axis=1)
 display(X_feature_engineered.head(5))
-
 
 # %% [markdown]
 # ## Models
@@ -1659,6 +1662,8 @@ class MetricsBenchmarker:
         """
         Display a table of benchmark results.
         """
+        print("Benchmark Results")
+        print(self.benchmark_results)
         results_df = pd.DataFrame(self.benchmark_results).T
         display(results_df)
 
@@ -1748,6 +1753,82 @@ evaluator.compare_top_n_customers(best_lr, n=100)
 # Assuming X and y are defined
 #
 
+# %%
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.svm import SVC
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import AdaBoostClassifier
+from tqdm import tqdm
+
+
+# Define models and their parameter grids
+models = {
+    "Random Forest": RandomForestClassifier(),
+    "Gradient Boosting": GradientBoostingClassifier(),
+    "SVM": SVC(probability=True),
+    "KNN": KNeighborsClassifier(),
+    "Decision Tree": DecisionTreeClassifier(),
+    "AdaBoost": AdaBoostClassifier(),
+}
+
+param_grid = {
+    "Random Forest": {
+        "model__n_estimators": [100, 200, 300],
+        "model__max_depth": [None, 5, 10],
+    },
+    "Gradient Boosting": {
+        "model__n_estimators": [100, 200, 300],
+        "model__learning_rate": [0.1, 0.01, 0.001],
+    },
+    "SVM": {"model__C": [0.1, 1, 10], "model__kernel": ["linear", "rbf"]},
+    "KNN": {"model__n_neighbors": [3, 5, 7], "model__weights": ["uniform", "distance"]},
+    "Decision Tree": {
+        "model__max_depth": [None, 5, 10],
+        "model__min_samples_split": [2, 5, 10],
+    },
+    "AdaBoost": {
+        "model__n_estimators": [50, 100, 150],
+        "model__learning_rate": [0.1, 0.01, 0.001],
+    },
+}
+
+# todo do something with the missing values
+
+selected_fields = (
+    [
+        "age",
+        "gender",
+        "region_client",
+        ""
+    ]
+    + [f"volume_{i}" for i in range(1, 14)]
+    + [f"balance_{i}" for i in range(1, 14)]
+)
+
+selected_fields = X.columns
+
+
+evaluator_models = ModelEvaluator(
+    models, param_grid, X, y, selected_fields=selected_fields
+)
+results = evaluator_models.evaluate_models()
+evaluator_models.plot_roc_curves()
+
+# for model_name in tqdm(models.keys()):
+#    best_models[model_name] = evaluator_models.optimize_model(model_name)
+
+# best_model_name = max(best_models, key=best_models.get)
+# best_model = best_models[best_model_name]
+
+# get best model out of the best_models roc auc and precision
+# best_model = max(best_models, key=lambda x: best_models[x].score(X, y))
+
+# evaluator_models.compare_top_n_customers(best_model, n=100)
+# evaluator_models
+# Assuming X and y are defined
+#
+
 
 # %% [markdown]
 # ## Results Comparision
@@ -1755,11 +1836,15 @@ evaluator.compare_top_n_customers(best_lr, n=100)
 # %%
 benchmark = MetricsBenchmarker()
 benchmark.add_evaluator(evaluator_baseline)
+benchmark.add_evaluator(evaluator_models)
 benchmark.add_evaluator(evaluator)
 benchmark.set_benchmark_results()
 benchmark.display_benchmark_results_table()
 benchmark.plot_benchmark_results_bar_chart()
 
+
+# %%
+evaluator_models.get_benchmark_results()
 
 # %% [markdown]
 # ## Interpretation von den Resultaten
