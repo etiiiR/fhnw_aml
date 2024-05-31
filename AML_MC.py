@@ -12,10 +12,9 @@
 
 # %% [markdown]
 # ### Todos
-# - Feature Engineerd has NaNs remove them.
-# - Clean Variables from X to not have dataleakage if we use all variables precison 1.00 and roc 1.00 --> leakage of y
-# - No Cosine in Preprocessing 
-# - Add Models (Tree, Random Forest, Boosted Trees, Logistic Regression with Lasso and Ridge L1/L2)
+# - Feature Engineerd has NaNs remove them and than use the X_feature_engineerd as dataset everywhere if not baseline.
+# - (Alex) no complex logic in preprocessing (What Danni said implementing)
+# - Add Lasso and L1/L2
 
 # %% [markdown]
 # # Setup
@@ -1404,37 +1403,17 @@ preprocessor = ColumnTransformer(
 # ## Test-Train-Split
 
 # %%
-# Split data into training and testing sets
+# At the time not used because We use KFolds for cross validation instead of Train-Test-Split
 X_train, X_test, y_train, y_test = train_test_split(
     XX, y, test_size=0.2, random_state=42, stratify=y
 )
 
-# %% [markdown]
-# ## Baseline
-
-# %%
-# Create a full pipeline with Logistic Regression
-model = Pipeline(
-    steps=[
-        ("preprocessor", preprocessor),
-        ("classifier", LogisticRegression(solver="liblinear")),
-    ]
-)
-
-# Fit the model
-model.fit(X_train, y_train)
-
-# Now the model can be used to predict or evaluate on the test set
-model.predict(X_test)
 
 # %% [markdown]
 # ## Drop Featrues
 
 # %%
-X.head(5)
-
-
-# %%
+# Remove the Variable that can lead to data leakage
 def clean_data(df):
     # Define unnecessary columns
     unnecessary_cols = [
@@ -1454,11 +1433,12 @@ def clean_data(df):
 
 X = clean_data(X)
 
+
 # %%
 print(X.columns)
 
 # %% [markdown]
-# ## Feature Engineering fuer Logistic Regression
+# ## Feature Engineering für Logistic Regression
 
 # %%
 df = X.copy()
@@ -1513,6 +1493,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import cross_val_score, GridSearchCV, StratifiedKFold
 from sklearn.metrics import roc_curve, auc, precision_score, roc_auc_score
+from sklearn.metrics import (
+    make_scorer,
+    fbeta_score,
+    cohen_kappa_score,
+    matthews_corrcoef,
+)
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.compose import ColumnTransformer
@@ -1544,23 +1530,24 @@ class ModelEvaluator:
         for name, model in self.models.items():
             pipeline = self.create_pipeline(model)
             cv = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
-            roc_auc = cross_val_score(
-                pipeline, self.X, self.y, cv=cv, scoring="roc_auc"
-            )
-            precision = cross_val_score(
-                pipeline, self.X, self.y, cv=cv, scoring="precision"
-            )
-            results[name] = {
-                "ROC AUC": np.mean(roc_auc),
-                "Precision": np.mean(precision),
+            metrics = {
+                "ROC AUC": "roc_auc",
+                "Precision": "precision",
+                "Recall": "recall",
+                "Accuracy": "accuracy",
+                "F-measure": make_scorer(fbeta_score, beta=1),
+                "Kappa": make_scorer(cohen_kappa_score),
+                "MCC": make_scorer(matthews_corrcoef),
             }
-            print(
-                f"{name}: ROC AUC = {np.mean(roc_auc):.2f}, Precision = {np.mean(precision):.2f}"
-            )
-            self.benchmark_results[name] = {
-                "ROC AUC": np.mean(roc_auc),
-                "Precision": np.mean(precision),
-            }
+            for metric_name, metric in metrics.items():
+                score = cross_val_score(
+                    pipeline, self.X, self.y, cv=cv, scoring=metric, n_jobs=-1
+                )
+                results.setdefault(name, {})[metric_name] = np.mean(score)
+                print(f"{name}: {metric_name} = {np.mean(score):.2f}")
+                self.benchmark_results.setdefault(name, {})[metric_name] = np.mean(
+                    score
+                )
         return results
 
     def plot_roc_curves(self):
@@ -1710,6 +1697,13 @@ evaluator_baseline.compare_top_n_customers(best_lr, n=100)
 #
 
 # %%
+# check if there are any missing values
+print(X_feature_engineered.isnull().sum())
+
+# todo do something with missing values
+
+
+# %%
 # Define models and their parameter grids
 models = {
     "Logistic Regression Features added": LogisticRegression(solver="liblinear"),
@@ -1717,13 +1711,6 @@ models = {
 param_grid = {
     "Logistic Regression Features added": {"model__C": [0.001, 0.01, 0.1, 1, 10]},
 }
-
-
-# check if there are any missing values
-print(X_feature_engineered.isnull().sum())
-
-
-# todo do something with the missing values
 
 selected_fields = (
     [
@@ -1754,6 +1741,11 @@ evaluator.compare_top_n_customers(best_lr, n=100)
 #
 
 # %%
+# data cleaning X_feature_engineered
+X_feature_engineered.head(5)
+
+
+# %%
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
@@ -1769,7 +1761,7 @@ models = {
     "SVM": SVC(probability=True),
     "KNN": KNeighborsClassifier(),
     "Decision Tree": DecisionTreeClassifier(),
-    "AdaBoost": AdaBoostClassifier(),
+    "AdaBoost": AdaBoostClassifier(algorithm="SAMME"),
 }
 
 param_grid = {
@@ -1795,22 +1787,14 @@ param_grid = {
 
 # todo do something with the missing values
 
-selected_fields = (
-    [
-        "age",
-        "gender",
-        "region_client",
-        ""
-    ]
-    + [f"volume_{i}" for i in range(1, 14)]
-    + [f"balance_{i}" for i in range(1, 14)]
-)
-
 selected_fields = X.columns
+
+# add the new features of df_features)
+# add mean
 
 
 evaluator_models = ModelEvaluator(
-    models, param_grid, X, y, selected_fields=selected_fields
+    models, param_grid, X_feature_engineered, y, selected_fields=selected_fields
 )
 results = evaluator_models.evaluate_models()
 evaluator_models.plot_roc_curves()
@@ -1829,7 +1813,6 @@ evaluator_models.plot_roc_curves()
 # Assuming X and y are defined
 #
 
-
 # %% [markdown]
 # ## Results Comparision
 
@@ -1841,7 +1824,6 @@ benchmark.add_evaluator(evaluator)
 benchmark.set_benchmark_results()
 benchmark.display_benchmark_results_table()
 benchmark.plot_benchmark_results_bar_chart()
-
 
 # %%
 evaluator_models.get_benchmark_results()
