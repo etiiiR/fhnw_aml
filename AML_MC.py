@@ -1501,9 +1501,14 @@ display(X_feature_engineered.head(5))
 # %%
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.model_selection import cross_val_score, GridSearchCV, StratifiedKFold
-from sklearn.metrics import roc_curve, auc, precision_score, roc_auc_score
+from sklearn.model_selection import (
+    cross_val_score,
+    GridSearchCV,
+    StratifiedKFold,
+)
 from sklearn.metrics import (
+    roc_curve,
+    auc,
     make_scorer,
     fbeta_score,
     cohen_kappa_score,
@@ -1513,6 +1518,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
+import lime.lime_tabular
+import shap
 
 
 class ModelEvaluator:
@@ -1531,15 +1538,17 @@ class ModelEvaluator:
         self.param_grid = param_grid
         self.X = X[selected_fields]
         self.y = y
+        self.fitted_models = {}
+        self.best_models = {}
+        self.cv_predictions = {}
 
     def get_benchmark_results(self):
         return self.benchmark_results
 
-    def evaluate_models(self):
-        results = {}
+    def fit_models(self):
+        cv = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
         for name, model in self.models.items():
             pipeline = self.create_pipeline(model)
-            cv = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
             metrics = {
                 "ROC AUC": "roc_auc",
                 "Precision": "precision",
@@ -1549,27 +1558,35 @@ class ModelEvaluator:
                 "Kappa": make_scorer(cohen_kappa_score),
                 "MCC": make_scorer(matthews_corrcoef),
             }
+            self.benchmark_results[name] = {}
+            all_cv_preds = np.zeros(len(self.y))
             for metric_name, metric in metrics.items():
                 score = cross_val_score(
                     pipeline, self.X, self.y, cv=cv, scoring=metric, n_jobs=-1
                 )
-                results.setdefault(name, {})[metric_name] = np.mean(score)
+                self.benchmark_results[name][metric_name] = np.mean(score)
                 print(f"{name}: {metric_name} = {np.mean(score):.2f}")
-                self.benchmark_results.setdefault(name, {})[metric_name] = np.mean(
-                    score
-                )
-        return results
+            for train_idx, test_idx in cv.split(self.X, self.y):
+                pipeline.fit(self.X.iloc[train_idx], self.y.iloc[train_idx])
+                all_cv_preds[test_idx] = pipeline.predict_proba(self.X.iloc[test_idx])[
+                    :, 1
+                ]
+            self.cv_predictions[name] = all_cv_preds
+            self.fitted_models[name] = pipeline.fit(self.X, self.y)
+
+    def evaluate_models(self):
+        if not self.fitted_models:
+            self.fit_models()
+        return self.benchmark_results
 
     def plot_roc_curves(self):
+        if not self.fitted_models:
+            self.fit_models()
+
         plt.figure(figsize=(10, 8))
-        X_train, X_test, y_train, y_test = train_test_split(
-            self.X, self.y, test_size=0.2, random_state=42
-        )
-        for name, model in self.models.items():
-            pipeline = self.create_pipeline(model)
-            pipeline.fit(X_train, y_train)
-            y_scores = pipeline.predict_proba(X_test)[:, 1]
-            fpr, tpr, _ = roc_curve(y_test, y_scores)
+        for name in self.fitted_models:
+            y_scores = self.cv_predictions[name]
+            fpr, tpr, _ = roc_curve(self.y, y_scores)
             roc_auc = auc(fpr, tpr)
             plt.plot(fpr, tpr, label=f"{name} (area = {roc_auc:.2f})")
 
@@ -1608,6 +1625,9 @@ class ModelEvaluator:
         return Pipeline([("preprocessor", preprocessor), ("model", model)])
 
     def optimize_model(self, model_name):
+        if model_name in self.best_models:
+            return self.best_models[model_name]
+
         model = self.models[model_name]
         pipeline = self.create_pipeline(model)
         grid_search = GridSearchCV(
@@ -1615,15 +1635,15 @@ class ModelEvaluator:
         )
         grid_search.fit(self.X, self.y)
         print(f"Best parameters for {model_name}: {grid_search.best_params_}")
-        return grid_search.best_estimator_
+        self.best_models[model_name] = grid_search.best_estimator_
+        return self.best_models[model_name]
 
-    def compare_top_n_customers(self, model, n=100):
-        """
-        Plot histogram of the top N scored customers using the fitted model pipeline.
-        """
-        # Fit the pipeline with the entire data; assuming `model` here is already a pipeline object
-        # returned from `optimize_model`
-        model.fit(self.X, self.y)
+    def compare_top_n_customers(self, model_name, n=100):
+        if model_name in self.best_models:
+            model = self.best_models[model_name]
+        else:
+            model = self.optimize_model(model_name)
+
         probabilities = model.predict_proba(self.X)[:, 1]
         top_n_indices = np.argsort(probabilities)[::-1][:n]
 
@@ -1633,6 +1653,68 @@ class ModelEvaluator:
         plt.xlabel("Probability")
         plt.ylabel("Frequency")
         plt.show()
+
+    def explain_with_lime(self, model_name, num_features=10):
+        if model_name in self.best_models:
+            model = self.best_models[model_name]
+        else:
+            model = self.optimize_model(model_name)
+
+        cv = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
+        for train_idx, test_idx in cv.split(self.X, self.y):
+            X_train, X_test = self.X.iloc[train_idx], self.X.iloc[test_idx]
+            y_train, y_test = self.y.iloc[train_idx], self.y.iloc[test_idx]
+            break  # Use the first fold
+
+        # Ensure only numeric features are passed to LIME
+        X_train_numeric = X_train.select_dtypes(include=[np.number])
+        X_test_numeric = X_test.select_dtypes(include=[np.number])
+
+        # Remove columns with zero variance
+        X_train_numeric = X_train_numeric.loc[
+            :, (X_train_numeric != X_train_numeric.iloc[0]).any()
+        ]
+        X_test_numeric = X_test_numeric.loc[:, X_train_numeric.columns]
+
+        explainer = lime.lime_tabular.LimeTabularExplainer(
+            X_train_numeric.values,
+            feature_names=X_train_numeric.columns,
+            class_names=["No Card", "Has Card"],
+            discretize_continuous=True,
+        )
+
+        # Explain a prediction for a single instance
+        idx = 0  # Index of the instance to explain
+        exp = explainer.explain_instance(
+            X_test_numeric.values[idx], model.predict_proba, num_features=num_features
+        )
+        exp.show_in_notebook(show_table=True, show_all=False)
+
+    def explain_with_shap(self, model_name):
+        if model_name in self.best_models:
+            model = self.best_models[model_name]
+        else:
+            model = self.optimize_model(model_name)
+
+        cv = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
+        for train_idx, test_idx in cv.split(self.X, self.y):
+            X_train, X_test = self.X.iloc[train_idx], self.X.iloc[test_idx]
+            y_train, y_test = self.y.iloc[train_idx], self.y.iloc[test_idx]
+            break  # Use the first fold
+
+        # Ensure only numeric features are passed to SHAP
+        X_train_numeric = X_train.select_dtypes(include=[np.number])
+        X_test_numeric = X_test.select_dtypes(include=[np.number])
+
+        explainer = shap.Explainer(model, X_train_numeric)
+        shap_values = explainer(X_test_numeric)
+
+        # Plot SHAP summary plot
+        shap.summary_plot(shap_values, X_test_numeric)
+
+        # Plot SHAP dependence plot for a single feature
+        feature = "balance_mean"  # Feature to explain
+        shap.dependence_plot(feature, shap_values, X_test_numeric)
 
 
 class MetricsBenchmarker:
@@ -1673,10 +1755,10 @@ class MetricsBenchmarker:
         plt.show()
 
 
-# %%
-# Example usage:
-from sklearn.linear_model import LogisticRegression
 
+# %%
+# Example usage
+from sklearn.linear_model import LogisticRegression
 
 # Define models and their parameter grids
 models = {
@@ -1685,7 +1767,6 @@ models = {
 param_grid = {
     "Baseline Logistic Regression": {"model__C": [0.01, 0.1, 1, 10]},
 }
-
 
 selected_fields = (
     ["age", "gender", "region_client"]
@@ -1696,19 +1777,11 @@ selected_fields = (
 evaluator_baseline = ModelEvaluator(
     models, param_grid, X, y, selected_fields=selected_fields
 )
-results = evaluator_baseline.evaluate_models()
+evaluator_baseline.evaluate_models()
 evaluator_baseline.plot_roc_curves()
-best_lr = evaluator_baseline.optimize_model("Baseline Logistic Regression")
-evaluator_baseline.compare_top_n_customers(best_lr, n=100)
+evaluator_baseline.optimize_model("Baseline Logistic Regression")
+evaluator_baseline.compare_top_n_customers("Baseline Logistic Regression", n=100)
 
-# Assuming X and y are defined
-#
-
-# %%
-# check if there are any missing values
-print(X_feature_engineered.isnull().sum())
-
-# todo do something with missing values
 
 # %%
 # Define models and their parameter grids
@@ -1739,17 +1812,14 @@ selected_fields = selected_fields + [
 evaluator = ModelEvaluator(
     models, param_grid, X_feature_engineered, y, selected_fields=selected_fields
 )
-results = evaluator.evaluate_models()
+evaluator.evaluate_models()
 evaluator.plot_roc_curves()
-best_lr = evaluator.optimize_model("Logistic Regression Features added")
-evaluator.compare_top_n_customers(best_lr, n=100)
+evaluator.optimize_model("Logistic Regression Features added")
+evaluator.compare_top_n_customers("Logistic Regression Features added", n=100)
+
 
 # Assuming X and y are defined
 #
-
-# %%
-# data cleaning X_feature_engineered
-X_feature_engineered.head(5)
 
 # %%
 # check if there are any missing values
@@ -1767,13 +1837,6 @@ X_feature_engineered["withdrawal_mean_ratio_last3_first3"] = X_feature_engineere
 ].fillna(X_feature_engineered["withdrawal_mean_ratio_last3_first3"].mean())
 
 display(X_feature_engineered.head(5))
-
-
-# %%
-# print range of values in withdrawal_mean_ratio_last3_first3
-print(
-    f"Range of values in withdrawal_mean_ratio_last3_first3: {X_feature_engineered['withdrawal_mean_ratio_last3_first3'].min()} - {X_feature_engineered['withdrawal_mean_ratio_last3_first3'].max()}"
-)
 
 
 # %%
@@ -1818,15 +1881,12 @@ param_grid = {
     },
 }
 
-for model_name, model in models.items():
-    models[model_name] = Pipeline(
-        [("feature_selection", SelectFromModel(LassoCV())), ("model", model)]
-    )
+# for model_name, model in models.items():
+#    models[model_name] = Pipeline(
+#        [("feature_selection", SelectFromModel(LassoCV())), ("model", model)]
+#    )
 
-# todo do something with the missing values
-print(df_features.columns)
-
-selected_fields = X_feature_engineered.columns  # add the new features of df_features
+selected_fields = X.columns  # add the new features of df_features
 
 evaluator_models = ModelEvaluator(
     models, param_grid, X_feature_engineered, y, selected_fields=selected_fields
@@ -1850,6 +1910,16 @@ evaluator_models.plot_roc_curves()
 
 # %% [markdown]
 # # Erklärbare Modelle
+
+# %%
+# todo fix the error
+
+# Explain the best model with LIME
+evaluator_models.explain_with_lime("Random Forest")
+
+# Explain the best model with SHAP
+evaluator_models.explain_with_shap("Random Forest")
+
 
 # %% [markdown]
 # ## Results Comparision
