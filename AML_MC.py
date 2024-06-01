@@ -15,6 +15,12 @@
 # - Feature Engineerd has NaNs remove them and than use the X_feature_engineerd as dataset everywhere if not baseline.
 # - (Alex) no complex logic in preprocessing (What Danni said implementing)
 # - Add Lasso and L1/L2
+# - plot_roc_curve should use the results of evalute_model and not a train_test_split and evalute again
+# - Reduce Model
+# - Explainable AI 
+# - Better metrics
+# - Markdown writing and explaine what we have done
+# - Clean up code: (Imports in central place, Comments, Code Refactor)
 
 # %% [markdown]
 # # Setup
@@ -29,7 +35,6 @@
 # %load_ext pretty_jupyter
 
 # %%
-# %%capture
 # Laden der eingesetzten Libraries
 from datetime import datetime
 
@@ -42,6 +47,8 @@ from itables import init_notebook_mode
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics.pairwise import cosine_similarity
 
+# %%
+# %%capture
 # set theme ggplot for plots
 plt.style.use("ggplot")
 # set display options
@@ -1351,7 +1358,7 @@ print(X.dtypes)
 X.columns
 
 # %% [markdown]
-# ## Preprocessing
+# # Preprocessing
 
 # %%
 import pandas as pd
@@ -1433,7 +1440,6 @@ def clean_data(df):
 
 X = clean_data(X)
 
-
 # %%
 print(X.columns)
 
@@ -1447,7 +1453,8 @@ df = X.copy()
 # Function to calculate features
 def calculate_features(df, prefix):
     monthly_values = df[[f"{prefix}_{i}" for i in range(1, 13)]]
-
+    # needs to be a small constant to avoid division by zero
+    epsilon = 1e-7  # small constant
     features = {
         f"{prefix}_mean": monthly_values.mean(axis=1),
         f"{prefix}_min": monthly_values.min(axis=1),
@@ -1457,7 +1464,10 @@ def calculate_features(df, prefix):
         .mean(axis=1),
         f"{prefix}_mean_ratio_last3_first3": (
             monthly_values[[f"{prefix}_{i}" for i in range(10, 13)]].mean(axis=1)
-            / monthly_values[[f"{prefix}_{i}" for i in range(1, 4)]].mean(axis=1)
+            / (
+                monthly_values[[f"{prefix}_{i}" for i in range(1, 4)]].mean(axis=1)
+                + epsilon
+            )
         ),
     }
 
@@ -1486,7 +1496,7 @@ X_feature_engineered = pd.concat([X, df_features], axis=1)
 display(X_feature_engineered.head(5))
 
 # %% [markdown]
-# ## Models
+# # Models
 
 # %%
 import numpy as np
@@ -1649,8 +1659,6 @@ class MetricsBenchmarker:
         """
         Display a table of benchmark results.
         """
-        print("Benchmark Results")
-        print(self.benchmark_results)
         results_df = pd.DataFrame(self.benchmark_results).T
         display(results_df)
 
@@ -1702,7 +1710,6 @@ print(X_feature_engineered.isnull().sum())
 
 # todo do something with missing values
 
-
 # %%
 # Define models and their parameter grids
 models = {
@@ -1744,6 +1751,30 @@ evaluator.compare_top_n_customers(best_lr, n=100)
 # data cleaning X_feature_engineered
 X_feature_engineered.head(5)
 
+# %%
+# check if there are any missing values
+# print the missing values of withdrawal mean ration last3 first3
+print(X_feature_engineered["withdrawal_mean_ratio_last3_first3"].isnull().sum())
+
+# get the index of the missing values
+missing_values = X_feature_engineered["withdrawal_mean_ratio_last3_first3"].isnull()
+missing_values_index = X_feature_engineered[missing_values].index
+print(missing_values_index)
+X_feature_engineered.loc[missing_values_index]
+# Transform the missing values to the mean of the column
+X_feature_engineered["withdrawal_mean_ratio_last3_first3"] = X_feature_engineered[
+    "withdrawal_mean_ratio_last3_first3"
+].fillna(X_feature_engineered["withdrawal_mean_ratio_last3_first3"].mean())
+
+display(X_feature_engineered.head(5))
+
+
+# %%
+# print range of values in withdrawal_mean_ratio_last3_first3
+print(
+    f"Range of values in withdrawal_mean_ratio_last3_first3: {X_feature_engineered['withdrawal_mean_ratio_last3_first3'].min()} - {X_feature_engineered['withdrawal_mean_ratio_last3_first3'].max()}"
+)
+
 
 # %%
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
@@ -1752,6 +1783,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import AdaBoostClassifier
 from tqdm import tqdm
+from sklearn.linear_model import LassoCV
+from sklearn.feature_selection import SelectFromModel
 
 
 # Define models and their parameter grids
@@ -1785,13 +1818,15 @@ param_grid = {
     },
 }
 
+for model_name, model in models.items():
+    models[model_name] = Pipeline(
+        [("feature_selection", SelectFromModel(LassoCV())), ("model", model)]
+    )
+
 # todo do something with the missing values
+print(df_features.columns)
 
-selected_fields = X.columns
-
-# add the new features of df_features)
-# add mean
-
+selected_fields = X_feature_engineered.columns  # add the new features of df_features
 
 evaluator_models = ModelEvaluator(
     models, param_grid, X_feature_engineered, y, selected_fields=selected_fields
@@ -1812,6 +1847,9 @@ evaluator_models.plot_roc_curves()
 # evaluator_models
 # Assuming X and y are defined
 #
+
+# %% [markdown]
+# # Erklärbare Modelle
 
 # %% [markdown]
 # ## Results Comparision

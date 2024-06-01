@@ -15,3 +15,5 @@ pretty_jupyter==2.0.7
 lxml[html_clean]
 jupytext==1.16.1
 sweetviz
+shap
+lime
