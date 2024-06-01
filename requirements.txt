@@ -5,13 +5,12 @@ pandas
 numpy
 plotly
 tabulate
-itables==1.6.4
+itables==1.7.1
 python-highcharts
 jupyter
 pandas
 scikit-learn
 statsmodels
-pretty_jupyter==2.0.7
 lxml[html_clean]
 jupytext==1.16.1
 sweetviz

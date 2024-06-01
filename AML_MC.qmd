@@ -1,40 +1,48 @@
-# ---
-# title: "AML Challenge 2024"
-# date: "`r Sys.Date()`"
-# author: "Etienne Roulet, Alexander Shanmugam"
-# format: 
-#     html:
-#         toc: true
-#         number_sections: true
-#         page-layout: full
-# editor_options: 
-#     chunk_output_type: console
-# ---
+---
+title: AML Challenge 2024
+date: '`r Sys.Date()`'
+author: 'Etienne Roulet, Alexander Shanmugam'
+format:
+  html:
+    toc: true
+    number_sections: true
+    page-layout: full
+editor_options:
+  chunk_output_type: console
+jupyter:
+  jupytext:
+    cell_metadata_filter: '-all'
+    main_language: python
+    notebook_metadata_filter: '-all'
+  kernelspec:
+    display_name: Python 3
+    language: python
+    name: python3
+---
 
-# %% [markdown]
-# ### Todos
-# - (Alex) no complex logic in preprocessing (What Danni said implementing)
-# - Reduce Model
-# - Explainable AI 
-# - Markdown writing and explaine what we have done
-# - Clean up code: (Imports in central place, Comments, Code Refactor)
+### Todos
+- (Alex) no complex logic in preprocessing (What Danni said implementing)
+- Reduce Model
+- Explainable AI 
+- Markdown writing and explaine what we have done
+- Clean up code: (Imports in central place, Comments, Code Refactor)
 
-# %% [markdown]
-# # Setup
-# Die folgenden Code-Blöcke können genutzt werden, um die benötigten Abhängigkeiten zu installieren und zu importieren.
+# Setup
+Die folgenden Code-Blöcke können genutzt werden, um die benötigten Abhängigkeiten zu installieren und zu importieren.
 
-# %%
-# %%capture
-# %pip install -r ../requirements.txt
+```{python}
+%%capture
+%pip install -r ../requirements.txt
+```
 
-# %%
+```{python}
 from itables import show
 from itables import init_notebook_mode
 
 init_notebook_mode(all_interactive=True)
+```
 
-
-# %%
+```{python}
 # Laden der eingesetzten Libraries
 from datetime import datetime
 
@@ -80,17 +88,18 @@ from sklearn.ensemble import AdaBoostClassifier
 from tqdm import tqdm
 from sklearn.linear_model import LassoCV
 from sklearn.feature_selection import SelectFromModel
+```
 
-# %%
-# %%capture
+```{python}
+%%capture
 # set theme ggplot for plots
 plt.style.use("ggplot")
 # set display options
 pd.set_option("display.max_columns", None)
 pd.set_option("display.max_rows", None)
+```
 
-
-# %%
+```{python}
 # Funktion zur Bestimmung des Geschlechts und Berechnung des Geburtstags
 def parse_details(birth_number):
     birth_number_str = str(
@@ -130,19 +139,17 @@ def regression_results(y_true, y_pred):
     print("MAE: ", round(metrics.mean_absolute_error(y_true, y_pred), 4))
     print("MSE: ", round(metrics.mean_squared_error(y_true, y_pred), 4))
     print("RMSE: ", round(np.sqrt(metrics.mean_squared_error(y_true, y_pred)), 4))
+```
 
+# Aufgabenstellung
+Inhalt der hier bearbeiteten und dokumentierten Mini-Challenge für das Modul «aml - Angewandtes Machine Learning» der FHNW ist die Entwicklung und Evaluierung von Aﬀinitätsmodellen für personalisierte Kreditkarten-Werbekampagnen im Auftrag einer Bank. Das Ziel der Authoren ist es also, mithilfe von Kunden- und Transaktionsdaten präzise Modelle zu erstellen, die die Wahrscheinlichkeit des Kreditkartenkaufs einer bestimmten Person vorhersagen.
 
-# %% [markdown]
-# # Aufgabenstellung
-# Inhalt der hier bearbeiteten und dokumentierten Mini-Challenge für das Modul «aml - Angewandtes Machine Learning» der FHNW ist die Entwicklung und Evaluierung von Aﬀinitätsmodellen für personalisierte Kreditkarten-Werbekampagnen im Auftrag einer Bank. Das Ziel der Authoren ist es also, mithilfe von Kunden- und Transaktionsdaten präzise Modelle zu erstellen, die die Wahrscheinlichkeit des Kreditkartenkaufs einer bestimmten Person vorhersagen.
+# Laden der zur Verfügung gestellten Daten
+[//]: # (-.- .tabset)
 
-# %% [markdown]
-# # Laden der zur Verfügung gestellten Daten
-# [//]: # (-.- .tabset)
-#
-# Zur Verfügung gestellt wurden 8 csv-Dateien von welchen die Beschreibung der erfassten Variablen unter dem folgenden Link eingesehen werden können: [PKDD'99 Discovery Challenge - Guide to the Financial Data Set](https://sorry.vse.cz/~berka/challenge/PAST/index.html). Nachfolgend werden diese csv-Dateien eingelesen.
+Zur Verfügung gestellt wurden 8 csv-Dateien von welchen die Beschreibung der erfassten Variablen unter dem folgenden Link eingesehen werden können: [PKDD'99 Discovery Challenge - Guide to the Financial Data Set](https://sorry.vse.cz/~berka/challenge/PAST/index.html). Nachfolgend werden diese csv-Dateien eingelesen.
 
-# %%
+```{python}
 account = pd.read_csv("./data/account.csv", sep=";", dtype={"date": "str"})
 card = pd.read_csv("./data/card.csv", sep=";", dtype={"issued": "str"})
 client = pd.read_csv("./data/client.csv", sep=";")
@@ -151,35 +158,36 @@ district = pd.read_csv("./data/district.csv", sep=";")
 loan = pd.read_csv("./data/loan.csv", sep=";", dtype={"date": "str"})
 order = pd.read_csv("./data/order.csv", sep=";")
 trans = pd.read_csv("./data/trans.csv", sep=";", dtype={"date": "str", "bank": "str"})
+```
 
-# %% [markdown]
-# # Datenaufbereitung & Explorative Datenanalyse
-# Im folgenden Abschnitt werden die geladenen Daten separat so transformiert, dass jede Zeile einer Observation und jede Spalte einer Variable im entsprechenden Datenformat entspricht, also ins Tidy-Format gebracht.
+# Datenaufbereitung & Explorative Datenanalyse
+Im folgenden Abschnitt werden die geladenen Daten separat so transformiert, dass jede Zeile einer Observation und jede Spalte einer Variable im entsprechenden Datenformat entspricht, also ins Tidy-Format gebracht.
 
-# %%
+```{python}
 data_frames = {}
+```
 
-# %% [markdown]
-# ## Account
-# [//]: # (-.- .tabset)
-# Der Datensatz `accounts.csv` beinhaltet 4500 Observationen mit den folgenden Informationen über die Kontos der Bank:  
-# - `account_id`: die Kontonummer, 
-# - `district_id`: den Standort der entsprechenden Bankfiliale,
-# - `frequency`: die Frequenz der Ausstellung von Kontoauszügen (monatlich, wöchentlich, pro Transaktion) und 
-# - `date`: das Erstellungsdatum
+## Account
+[//]: # (-.- .tabset)
+Der Datensatz `accounts.csv` beinhaltet 4500 Observationen mit den folgenden Informationen über die Kontos der Bank:  
+- `account_id`: die Kontonummer, 
+- `district_id`: den Standort der entsprechenden Bankfiliale,
+- `frequency`: die Frequenz der Ausstellung von Kontoauszügen (monatlich, wöchentlich, pro Transaktion) und 
+- `date`: das Erstellungsdatum
 
-# %%
+```{python}
 account.info()
+```
 
-# %%
+```{python}
 print("Anzahl fehlender Werte:", sum(account.isnull().sum()))
 print("Anzahl duplizierter Einträge:", account.duplicated().sum())
+```
 
-# %% [markdown]
-# ### Aufbereitung
-# Nachfolgend wird die `date` Spalte des `account.csv`-Datensatzes in das entsprechende Datenformat geparsed und die Werte von `frequency` übersetzt und als Levels einer Kategorie definiert.
+### Aufbereitung
+Nachfolgend wird die `date` Spalte des `account.csv`-Datensatzes in das entsprechende Datenformat geparsed und die Werte von `frequency` übersetzt und als Levels einer Kategorie definiert.
 
-# %%
+```{python}
 # parse date
 account["date"] = pd.to_datetime(account["date"], format="%y%m%d")
 # translate categories
@@ -196,12 +204,12 @@ account["frequency"] = account["frequency"].astype("category")
 
 # sample 5 random rows
 account.sample(n=5)
+```
 
-# %% [markdown]
-# ### Distrikt
-# Hier zu sehen ist die Verteilung der Distrikte pro Bankkonto. Ersichtlich ist, dass im Distrikt 1 mit Abstand am meisten Bankkontos geführt werden. Die darauf folgenden Distrikte bewegen sich alle im Bereich zwischen ~250 - 50 Bankkonten.  
+### Distrikt
+Hier zu sehen ist die Verteilung der Distrikte pro Bankkonto. Ersichtlich ist, dass im Distrikt 1 mit Abstand am meisten Bankkontos geführt werden. Die darauf folgenden Distrikte bewegen sich alle im Bereich zwischen ~250 - 50 Bankkonten.  
 
-# %%
+```{python}
 # plot the distribution of the district_ids and replace the id with it's name
 plt.figure(figsize=(15, 6))
 account["district_id"].value_counts().plot(kind="bar")
@@ -209,12 +217,12 @@ plt.title("Verteilung der Distrikte")
 plt.xlabel("Distrikt")
 plt.ylabel("Anzahl")
 plt.show()
+```
 
-# %% [markdown]
-# ### Frequenz
-# Auf dieser Visualisierung zu sehen ist die Klassenverteilung der Frequenz der Ausstellung der Kontoauszüge. Die allermeisten Bankkonten besitzen eine monatliche Ausstellung.
+### Frequenz
+Auf dieser Visualisierung zu sehen ist die Klassenverteilung der Frequenz der Ausstellung der Kontoauszüge. Die allermeisten Bankkonten besitzen eine monatliche Ausstellung.
 
-# %%
+```{python}
 # Verteilung der Frequenz visualisieren
 plt.figure(figsize=(10, 6))
 account["frequency"].value_counts().plot(kind="bar")
@@ -222,12 +230,12 @@ plt.title("Frequenz der Kontoauszüge")
 plt.xlabel("Frequenz")
 plt.ylabel("Anzahl")
 plt.show()
+```
 
-# %% [markdown]
-# ### Datum
-# Der hier dargestellte Plot zeigt die Verteilung der Kontoerstellungsdaten. Das erste Konto wurde im Jahr 1993 und das neuste im 1998 erstellt.  
+### Datum
+Der hier dargestellte Plot zeigt die Verteilung der Kontoerstellungsdaten. Das erste Konto wurde im Jahr 1993 und das neuste im 1998 erstellt.  
 
-# %%
+```{python}
 # plot date distribution
 plt.figure(figsize=(10, 6))
 plt.hist(account["date"], bins=20)
@@ -235,43 +243,45 @@ plt.title("Verteilung der Kontoerstellungsdaten")
 plt.xlabel("Datum")
 plt.ylabel("Anzahl")
 plt.show()
+```
 
-# %% [markdown]
-# ### Korrelation & weitere Informationen
-# Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/accounts.html) entnommen werden. 
+### Korrelation & weitere Informationen
+Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/accounts.html) entnommen werden. 
 
-# %%
+```{python}
 # append account data to dataframe collection
 data_frames["account.csv"] = account
+```
 
-# %%
-# # %%capture
+```{python}
+# %%capture
 # # generate sweetviz report
 # svReport_account = sv.analyze(account)
 # svReport_account.show_html(filepath="./reports/accounts.html", open_browser=False)
+```
 
-# %% [markdown]
-# ## Card
-# [//]: # (-.- .tabset)
-#
-# Der Datensatz `card.csv` beinhaltet 892 Observationen mit den folgenden Informationen über die von der Bank herausgegebenen Kreditkarten:  
-# - `card_id`: die Kartennummer, 
-# - `disp_id`: die Zuordnung zum entsprechenden Bankkonto und -inhaber (Disposition),
-# - `type`: die Art der Kreditkarte (junior, classic, gold) und 
-# - `issued`: das Ausstellungsdatum
+## Card
+[//]: # (-.- .tabset)
 
-# %%
+Der Datensatz `card.csv` beinhaltet 892 Observationen mit den folgenden Informationen über die von der Bank herausgegebenen Kreditkarten:  
+- `card_id`: die Kartennummer, 
+- `disp_id`: die Zuordnung zum entsprechenden Bankkonto und -inhaber (Disposition),
+- `type`: die Art der Kreditkarte (junior, classic, gold) und 
+- `issued`: das Ausstellungsdatum
+
+```{python}
 card.info()
+```
 
-# %%
+```{python}
 print("Anzahl fehlender Werte:", sum(card.isnull().sum()))
 print("Anzahl duplizierter Einträge:", card.duplicated().sum())
+```
 
-# %% [markdown]
-# ### Aufbereitung
-# Auch bei diesem Datensatz (`card.csv`) werden zunächst die Datentypen korrigiert um anschliessend die Inhalte entsprechend beschreiben zu können
+### Aufbereitung
+Auch bei diesem Datensatz (`card.csv`) werden zunächst die Datentypen korrigiert um anschliessend die Inhalte entsprechend beschreiben zu können
 
-# %%
+```{python}
 # parse date
 card["issued"] = pd.to_datetime(card["issued"].str[:6], format="%y%m%d")
 card["issued"] = card["issued"].dt.to_period("M")
@@ -279,12 +289,12 @@ card["issued"] = card["issued"].dt.to_period("M")
 card["type"] = card["type"].astype("category")
 
 card.sample(n=5)
+```
 
-# %% [markdown]
-# ### Kartentyp
-# Hier dargestellt ist die Klassenverteilung der Kartentypen. Die meisten Karteninhaber besitzen eine klassische Kreditkarte, gefolgt von ~180 junior- und ~100 gold Karten.  
+### Kartentyp
+Hier dargestellt ist die Klassenverteilung der Kartentypen. Die meisten Karteninhaber besitzen eine klassische Kreditkarte, gefolgt von ~180 junior- und ~100 gold Karten.  
 
-# %%
+```{python}
 # plot distribution of type
 plt.figure(figsize=(10, 6))
 card["type"].value_counts().plot(kind="bar")
@@ -292,12 +302,12 @@ plt.title("Verteilung der Kartentypen")
 plt.xlabel("Kartentyp")
 plt.ylabel("Anzahl")
 plt.show()
+```
 
-# %% [markdown]
-# ### Ausstellungsdatum
-# Hier dargestellt ist die Häufigkeit von Kreditkartenausstellungen pro Monat. Erkennbar ist eine steigende Tendenz mit einem Rückgang in den Monaten Februar - April 1997.  
+### Ausstellungsdatum
+Hier dargestellt ist die Häufigkeit von Kreditkartenausstellungen pro Monat. Erkennbar ist eine steigende Tendenz mit einem Rückgang in den Monaten Februar - April 1997.  
 
-# %%
+```{python}
 # plot issued date per month and year
 plt.figure(figsize=(15, 6))
 card["issued"].value_counts().sort_index().plot(kind="bar")
@@ -305,42 +315,44 @@ plt.title("Verteilung der Ausstellungsdaten")
 plt.xlabel("Datum")
 plt.ylabel("Anzahl")
 plt.show()
+```
 
-# %% [markdown]
-# ### Korrelation & weitere Informationen
-# Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/card.html) entnommen werden.
+### Korrelation & weitere Informationen
+Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/card.html) entnommen werden.
 
-# %%
+```{python}
 # append to dataframes collection
 data_frames["card.csv"] = card
+```
 
-# %%
-# # %%capture
+```{python}
+# %%capture
 # # generate sweetviz report
 # svReport_card = sv.analyze(card)
 # svReport_card.show_html(filepath="./reports/card.html", open_browser=False)
+```
 
-# %% [markdown]
-# ## Client
-# [//]: # (-.- .tabset)
-#
-# Der Datensatz `client.csv` beinhaltet 5369 Observationen mit den folgenden Informationen über die Kunden der Bank:  
-# - `client_id`: die Kundennummer, 
-# - `birth_number`: eine Kombination aus Geburtsdatum und Geschlecht sowie
-# - `district_id`: die Adresse  
+## Client
+[//]: # (-.- .tabset)
 
-# %%
+Der Datensatz `client.csv` beinhaltet 5369 Observationen mit den folgenden Informationen über die Kunden der Bank:  
+- `client_id`: die Kundennummer, 
+- `birth_number`: eine Kombination aus Geburtsdatum und Geschlecht sowie
+- `district_id`: die Adresse  
+
+```{python}
 client.info()
+```
 
-# %%
+```{python}
 print("Anzahl fehlender Werte:", sum(client.isnull().sum()))
 print("Anzahl duplizierter Einträge:", client.duplicated().sum())
+```
 
-# %% [markdown]
-# ### Aufbereitung
-# Die Spalte `birth_number` des `client.csv`-Datensatzes codiert 3 Features der Bankkunden: Geschlecht, Geburtsdatum und damit auch das Alter. Diese Informationen werden mithilfe der zuvor definierten Funktionen `parse_details()` und `calculate_age` extrahiert.
+### Aufbereitung
+Die Spalte `birth_number` des `client.csv`-Datensatzes codiert 3 Features der Bankkunden: Geschlecht, Geburtsdatum und damit auch das Alter. Diese Informationen werden mithilfe der zuvor definierten Funktionen `parse_details()` und `calculate_age` extrahiert.
 
-# %%
+```{python}
 # Geburtstag & Geschlecht aus birth_number extrahieren
 client["gender"], client["birth_day"] = zip(
     *client["birth_number"].apply(parse_details)
@@ -354,12 +366,12 @@ client = client.drop(columns=["birth_number"])
 
 # Sample 5 random rows
 client.sample(n=5)
+```
 
-# %% [markdown]
-# ### Geschlecht
-# Hier dargestellt ist die Verteilung des Geschlechts der Bankkunden. Das Geschlecht der erfassten Bankkunden ist fast gleichverteilt mit einem etwas kleineren Frauenanteil.  
+### Geschlecht
+Hier dargestellt ist die Verteilung des Geschlechts der Bankkunden. Das Geschlecht der erfassten Bankkunden ist fast gleichverteilt mit einem etwas kleineren Frauenanteil.  
 
-# %%
+```{python}
 # plot distribution of gender
 plt.figure(figsize=(10, 6))
 gender_distribution = client["gender"].value_counts().plot(kind="bar")
@@ -367,12 +379,12 @@ plt.title("Verteilung des Geschlechts der Bankkunden")
 plt.xlabel("Geschlecht")
 plt.ylabel("Anzahl")
 plt.show()
+```
 
-# %% [markdown]
-# ### Alter
-# Nachfolgend abgebildet ist die Verteilung des Alters der Bankkunden. Die jüngste erfasste Person ist 12 Jahre alt und die älteste 88. 
+### Alter
+Nachfolgend abgebildet ist die Verteilung des Alters der Bankkunden. Die jüngste erfasste Person ist 12 Jahre alt und die älteste 88. 
 
-# %%
+```{python}
 # plot distribution of age
 plt.figure(figsize=(10, 6))
 client["age"].plot(kind="hist", bins=20)
@@ -380,52 +392,54 @@ plt.title("Verteilung des Alters der Bankkunden")
 plt.xlabel("Alter")
 plt.ylabel("Anzahl")
 plt.show()
+```
 
-# %% [markdown]
-# ### Korrelation & weitere Informationen
-# Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/client.html) entnommen werden.
+### Korrelation & weitere Informationen
+Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/client.html) entnommen werden.
 
-# %%
+```{python}
 data_frames["client.csv"] = client
+```
 
-# %%
-# # %%capture
+```{python}
+# %%capture
 # svReport_client = sv.analyze(client)
 # svReport_client.show_html(filepath="./reports/client.html", open_browser=False)
+```
 
-# %% [markdown]
-# ## Disp
-# [//]: # (-.- .tabset)
-#
-# Der Datensatz `disp.csv` beinhaltet 5369 Observationen mit den folgenden Informationen über die Dispositionen der Bank:  
-# - `disp_id`: der Identifikationsschlüssel der Disposition,
-# - `client_id`: die Kundennummer,
-# - `account_id`: die Kontonummer,
-# - `type`: die Art der Disposition (Inhaber, Benutzer)
+## Disp
+[//]: # (-.- .tabset)
 
-# %%
+Der Datensatz `disp.csv` beinhaltet 5369 Observationen mit den folgenden Informationen über die Dispositionen der Bank:  
+- `disp_id`: der Identifikationsschlüssel der Disposition,
+- `client_id`: die Kundennummer,
+- `account_id`: die Kontonummer,
+- `type`: die Art der Disposition (Inhaber, Benutzer)
+
+```{python}
 disp.info()
+```
 
-# %%
+```{python}
 print("Anzahl fehlender Werte:", sum(disp.isnull().sum()))
 print("Anzahl duplizierter Einträge:", disp.duplicated().sum())
+```
 
-# %% [markdown]
-# ### Aufbereitung
-# Auch die Variablen des Datensatzes `disp.csv` werden in die korrekten Datentypen übertragen. 
+### Aufbereitung
+Auch die Variablen des Datensatzes `disp.csv` werden in die korrekten Datentypen übertragen. 
 
-# %%
+```{python}
 # Spalte type als Kategorie speichern
 disp["type"] = disp["type"].astype("category")
 
 # random sample
 disp.sample(n=5)
+```
 
-# %% [markdown]
-# ### Typ der Disposition
-# Hier dargestellt ist die Verteilung der Art der Dispositionen. 4500 Kunden sind Inhaber eines Kontos und 896 sind Disponenten. 
+### Typ der Disposition
+Hier dargestellt ist die Verteilung der Art der Dispositionen. 4500 Kunden sind Inhaber eines Kontos und 896 sind Disponenten. 
 
-# %%
+```{python}
 # plot distribution of kind
 plt.figure(figsize=(10, 6))
 disp["type"].value_counts().plot(kind="bar")
@@ -433,57 +447,60 @@ plt.title("Verteilung der Dispositionen")
 plt.xlabel("Disposition")
 plt.ylabel("Anzahl")
 plt.show()
+```
 
-# %%
+```{python}
 # remove disponents
 disp = disp[disp["type"] == "OWNER"]
+```
 
-# %% [markdown]
-# ### Korrelation & weitere Informationen
-# Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/disp.html) entnommen werden.
+### Korrelation & weitere Informationen
+Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/disp.html) entnommen werden.
 
-# %%
+```{python}
 data_frames["disp.csv"] = disp
+```
 
-# %%
-# # %%capture
+```{python}
+# %%capture
 # svReport_disp = sv.analyze(disp)
 # svReport_disp.show_html(filepath="./reports/disp.html", open_browser=False)
+```
 
-# %% [markdown]
-# ## District
-# [//]: # (-.- .tabset)
-#
-# Der Datensatz `district.csv` beinhaltet 77 Observationen mit den folgenden demografischen Informationen:  
-# - `A1`: die ID des Distrikts, 
-# - `A2`: der Name des Distrikts,
-# - `A3`: die Region,
-# - `A4`: die Anzahl der Einwohner,
-# - `A5`: die Anzahl der Gemeinden mit < 499 Einwohner,
-# - `A6`: die Anzahl der Gemeinden mit 500 - 1999 Einwohner,
-# - `A7`: die Anzahl der Gemeinden mit 2000 - 9999 Einwohner,
-# - `A8`: die Anzahl der Gemeinden mit >10000 Einwohner,
-# - `A9`: die Anzahl Städte,
-# - `A10`: das Verhältnis von städtischen Einwohnern,
-# - `A11`: das durchschnittliche Einkommen,
-# - `A12`: die Arbeitslosenrate vom Jahr 95,
-# - `A13`: die Arbeitslosenrate vom Jahr 96,
-# - `A14`: die Anzahl von Unternehmer pro 1000 Einwohner,
-# - `A15`: die Anzahl von begangenen Verbrechen im Jahr 95,
-# - `A16`: die Anzahl von begangenen Verbrechen im Jahr 96, 
+## District
+[//]: # (-.- .tabset)
 
-# %%
+Der Datensatz `district.csv` beinhaltet 77 Observationen mit den folgenden demografischen Informationen:  
+- `A1`: die ID des Distrikts, 
+- `A2`: der Name des Distrikts,
+- `A3`: die Region,
+- `A4`: die Anzahl der Einwohner,
+- `A5`: die Anzahl der Gemeinden mit < 499 Einwohner,
+- `A6`: die Anzahl der Gemeinden mit 500 - 1999 Einwohner,
+- `A7`: die Anzahl der Gemeinden mit 2000 - 9999 Einwohner,
+- `A8`: die Anzahl der Gemeinden mit >10000 Einwohner,
+- `A9`: die Anzahl Städte,
+- `A10`: das Verhältnis von städtischen Einwohnern,
+- `A11`: das durchschnittliche Einkommen,
+- `A12`: die Arbeitslosenrate vom Jahr 95,
+- `A13`: die Arbeitslosenrate vom Jahr 96,
+- `A14`: die Anzahl von Unternehmer pro 1000 Einwohner,
+- `A15`: die Anzahl von begangenen Verbrechen im Jahr 95,
+- `A16`: die Anzahl von begangenen Verbrechen im Jahr 96, 
+
+```{python}
 district.info()
+```
 
-# %%
+```{python}
 print("Anzahl fehlender Werte:", sum(district.isnull().sum()))
 print("Anzahl duplizierter Einträge:", district.duplicated().sum())
+```
 
-# %% [markdown]
-# ### Aufbereitung
-# Zunächst werden die Spaltennamen in sprechendere übersetzt.
+### Aufbereitung
+Zunächst werden die Spaltennamen in sprechendere übersetzt.
 
-# %%
+```{python}
 # Spalten umbenennen
 district = district.rename(
     columns={
@@ -527,39 +544,41 @@ district = district.rename(
 
 district["region"] = district["region"].astype("category")
 district["district_name"] = district["district_name"].astype("category")
+```
 
-# %% [markdown]
-# Auffällig ist, dass nebst den Spalten `A2` (dem Namen) und `A3` (der Region) die Spalten `A12` und `A15` den Datentyp `object` erhalten. Das ist, weil jeweils ein fehlender Wert vorhanden ist, welcher mit einem `?` gekennzeichnet ist. 
+Auffällig ist, dass nebst den Spalten `A2` (dem Namen) und `A3` (der Region) die Spalten `A12` und `A15` den Datentyp `object` erhalten. Das ist, weil jeweils ein fehlender Wert vorhanden ist, welcher mit einem `?` gekennzeichnet ist. 
 
-# %%
+```{python}
 # die fehlenden Werte anzeigen
 district[district.isin(["?"]).any(axis=1)]
+```
 
-# %% [markdown]
-# Wir gehen davon aus, dass es sich hier um effektiv fehlende Werte handelt und nicht um zensierte Daten, also Werte, für welche der exakte Wert fehlt, aber trotzdem Informationen vorhanden sind. In diesem Fall, wenn die Variable mit den fehlenden Werten eine hohe Korrelation mit anderen Prediktoren aufweist, bietet es sich an, KNN oder eine einfache lineare Regression für die Imputation anzuwenden. [1] 
-#
-# Die Korrelationsmatrix des [SweetViz Reports](./reports/district.html) zeigt, dass `unemploy_rate95` stark mit `unemploy_rate96` und `no_of_crimes95` mit `no_of_crimes96` korreliert. 
+Wir gehen davon aus, dass es sich hier um effektiv fehlende Werte handelt und nicht um zensierte Daten, also Werte, für welche der exakte Wert fehlt, aber trotzdem Informationen vorhanden sind. In diesem Fall, wenn die Variable mit den fehlenden Werten eine hohe Korrelation mit anderen Prediktoren aufweist, bietet es sich an, KNN oder eine einfache lineare Regression für die Imputation anzuwenden. [1] 
 
-# %%
+Die Korrelationsmatrix des [SweetViz Reports](./reports/district.html) zeigt, dass `unemploy_rate95` stark mit `unemploy_rate96` und `no_of_crimes95` mit `no_of_crimes96` korreliert. 
+
+```{python}
 # die ? ersetzen mit NaN
 district = district.replace("?", np.nan)
 
 # Datentyp korrigieren
 district["no_of_crimes95"] = district["no_of_crimes95"].astype(float)
 district["unemploy_rate95"] = district["unemploy_rate95"].astype(float)
+```
 
-# %%
+```{python}
 # Korrelation zwischen Arbeitslosenquote 95 und 96
 district[["unemploy_rate95", "unemploy_rate96"]].corr()
+```
 
-# %%
+```{python}
 # Korrelation zwischen Anzahl Verbrechen 95 und 96
 district[["no_of_crimes95", "no_of_crimes96"]].corr()
+```
 
-# %% [markdown]
-# Demnach werden nachfolgend zwei lineare Regressions-Modelle trainiert, um die fehlenden Werte zu imputieren.
+Demnach werden nachfolgend zwei lineare Regressions-Modelle trainiert, um die fehlenden Werte zu imputieren.
 
-# %%
+```{python}
 # Zeilen filtern, sodass keine fehlenden Werte vorhanden sind
 district_no_na = district[district["unemploy_rate95"].notnull()]
 
@@ -577,11 +596,11 @@ regression_results(
     district_no_na["unemploy_rate95"],
     lin_reg_unemploy.predict(district_no_na["unemploy_rate96"].values.reshape(-1, 1)),
 )
+```
 
-# %% [markdown]
-# Der $R^2$ Wert von $0.9634$ versichert, damit ein stabiles Modell für die Imputation erreicht zu haben. 
+Der $R^2$ Wert von $0.9634$ versichert, damit ein stabiles Modell für die Imputation erreicht zu haben. 
 
-# %%
+```{python}
 # Lineares regressions Modell erstellen
 lin_reg_crime = LinearRegression()
 
@@ -596,11 +615,11 @@ regression_results(
     district_no_na["no_of_crimes95"],
     lin_reg_crime.predict(district_no_na["no_of_crimes96"].values.reshape(-1, 1)),
 )
+```
 
-# %% [markdown]
-# Auch hier mit einem $R^2$ Wert von $0.9969$ gehen wir davon aus, damit ein stabiles Modell für die Imputation erreicht zu haben. Somit werden nachfolgend die beiden Modelle genutzt, um die fehlenden Werte einzufüllen.
+Auch hier mit einem $R^2$ Wert von $0.9969$ gehen wir davon aus, damit ein stabiles Modell für die Imputation erreicht zu haben. Somit werden nachfolgend die beiden Modelle genutzt, um die fehlenden Werte einzufüllen.
 
-# %%
+```{python}
 # Vorhersage der fehlenden Werte
 district.loc[district["no_of_crimes95"].isnull(), "no_of_crimes95"] = (
     lin_reg_crime.predict(
@@ -617,51 +636,54 @@ district.loc[district["unemploy_rate95"].isnull(), "unemploy_rate95"] = (
         ].values.reshape(-1, 1)
     )
 )
+```
 
-# %%
+```{python}
 district.sample(n=5)
+```
 
-# %%
+```{python}
 district.isnull().sum()
+```
 
-# %% [markdown]
-# ### EDA
-# Es gibt keine Duplikate und somit 77 unterschiedliche Namen der Distrikte. Diese sind auf 8 Regionen verteilt, wobei die meisten in south Moravia und die wenigsten in Prague liegen. Der Distrikt mit den wenigsten Einwohnern zählt 42821, im Vergleich zu demjenigen mit den meisten: 1204953, wobei die nächst kleinere Ortschaft 102609 Einwohner zählt. Weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/district.html) entnommen werden. 
+### EDA
+Es gibt keine Duplikate und somit 77 unterschiedliche Namen der Distrikte. Diese sind auf 8 Regionen verteilt, wobei die meisten in south Moravia und die wenigsten in Prague liegen. Der Distrikt mit den wenigsten Einwohnern zählt 42821, im Vergleich zu demjenigen mit den meisten: 1204953, wobei die nächst kleinere Ortschaft 102609 Einwohner zählt. Weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/district.html) entnommen werden. 
 
-# %%
+```{python}
 data_frames["district.csv"] = district
+```
 
-# %%
-# # %%capture
+```{python}
+# %%capture
 # svReport_district = sv.analyze(district)
 # svReport_district.show_html(filepath="./reports/district.html", open_browser=False)
+```
 
-# %% [markdown]
-# ## Loan
-# [//]: # (-.- .tabset)
-#
-# Der Datensatz `loan.csv` beinhaltet 682 Observationen mit den folgenden Informationen über die vergebenen Darlehen der Bank:  
-# - `loan_id`: ID des Darlehens,
-# - `account_id`: die Kontonummer,
-# - `date`: das Datum, wann das Darlehen gewährt wurde,
-# - `amount`: der Betrag,
-# - `duration`: die Dauer des Darlehens,
-# - `payments`: die höhe der monatlichen Zahlungen und
-# - `status`: der Rückzahlungsstatus (A: ausgeglichen, B: Vertrag abgelaufen aber nicht fertig bezahlt, C: laufender Vertrag und alles in Ordnung, D: laufender Vertrag und Kunde verschuldet)
-#
+## Loan
+[//]: # (-.- .tabset)
 
-# %%
+Der Datensatz `loan.csv` beinhaltet 682 Observationen mit den folgenden Informationen über die vergebenen Darlehen der Bank:  
+- `loan_id`: ID des Darlehens,
+- `account_id`: die Kontonummer,
+- `date`: das Datum, wann das Darlehen gewährt wurde,
+- `amount`: der Betrag,
+- `duration`: die Dauer des Darlehens,
+- `payments`: die höhe der monatlichen Zahlungen und
+- `status`: der Rückzahlungsstatus (A: ausgeglichen, B: Vertrag abgelaufen aber nicht fertig bezahlt, C: laufender Vertrag und alles in Ordnung, D: laufender Vertrag und Kunde verschuldet)
+
+```{python}
 loan.info()
+```
 
-# %%
+```{python}
 print("Anzahl fehlender Werte:", sum(loan.isnull().sum()))
 print("Anzahl duplizierter Einträge:", loan.duplicated().sum())
+```
 
-# %% [markdown]
-# ### Aufbereitung
-# Auch für den `loan.csv` Datensatz werden zunächst Datenformate korrigiert und Kategorien übersetzt. Anschliessend wird überprüft, ob ein Bankkonto mehrere Darlehen besitzt.  
+### Aufbereitung
+Auch für den `loan.csv` Datensatz werden zunächst Datenformate korrigiert und Kategorien übersetzt. Anschliessend wird überprüft, ob ein Bankkonto mehrere Darlehen besitzt.  
 
-# %%
+```{python}
 # Datum parsen
 loan["date"] = pd.to_datetime(loan["date"], format="%y%m%d")
 
@@ -676,8 +698,9 @@ loan["status"] = loan["status"].map(
 )
 
 loan["status"] = loan["status"].astype("category")
+```
 
-# %%
+```{python}
 # Anzahl der Darlehen pro Kontonummer berechnen
 num_of_loan_df = (
     loan.groupby("account_id")
@@ -685,23 +708,24 @@ num_of_loan_df = (
     .reset_index(name="num_of_loan")
     .sort_values(by="num_of_loan", ascending=False)
 )
+```
 
-# %%
+```{python}
 # Überprüfen, ob jedes Konto nur ein Darlehen hat
 num_of_loan_df["num_of_loan"].value_counts()
+```
 
-# %% [markdown]
-# Von allen Bankkontos, die ein Darlehen aufgenommen haben, hat jedes Konto genau ein Darlehen zugewiesen.
+Von allen Bankkontos, die ein Darlehen aufgenommen haben, hat jedes Konto genau ein Darlehen zugewiesen.
 
-# %%
+```{python}
 # Sample 5 random rows from the joined DataFrame
 display(loan.sample(n=5))
+```
 
-# %% [markdown]
-# ### Ausstellungsdatum
-# Nachfolgend dargestellt ist die Verteilung der Darlehensausstellungsdaten. das erste Darlehen wurde im Juli 1993 ausgestellt und das neuste im Dezember 1998. 
+### Ausstellungsdatum
+Nachfolgend dargestellt ist die Verteilung der Darlehensausstellungsdaten. das erste Darlehen wurde im Juli 1993 ausgestellt und das neuste im Dezember 1998. 
 
-# %%
+```{python}
 # plot distribution of date
 plt.figure(figsize=(15, 6))
 loan["date"].dt.to_period("M").value_counts().sort_index().plot(kind="bar")
@@ -709,12 +733,12 @@ plt.title("Verteilung der Darlehensausstellungsdaten")
 plt.xlabel("Datum")
 plt.ylabel("Anzahl")
 plt.show()
+```
 
-# %% [markdown]
-# ### Dauer
-# Hier ersichtlich ist die Verteilung der Dauer der Darlehen. Sie ist fast gleichverteilt über die 5 möglichen Optionen. 
+### Dauer
+Hier ersichtlich ist die Verteilung der Dauer der Darlehen. Sie ist fast gleichverteilt über die 5 möglichen Optionen. 
 
-# %%
+```{python}
 # plot duration distribution
 plt.figure(figsize=(10, 6))
 loan["duration"].value_counts().plot(kind="bar")
@@ -722,12 +746,12 @@ plt.title("Verteilung der Darlehensdauer")
 plt.xlabel("Dauer")
 plt.ylabel("Anzahl")
 plt.show()
+```
 
-# %% [markdown]
-# ### Betrag
-# Hier dargestellt ist die Verteilung der Darlehensbeträge. Nur wenige Darlehensbeträge sind höher als 400000 wobei die meisten um die 100000 betragen. 
+### Betrag
+Hier dargestellt ist die Verteilung der Darlehensbeträge. Nur wenige Darlehensbeträge sind höher als 400000 wobei die meisten um die 100000 betragen. 
 
-# %%
+```{python}
 # plot amount
 plt.figure(figsize=(10, 6))
 loan["amount"].plot(kind="hist", bins=20)
@@ -735,12 +759,12 @@ plt.title("Verteilung der Darlehensbeträge")
 plt.xlabel("Betrag")
 plt.ylabel("Anzahl")
 plt.show()
+```
 
-# %% [markdown]
-# ### Status
-# Der nachfolgende Plot zeigt die Klassenverteilung vom Darlehensstatus. Die meisten (~400) sind laufend und ok, rund 200 sind abgeschlossen, die Kunden von ~50 Darlehen sind verschuldet und etwas weniger wurden abgeschlossen, ohne fertig abbezahlt worden zu sein.  
+### Status
+Der nachfolgende Plot zeigt die Klassenverteilung vom Darlehensstatus. Die meisten (~400) sind laufend und ok, rund 200 sind abgeschlossen, die Kunden von ~50 Darlehen sind verschuldet und etwas weniger wurden abgeschlossen, ohne fertig abbezahlt worden zu sein.  
 
-# %%
+```{python}
 # plot status distribution
 plt.figure(figsize=(10, 6))
 loan["status"].value_counts().plot(kind="bar")
@@ -748,12 +772,12 @@ plt.title("Verteilung der Darlehensstatus")
 plt.xlabel("Status")
 plt.ylabel("Anzahl")
 plt.show()
+```
 
-# %% [markdown]
-# ### Zahlungen
-# Hier ersichtlich ist die Verteilung der monatlichen Zahlungen der Darlehen. Die kleinste monatliche Zahlung beträgt 304 und die höchste 9910.
+### Zahlungen
+Hier ersichtlich ist die Verteilung der monatlichen Zahlungen der Darlehen. Die kleinste monatliche Zahlung beträgt 304 und die höchste 9910.
 
-# %%
+```{python}
 # plot payments
 plt.figure(figsize=(10, 6))
 loan["payments"].plot(kind="hist", bins=20)
@@ -761,45 +785,46 @@ plt.title("Verteilung der monatlichen Zahlungen")
 plt.xlabel("Zahlungen")
 plt.ylabel("Anzahl")
 plt.show()
+```
 
-# %% [markdown]
-# ### Korrelation & weitere Informationen
-# Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/loan.html) entnommen werden.
+### Korrelation & weitere Informationen
+Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/loan.html) entnommen werden.
 
-# %%
+```{python}
 # Assign the resulting DataFrame to a dictionary for storage
 data_frames["loan.csv"] = loan
+```
 
-# %%
-# # %%capture
+```{python}
+# %%capture
 # svReport_loan = sv.analyze(loan)
 # svReport_loan.show_html(filepath="./reports/loan.html", open_browser=False)
+```
 
-# %% [markdown]
-# ## Order
-# [//]: # (-.- .tabset)
-#
-# Der Datensatz `order.csv` beinhaltet 6471 Observationen mit den folgenden Informationen über die Daueraufträge eines Kontos:  
-# - `order_id`: die Nummer des Dauerauftrags,
-# - `account_id`: die Kontonummer von welchem der Auftrag stammt,
-# - `bank_to`: die empfangende Bank,
-# - `account_to`: das empfangende Konto, 
-# - `amount`: der Betrag,
-# - `k_symbol`: die Art des Auftrags (Versicherungszahlung, Haushalt, Leasing, Darlehen)
-#
+## Order
+[//]: # (-.- .tabset)
 
-# %%
+Der Datensatz `order.csv` beinhaltet 6471 Observationen mit den folgenden Informationen über die Daueraufträge eines Kontos:  
+- `order_id`: die Nummer des Dauerauftrags,
+- `account_id`: die Kontonummer von welchem der Auftrag stammt,
+- `bank_to`: die empfangende Bank,
+- `account_to`: das empfangende Konto, 
+- `amount`: der Betrag,
+- `k_symbol`: die Art des Auftrags (Versicherungszahlung, Haushalt, Leasing, Darlehen)
+
+```{python}
 order.info()
+```
 
-# %%
+```{python}
 print("Anzahl fehlender Werte:", sum(order.isnull().sum()))
 print("Anzahl duplizierter Einträge:", order.duplicated().sum())
+```
 
-# %% [markdown]
-# ### Aufbereitung
-# Auch für `order.csv` werden die Kategorien zunächst übersetzt und fehlende Werte mit der Kategorie `unknown` ersetzt. Es bestehen deutlich mehr Daueraufträge als Bankkontos, was darauf hindeutet, dass ein Bankkonto mehrere Daueraufträge eingerichtet haben kann. Zur weiteren Verarbeitung der Daten wird das Format so geändert, dass pro Konto ein `order`-Eintrag existiert.  
+### Aufbereitung
+Auch für `order.csv` werden die Kategorien zunächst übersetzt und fehlende Werte mit der Kategorie `unknown` ersetzt. Es bestehen deutlich mehr Daueraufträge als Bankkontos, was darauf hindeutet, dass ein Bankkonto mehrere Daueraufträge eingerichtet haben kann. Zur weiteren Verarbeitung der Daten wird das Format so geändert, dass pro Konto ein `order`-Eintrag existiert.  
 
-# %%
+```{python}
 # Kategorien übersetzen und fehlende Werte mit "unknown" füllen
 order["k_symbol"] = (
     order["k_symbol"]
@@ -815,8 +840,9 @@ order["k_symbol"] = (
 )
 
 order["k_symbol"] = order["k_symbol"].astype("category")
+```
 
-# %%
+```{python}
 # Merge with 'account_id_df' to ensure all accounts are represented
 order = pd.merge(account[["account_id"]], order, on="account_id", how="left")
 
@@ -842,65 +868,62 @@ orders_pivot = orders_pivot.reset_index()
 orders_pivot = orders_pivot.fillna(0)
 # Sample 5 random rows from the merged DataFrame
 orders_pivot.sample(n=5)
+```
 
-# %% [markdown]
-# ### Empfangende Bank
-# Die Verteilung der empfangenden Banken ist ziemlich ausgeglichen, wobei in 742 Observationen diese Angabe fehlt.  
+### Empfangende Bank
+Die Verteilung der empfangenden Banken ist ziemlich ausgeglichen, wobei in 742 Observationen diese Angabe fehlt.  
 
-# %% [markdown]
-# ### Empfangendes Konto
-# Auch bei den empfangenden Konten scheint es keine auffällige Konzentration bei wenigen Konten zu geben und bei 742 Observationen fehlt die Angabe ebenfalls.  
+### Empfangendes Konto
+Auch bei den empfangenden Konten scheint es keine auffällige Konzentration bei wenigen Konten zu geben und bei 742 Observationen fehlt die Angabe ebenfalls.  
 
-# %% [markdown]
-# ### Betrag
-# Der Betrag bewegt sich im Bereich zwischen 0 - 14882 mit einem Mittelwert von 2943 und einem Median von 2249. Die Verteilung ist also stark rechtsschief
+### Betrag
+Der Betrag bewegt sich im Bereich zwischen 0 - 14882 mit einem Mittelwert von 2943 und einem Median von 2249. Die Verteilung ist also stark rechtsschief
 
-# %% [markdown]
-# ### Art
-# Die meisten Daueraufträge sind betreffend dem Haushalt eingerichtet worden (3502), die wenigsten für Leasing (341).  
+### Art
+Die meisten Daueraufträge sind betreffend dem Haushalt eingerichtet worden (3502), die wenigsten für Leasing (341).  
 
-# %% [markdown]
-# ### Korrelation & weitere Informationen
-# Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/order.html) entnommen werden.
+### Korrelation & weitere Informationen
+Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/order.html) entnommen werden.
 
-# %%
+```{python}
 # Assuming data_frames is a dictionary for storing DataFrames
 data_frames["order.csv"] = orders_pivot
+```
 
-# %%
-# # %%capture
+```{python}
+# %%capture
 # svReport_order = sv.analyze(order)
 # svReport_order.show_html(filepath="./reports/order.html", open_browser=False)
+```
 
-# %% [markdown]
-# ## Trans
-# [//]: # (-.- .tabset)
-#
-# Der Datensatz `trans.csv` beinhaltet 1056320 Observationen mit den folgenden Informationen über die Transaktionen eines Kontos:  
-# - `trans_id`: die ID der Transaktion,
-# - `account_id`: die Kontonummer des ausführenden Kontos,
-# - `date`: das Datum,
-# - `type`: der Typ (Einzahlung, Bezug)
-# - `operation`: die Art der Transaktion (Bezug Kreditkarte, Bareinzahlung, Bezug über eine andere Bank, Bezug Bar, Überweisung)
-# - `amount`: der Betrag der Transaktion,
-# - `balance`: der Kontostand nach ausführung der Transaktion,
-# - `k_symbol`: die Klassifikation der Transaktion (Versicherungszahlung, Kontoauszug, Zinsauszahlung, Zinszahlung bei negativem Kontostand, Haushalt, Pension, Darlehensauszahlung),
-# - `bank`: die empfangende Bank und 
-# - `account`: das empfangende Bankkonto
-#
+## Trans
+[//]: # (-.- .tabset)
 
-# %%
+Der Datensatz `trans.csv` beinhaltet 1056320 Observationen mit den folgenden Informationen über die Transaktionen eines Kontos:  
+- `trans_id`: die ID der Transaktion,
+- `account_id`: die Kontonummer des ausführenden Kontos,
+- `date`: das Datum,
+- `type`: der Typ (Einzahlung, Bezug)
+- `operation`: die Art der Transaktion (Bezug Kreditkarte, Bareinzahlung, Bezug über eine andere Bank, Bezug Bar, Überweisung)
+- `amount`: der Betrag der Transaktion,
+- `balance`: der Kontostand nach ausführung der Transaktion,
+- `k_symbol`: die Klassifikation der Transaktion (Versicherungszahlung, Kontoauszug, Zinsauszahlung, Zinszahlung bei negativem Kontostand, Haushalt, Pension, Darlehensauszahlung),
+- `bank`: die empfangende Bank und 
+- `account`: das empfangende Bankkonto
+
+```{python}
 trans.info()
+```
 
-# %%
+```{python}
 print("Anzahl fehlender Werte:", sum(trans.isnull().sum()))
 print("Anzahl duplizierter Einträge:", trans.duplicated().sum())
+```
 
-# %% [markdown]
-# ### Aufbereitung
-# Die Kategorien für `type`, `operation` und `k_symbol` wurden übersetzt und die Datentypen korrigiert.  
+### Aufbereitung
+Die Kategorien für `type`, `operation` und `k_symbol` wurden übersetzt und die Datentypen korrigiert.  
 
-# %%
+```{python}
 trans["date"] = pd.to_datetime(trans["date"], format="%y%m%d")
 
 # Update 'type' column
@@ -939,15 +962,16 @@ trans["k_symbol"] = trans["k_symbol"].astype("category")
 trans.loc[trans["type"] == "withdrawal", "amount"] = trans.loc[
     trans["type"] == "withdrawal", "amount"
 ] * (-1)
+```
 
-# %%
+```{python}
 # Sample 5 random rows from the DataFrame
 trans.sample(n=5)
+```
 
-# %% [markdown]
-# ### Zeitliche Entwicklung eines Kontos
+### Zeitliche Entwicklung eines Kontos
 
-# %%
+```{python}
 # Plot Zeitliche Entwicklung des Konto-Saldos für die Konto nummer 19
 account_19 = trans[trans["account_id"] == 19].copy()  # Create a copy of the DataFrame
 # Ensure the date column is in datetime format
@@ -962,8 +986,9 @@ plt.title("Time evolution of balance for account number 19")
 plt.xlabel("Date")
 plt.ylabel("Balance")
 plt.show()
+```
 
-# %%
+```{python}
 # zoom the year 1995 of the plot
 account_19_1995 = account_19[account_19["date"].dt.year == 1995]
 # plot it
@@ -975,37 +1000,38 @@ plt.ylabel("Balance")
 plt.show()
 
 # Wee see that there is a steep line in 1995-10 so there are two transactions, this we have to clean.
+```
 
-# %% [markdown]
-# ### Korrelation & weitere Informationen
-# Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/trans.html) entnommen werden.
+### Korrelation & weitere Informationen
+Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/trans.html) entnommen werden.
 
-# %%
+```{python}
 # Assign to a dictionary if needed (similar to list assignment in R)
 data_frames["trans.csv"] = trans
+```
 
-# %%
-# # %%capture
+```{python}
+# %%capture
 # svReport_trans = sv.analyze(trans)
 # svReport_trans.show_html(filepath="./reports/trans.html", open_browser=False)
+```
 
-# %% [markdown]
-# # Kombinieren der Daten zu einem Modellierungsdatensatz
-# Im nachfolgenden Abschnitt werden die Daten zu statischen (Kunden-) Daten und transaktionellen (Bankdienstleistungs-) Daten kombiniert um diese anschliessend zu einem Datensatz für die Modellierung zusammenzufügen.  
-#  
-# ## Stammdaten
-# Die aufbereiteten Stammdaten aus den Dateien 
-# - `disp.csv`
-# - `account.csv`
-# - `client.csv`
-# - `card.csv`
-# - `loan.csv` 
-# - `order.csv`
-# - `districts.csv`
-#
-# werden nachfolgend zu einem Datensatz kombiniert. 
+# Kombinieren der Daten zu einem Modellierungsdatensatz
+Im nachfolgenden Abschnitt werden die Daten zu statischen (Kunden-) Daten und transaktionellen (Bankdienstleistungs-) Daten kombiniert um diese anschliessend zu einem Datensatz für die Modellierung zusammenzufügen.  
+ 
+## Stammdaten
+Die aufbereiteten Stammdaten aus den Dateien 
+- `disp.csv`
+- `account.csv`
+- `client.csv`
+- `card.csv`
+- `loan.csv` 
+- `order.csv`
+- `districts.csv`
 
-# %%
+werden nachfolgend zu einem Datensatz kombiniert. 
+
+```{python}
 # merge dataframes
 static_data = (
     data_frames["disp.csv"]
@@ -1047,17 +1073,21 @@ static_data = (
         how="left",
     )
 )
+```
 
-# %%
+```{python}
 static_data["has_card"] = ~static_data["card_id"].isna()
+```
 
-# %%
+```{python}
 static_data.info()
+```
 
-# %%
+```{python}
 print("Anzahl duplizierter Einträge:", static_data.duplicated().sum())
+```
 
-# %%
+```{python}
 ## Junior Cards removal
 # In the advertising campaign, we do not want to promote children's/junior cards (for whatever reasons). First, I looked at the distribution of age at issuance. Here I see that there are not many junior cards, nor are the cards issued at a late age.
 # # Filter rows where 'card_type' contains 'junior' (case insensitive)
@@ -1079,11 +1109,11 @@ print("Anzahl duplizierter Einträge:", static_data.duplicated().sum())
 # plt.xlabel("Age at issue date")
 # plt.ylabel("Number of cards")
 # plt.show()
+```
 
-# %% [markdown]
-# ## Junior Cards Removal
+## Junior Cards Removal
 
-# %%
+```{python}
 num_accounts_before = len(static_data)
 # # Filter rows where 'card_type' does not contain 'junior' (case insensitive)
 static_data = static_data[
@@ -1092,17 +1122,17 @@ static_data = static_data[
 num_accounts_after = len(static_data)
 num_junior_cards = num_accounts_before - num_accounts_after
 print(f"Number of junior cards removed: {num_junior_cards}")
+```
 
-# %% [markdown]
-# ## Bewegungsdaten
-# ### Käufer
-#
+## Bewegungsdaten
+### Käufer
 
-# %%
+```{python}
 # select all transactions from trans from date 1995-03-16 and account_id 150
 trans[(trans["date"] == "1995-03-16") & (trans["account_id"] == 150)]
+```
 
-# %%
+```{python}
 # sort dataframe trans by account_id and date
 first_row_per_account = trans.groupby("account_id")
 
@@ -1110,15 +1140,18 @@ first_row_per_account = trans.groupby("account_id")
 first_row_per_account = first_row_per_account.apply(
     lambda x: x[x["amount"] == x["balance"]].iloc[0], include_groups=False
 ).reset_index()
+```
 
-# %%
+```{python}
 # show that there's one row per unique account_id in trans
 first_row_per_account["account_id"].nunique() == trans["account_id"].nunique()
+```
 
-# %%
+```{python}
 first_row_per_account.query("amount != balance")
+```
 
-# %%
+```{python}
 # Extract year and month from date to a new column 'year_month'
 trans["year_month"] = trans["date"].dt.to_period("M")
 
@@ -1142,9 +1175,9 @@ transactions_monthly = (
 transactions_monthly["balance"] = transactions_monthly.groupby("account_id")[
     "volume"
 ].cumsum()
+```
 
-
-# %%
+```{python}
 def rollup_credit_card(trans_monthly, account_card_issue_dates):
     # Add issue date and calculate months since card issue
     trans_monthly = pd.merge(trans_monthly, account_card_issue_dates, on="account_id")
@@ -1178,21 +1211,19 @@ def rollup_credit_card(trans_monthly, account_card_issue_dates):
     trans_monthly = trans_monthly.rename(columns={"account_id_": "account_id"})
 
     return trans_monthly
+```
 
-
-# %%
+```{python}
 buyers = static_data[static_data["has_card"]]
 
 transactions_rolled_up_buyers = rollup_credit_card(
     transactions_monthly, buyers.loc[:, ["account_id", "issued"]]
 )
+```
 
+### Nicht-Käufer
 
-# %% [markdown]
-# ### Nicht-Käufer
-#
-
-# %%
+```{python}
 # model top-n similarity of districts
 def calculate_district_similarity():
     data = data_frames["district.csv"]
@@ -1213,9 +1244,9 @@ def calculate_district_similarity():
     similarity_df = similarity_df.mask(mask)
 
     return similarity_df
+```
 
-
-# %%
+```{python}
 def top_n_similarity(district_id, n, similarity_df):
     # Get the row of the similarity matrix corresponding to the district_id
     similarity_row = similarity_df.loc[district_id - 1]
@@ -1227,9 +1258,9 @@ def top_n_similarity(district_id, n, similarity_df):
     top_n_indices = top_n_indices.append(pd.Index([district_id]))
 
     return top_n_indices
+```
 
-
-# %%
+```{python}
 # find similar non-buyers
 def find_similar_non_buyers(buyers, non_buyers):
     similar_non_buyers = pd.DataFrame(
@@ -1288,42 +1319,45 @@ def find_similar_non_buyers(buyers, non_buyers):
         )
 
     return similar_non_buyers, no_similar_found
+```
 
-
-# %%
+```{python}
 non_buyers = static_data[~static_data["has_card"]]
 similar_non_buyers, none_found = find_similar_non_buyers(buyers, non_buyers)
+```
 
-# %%
+```{python}
 len(non_buyers[~non_buyers["account_id"].isin(similar_non_buyers["account_id"])])
+```
 
-# %%
+```{python}
 transactions_rolled_up_non_buyers = rollup_credit_card(
     transactions_monthly, similar_non_buyers
 )
+```
 
-# %% [markdown]
-# ## Zusammenfügen der Daten
+## Zusammenfügen der Daten
 
-# %%
+```{python}
 transactions_rolled_up = pd.concat(
     [transactions_rolled_up_buyers, transactions_rolled_up_non_buyers]
 )
+```
 
-# %%
+```{python}
 # merge transactions_rolled_up and static data
 X = pd.merge(static_data, transactions_rolled_up, on="account_id")
+```
 
-# %% [markdown]
-# ## Remove Data
+## Remove Data
 
-# %%
+```{python}
 # print underage accounts
+```
 
-# %% [markdown]
-# ## Visualize
+## Visualize
 
-# %%
+```{python}
 # plot distribution of has_card
 plt.figure(figsize=(10, 6))
 X["has_card"].value_counts().plot(kind="bar")
@@ -1331,8 +1365,9 @@ plt.title("Verteilung der Kartenbesitzer")
 plt.xlabel("Kartenbesitzer")
 plt.ylabel("Anzahl")
 plt.show()
+```
 
-# %%
+```{python}
 ## plot distribution of card_type
 plt.figure(figsize=(10, 6))
 X["type_card"].value_counts(dropna=False).plot(kind="bar")
@@ -1340,8 +1375,9 @@ plt.title("Verteilung der Kartentypen")
 plt.xlabel("Kartentyp")
 plt.ylabel("Anzahl")
 plt.show()
+```
 
-# %%
+```{python}
 # Filter the data for accounts 14 and 18
 account_data = X[X["account_id"].isin([14, 18])]
 # Reshape the DataFrame for easier plotting
@@ -1383,17 +1419,19 @@ plt.xlabel("Month")
 plt.ylabel("Volume")
 plt.legend()
 plt.show()
+```
 
-# %%
+```{python}
 print(X.dtypes)
+```
 
-# %%
+```{python}
 X.columns
+```
 
-# %% [markdown]
-# # Preprocessing
+# Preprocessing
 
-# %%
+```{python}
 # Assuming 'X' is your DataFrame and 'has_card' is the target variable
 y = X["has_card"]
 XX = X.drop(columns=["has_card"])
@@ -1430,21 +1468,20 @@ preprocessor = ColumnTransformer(
         ("cat", categorical_transformer, categorical_cols),
     ]
 )
+```
 
-# %% [markdown]
-# ## Test-Train-Split
+## Test-Train-Split
 
-# %%
+```{python}
 # At the time not used because We use KFolds for cross validation instead of Train-Test-Split
 X_train, X_test, y_train, y_test = train_test_split(
     XX, y, test_size=0.2, random_state=42, stratify=y
 )
+```
 
+## Drop Featrues
 
-# %% [markdown]
-# ## Drop Featrues
-
-# %%
+```{python}
 # Remove the Variable that can lead to data leakage
 def clean_data(df):
     # Define unnecessary columns
@@ -1464,14 +1501,15 @@ def clean_data(df):
 
 
 X = clean_data(X)
+```
 
-# %%
+```{python}
 print(X.columns)
+```
 
-# %% [markdown]
-# ## Feature Engineering für Logistic Regression
+## Feature Engineering für Logistic Regression
 
-# %%
+```{python}
 df = X.copy()
 
 
@@ -1519,12 +1557,11 @@ df_features = pd.DataFrame(all_features)
 display(df_features.head(5))
 X_feature_engineered = pd.concat([X, df_features], axis=1)
 display(X_feature_engineered.head(5))
+```
 
+# Models
 
-# %% [markdown]
-# # Models
-
-# %%
+```{python}
 class ModelEvaluator:
     def __init__(self, models, param_grid, X, y, selected_fields=None):
         """
@@ -1756,10 +1793,9 @@ class MetricsBenchmarker:
         plt.title("Benchmark Results")
         plt.ylabel("Score")
         plt.show()
+```
 
-
-
-# %%
+```{python}
 # Example usage
 from sklearn.linear_model import LogisticRegression
 
@@ -1784,9 +1820,9 @@ evaluator_baseline.evaluate_models()
 evaluator_baseline.plot_roc_curves()
 evaluator_baseline.optimize_model("Baseline Logistic Regression")
 evaluator_baseline.compare_top_n_customers("Baseline Logistic Regression", n=100)
+```
 
-
-# %%
+```{python}
 # Define models and their parameter grids
 models = {
     "Logistic Regression Features added": LogisticRegression(solver="liblinear"),
@@ -1808,8 +1844,9 @@ evaluator.compare_top_n_customers("Logistic Regression Features added", n=100)
 
 # Assuming X and y are defined
 #
+```
 
-# %%
+```{python}
 # check if there are any missing values
 # print the missing values of withdrawal mean ration last3 first3
 print(X_feature_engineered["withdrawal_mean_ratio_last3_first3"].isnull().sum())
@@ -1825,9 +1862,9 @@ X_feature_engineered["withdrawal_mean_ratio_last3_first3"] = X_feature_engineere
 ].fillna(X_feature_engineered["withdrawal_mean_ratio_last3_first3"].mean())
 
 display(X_feature_engineered.head(5))
+```
 
-
-# %%
+```{python}
 # Define models and their parameter grids
 models = {
     "Random Forest": RandomForestClassifier(),
@@ -1886,11 +1923,11 @@ evaluator_models.plot_roc_curves()
 # evaluator_models
 # Assuming X and y are defined
 #
+```
 
-# %% [markdown]
-# # Erklärbare Modelle
+# Erklärbare Modelle
 
-# %%
+```{python}
 # todo fix the error
 
 # Explain the best model with LIME
@@ -1899,12 +1936,11 @@ evaluator_models.plot_roc_curves()
 # Explain the best model with SHAP
 # evaluator_models.explain_with_shap("Random Forest")
 
+```
 
+## Results Comparision
 
-# %% [markdown]
-# ## Results Comparision
-
-# %%
+```{python}
 benchmark = MetricsBenchmarker()
 benchmark.add_evaluator(evaluator_baseline)
 benchmark.add_evaluator(evaluator_models)
@@ -1912,21 +1948,20 @@ benchmark.add_evaluator(evaluator)
 benchmark.set_benchmark_results()
 benchmark.display_benchmark_results_table()
 benchmark.plot_benchmark_results_bar_chart()
+```
 
-# %%
+```{python}
 evaluator_models.get_benchmark_results()
+```
 
-# %% [markdown]
-# ## Interpretation von den Resultaten
+## Interpretation von den Resultaten
 
-# %% [markdown]
-# - todo
+- todo
 
-# %% [markdown]
-# # Convert Notebook
+# Convert Notebook
 
-# %%
-# %%capture
+```{python}
+%%capture
 import subprocess
 import pathlib
 import os
@@ -1953,8 +1988,9 @@ elif file_path.suffix == ".ipynb":
         print("Conversion failed. Error message:", e.output)
 else:
     print("Unsupported file type.")
+```
 
-# %%
+```{python}
 import subprocess
 import pathlib
 import os
@@ -1982,14 +2018,14 @@ elif file_path.suffix == ".ipynb":
         print("Conversion failed. Error message:", e.output)
 else:
     print("Unsupported file type.")
+```
 
-
-# %%
+```{python}
 import os
 
 os.system("quarto render AML_MC.ipynb --to html")
+```
 
+# Referenzen
+- [1] [Applied Predictive Modelling](http://link.springer.com/10.1007/978-1-4614-6849-3)
 
-# %% [markdown]
-# # Referenzen
-# - [1] [Applied Predictive Modelling](http://link.springer.com/10.1007/978-1-4614-6849-3)
