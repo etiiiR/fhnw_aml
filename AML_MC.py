@@ -33,7 +33,6 @@ from itables import init_notebook_mode
 
 init_notebook_mode(all_interactive=True)
 
-
 # %%
 # Laden der eingesetzten Libraries
 from datetime import datetime
@@ -48,7 +47,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics.pairwise import cosine_similarity
 
 import pandas as pd
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, cross_validate
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.impute import SimpleImputer
 from sklearn.compose import ColumnTransformer
@@ -57,7 +56,6 @@ from sklearn.linear_model import LogisticRegression
 
 
 from sklearn.model_selection import (
-    cross_val_score,
     GridSearchCV,
     StratifiedKFold,
 )
@@ -65,6 +63,8 @@ from sklearn.metrics import (
     roc_curve,
     auc,
     make_scorer,
+    confusion_matrix,
+    ConfusionMatrixDisplay,
     fbeta_score,
     cohen_kappa_score,
     matthews_corrcoef,
@@ -1552,30 +1552,68 @@ class ModelEvaluator:
         cv = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
         for name, model in self.models.items():
             pipeline = self.create_pipeline(model)
+
+            # Prefix the parameters with the step name 'model'
+            grid_search_params = {}
+            for param, values in self.param_grid[name].items():
+                if "model__" in param:
+                    grid_search_params[param] = values
+                else:
+                    grid_search_params[f"model__{param}"] = values
+
+            grid_search = GridSearchCV(
+                estimator=pipeline,
+                param_grid=grid_search_params,
+                cv=cv,
+                scoring="accuracy",
+                n_jobs=-1,
+                verbose=1,
+            )
+            grid_search.fit(self.X, self.y)
+            print(f"Best parameters for {name}: {grid_search.best_params_}")
+
+            best_pipeline = grid_search.best_estimator_
+
             metrics = {
-                "ROC AUC": "roc_auc",
-                "Precision": "precision",
-                "Recall": "recall",
-                "Accuracy": "accuracy",
-                "F-measure": make_scorer(fbeta_score, beta=1),
-                "Kappa": make_scorer(cohen_kappa_score),
-                "MCC": make_scorer(matthews_corrcoef),
+                "roc_auc": "roc_auc",
+                "precision": "precision",
+                "recall": "recall",
+                "accuracy": "accuracy",
+                "f1": make_scorer(fbeta_score, beta=1),
+                "kappa": make_scorer(cohen_kappa_score),
+                "mcc": make_scorer(matthews_corrcoef),
             }
+
             self.benchmark_results[name] = {}
             all_cv_preds = np.zeros(len(self.y))
-            for metric_name, metric in metrics.items():
-                score = cross_val_score(
-                    pipeline, self.X, self.y, cv=cv, scoring=metric, n_jobs=-1
+
+            results = cross_validate(
+                best_pipeline,
+                self.X,
+                self.y,
+                cv=cv,
+                scoring=metrics,
+                return_estimator=True,
+                n_jobs=-1,
+                verbose=0,
+            )
+
+            for metric_name in metrics.keys():
+                self.benchmark_results[name][metric_name] = np.mean(
+                    results["test_" + metric_name]
                 )
-                self.benchmark_results[name][metric_name] = np.mean(score)
-                print(f"{name}: {metric_name} = {np.mean(score):.2f}")
+                print(
+                    f"{name}: {metric_name} = {np.mean(results['test_' + metric_name]):.2f}"
+                )
+
             for train_idx, test_idx in cv.split(self.X, self.y):
-                pipeline.fit(self.X.iloc[train_idx], self.y.iloc[train_idx])
-                all_cv_preds[test_idx] = pipeline.predict_proba(self.X.iloc[test_idx])[
-                    :, 1
-                ]
+                best_pipeline.fit(self.X.iloc[train_idx], self.y.iloc[train_idx])
+                all_cv_preds[test_idx] = best_pipeline.predict_proba(
+                    self.X.iloc[test_idx]
+                )[:, 1]
+
             self.cv_predictions[name] = all_cv_preds
-            self.fitted_models[name] = pipeline.fit(self.X, self.y)
+            self.fitted_models[name] = best_pipeline.fit(self.X, self.y)
 
     def evaluate_models(self):
         if not self.fitted_models:
@@ -1627,32 +1665,15 @@ class ModelEvaluator:
 
         return Pipeline([("preprocessor", preprocessor), ("model", model)])
 
-    def optimize_model(self, model_name):
-        if model_name in self.best_models:
-            return self.best_models[model_name]
-
-        model = self.models[model_name]
-        pipeline = self.create_pipeline(model)
-        grid_search = GridSearchCV(
-            pipeline, self.param_grid[model_name], cv=5, scoring="roc_auc"
-        )
-        grid_search.fit(self.X, self.y)
-        print(f"Best parameters for {model_name}: {grid_search.best_params_}")
-        self.best_models[model_name] = grid_search.best_estimator_
-        return self.best_models[model_name]
-
     def compare_top_n_customers(self, model_name, n=100):
-        if model_name in self.best_models:
-            model = self.best_models[model_name]
-        else:
-            model = self.optimize_model(model_name)
-
+        print(f"Comparing top {n} customers for {model_name}")
+        model = self.fitted_models[model_name]
         probabilities = model.predict_proba(self.X)[:, 1]
         top_n_indices = np.argsort(probabilities)[::-1][:n]
 
         plt.figure()
         plt.hist(probabilities[top_n_indices], bins=20, alpha=0.75)
-        plt.title(f"Histogram of top {n} customers' probabilities")
+        plt.title(f"Histogram of top {n} customers' probabilities for {model_name}")
         plt.xlabel("Probability")
         plt.ylabel("Frequency")
         plt.show()
@@ -1719,6 +1740,20 @@ class ModelEvaluator:
         feature = "balance_mean"  # Feature to explain
         shap.dependence_plot(feature, shap_values, X_test_numeric)
 
+    def plot_confusion_matrices(self):
+        if not self.fitted_models:
+            self.fit_models()
+
+        for name, model in self.fitted_models.items():
+            plt.style.use("default")
+            y_pred = model.predict(self.X)
+            cm = confusion_matrix(self.y, y_pred)
+            disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+            disp.plot(cmap=plt.cm.Blues)
+            plt.title(f"Confusion Matrix for {name}")
+            plt.show()
+            plt.style.use("ggplot")
+
 
 class MetricsBenchmarker:
     def __init__(self):
@@ -1782,9 +1817,8 @@ evaluator_baseline = ModelEvaluator(
 )
 evaluator_baseline.evaluate_models()
 evaluator_baseline.plot_roc_curves()
-evaluator_baseline.optimize_model("Baseline Logistic Regression")
+evaluator_baseline.plot_confusion_matrices()
 evaluator_baseline.compare_top_n_customers("Baseline Logistic Regression", n=100)
-
 
 # %%
 # Define models and their parameter grids
@@ -1802,7 +1836,6 @@ evaluator = ModelEvaluator(
 )
 evaluator.evaluate_models()
 evaluator.plot_roc_curves()
-evaluator.optimize_model("Logistic Regression Features added")
 evaluator.compare_top_n_customers("Logistic Regression Features added", n=100)
 
 
@@ -1826,8 +1859,8 @@ X_feature_engineered["withdrawal_mean_ratio_last3_first3"] = X_feature_engineere
 
 display(X_feature_engineered.head(5))
 
-
 # %%
+# Usage example:
 # Define models and their parameter grids
 models = {
     "Random Forest": RandomForestClassifier(),
@@ -1854,16 +1887,16 @@ param_grid = {
         "model__min_samples_split": [2, 5, 10],
     },
     "AdaBoost": {
-        "model__n_estimators": [50, 100, 150],
-        "model__learning_rate": [0.1, 0.01, 0.001],
+        
     },
 }
 
-# todo fix here the not converging models with LassoCV
-for model_name, model in models.items():
-    models[model_name] = Pipeline(
-        [("feature_selection", SelectFromModel(LassoCV())), ("model", model)]
-    )
+
+# Fix the not converging models with LassoCV
+# for model_name, model in models.items():
+#    models[model_name] = Pipeline(
+#        [("feature_selection", SelectFromModel(LassoCV(max_iter=1500))), ("model", model)]
+#    )
 
 selected_fields = X_feature_engineered.columns  # add the new features of df_features
 
@@ -1872,33 +1905,14 @@ evaluator_models = ModelEvaluator(
 )
 results = evaluator_models.evaluate_models()
 evaluator_models.plot_roc_curves()
+evaluator_models.plot_confusion_matrices()
+# compare top n customers for all models
 
-# for model_name in tqdm(models.keys()):
-#    best_models[model_name] = evaluator_models.optimize_model(model_name)
-
-# best_model_name = max(best_models, key=best_models.get)
-# best_model = best_models[best_model_name]
-
-# get best model out of the best_models roc auc and precision
-# best_model = max(best_models, key=lambda x: best_models[x].score(X, y))
-
-# evaluator_models.compare_top_n_customers(best_model, n=100)
-# evaluator_models
-# Assuming X and y are defined
-#
-
-# %% [markdown]
-# # Erklärbare Modelle
 
 # %%
-# todo fix the error
-
-# Explain the best model with LIME
-# evaluator_models.explain_with_lime("Random Forest")
-
-# Explain the best model with SHAP
-# evaluator_models.explain_with_shap("Random Forest")
-
+# compare top n customers for all models
+for model_name in models.keys():
+    evaluator_models.compare_top_n_customers(model_name, n=100)
 
 
 # %% [markdown]
@@ -1914,7 +1928,79 @@ benchmark.display_benchmark_results_table()
 benchmark.plot_benchmark_results_bar_chart()
 
 # %%
-evaluator_models.get_benchmark_results()
+# best model
+# Define weights for the metrics
+weights = {"roc_auc": 0.25, "precision": 0.25, "recall": 0.25, "f1": 0.25}
+
+# Calculate weighted scores for each model
+weighted_scores = {}
+for model, metrics in benchmark.benchmark_results.items():
+    weighted_score = sum(
+        weights[metric] * score
+        for metric, score in metrics.items()
+        if metric in weights
+    )
+    weighted_scores[model] = weighted_score
+
+# Find the best model based on weighted score
+best_model_name = max(weighted_scores, key=weighted_scores.get)
+best_model_score = weighted_scores[best_model_name]
+
+
+# %% [markdown]
+# # Erklärbare Modelle
+
+# %% [markdown]
+# ## Reduziere Modell für Erklärbarkeit
+
+# %%
+# todo reduce model and do training
+
+# %%
+# todo fix the error of lime and shap and add the explanation to the reduced model
+
+# Explain the best model with LIME
+# evaluator_models.explain_with_lime("Random Forest")
+
+# Explain the best model with SHAP
+# evaluator_models.explain_with_shap("Random Forest")
+
+
+
+# %% [markdown]
+# ### Stepwise Regression 
+
+# %%
+
+# %% [markdown]
+# ### Logistic Regression Reduziert
+
+# %%
+# Example usage
+# Define models and their parameter grids
+models = {
+    "Logistic Regression Reduced": LogisticRegression(solver="liblinear"),
+}
+param_grid = {
+    "Logistic Regression Reduced": {"model__C": [0.01, 0.1, 1, 10]},
+}
+
+# todo fields of stepwise regression selection
+selected_fields = []
+
+evaluator_reduced = ModelEvaluator(
+    models, param_grid, X, y, selected_fields=selected_fields
+)
+# evaluator_reduced.evaluate_models()
+# evaluator_reduced.plot_roc_curves()
+# evaluator_reduced.plot_confusion_matrices()
+# evaluator_reduced.compare_top_n_customers("Baseline Logistic Regression", n=100)
+
+
+# %% [markdown]
+# ### todo Explain model
+
+# %%
 
 # %% [markdown]
 # ## Interpretation von den Resultaten
@@ -1983,12 +2069,10 @@ elif file_path.suffix == ".ipynb":
 else:
     print("Unsupported file type.")
 
-
 # %%
 import os
 
 os.system("quarto render AML_MC.ipynb --to html")
-
 
 # %% [markdown]
 # # Referenzen
