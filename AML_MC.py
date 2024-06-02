@@ -13,11 +13,19 @@
 
 # %% [markdown]
 # ### Todos
-# - (Alex) no complex logic in preprocessing (What Danni said implementing)
-# - Reduce Model
-# - Explainable AI 
+#
+# - Big todo: Data # print y.value_counts() there are 2000 none has_card == no is that really sooo???
+#
+# - Big todo: inballanced Data and very bad metrics see precision idk where that comes from
+# - Big todo: Fix plotting Confusion Matrix and ROC, see metrics are different from plotting
+# - Big todo: - Reduce Model, Explainable AI 
+# - Big todo: no complex logic in preprocessing (What Danni said implementing) 
+#
+#
 # - Markdown writing and explaine what we have done
 # - Clean up code: (Imports in central place, Comments, Code Refactor)
+#
+#
 
 # %% [markdown]
 # # Setup
@@ -1390,91 +1398,41 @@ print(X.dtypes)
 # %%
 X.columns
 
-# %% [markdown]
-# # Preprocessing
+# %%
+# todo think about a better approach
+
+# Sample from both groups to create a balanced dataset
+counts = X["has_card"].value_counts()
+
+# Determine the minimum count between True and False
+min_count = counts.min()
+
+true_sample = X[X["has_card"] == True].sample(n=min_count, random_state=42)
+false_sample = X[X["has_card"] == False].sample(n=min_count, random_state=42)
+
+# Combine the sampled data
+X = pd.concat([true_sample, false_sample])
+
+# Verify the counts
+balanced_counts = X["has_card"].value_counts()
+
+print(balanced_counts)
+
 
 # %%
-# Assuming 'X' is your DataFrame and 'has_card' is the target variable
-y = X["has_card"]
-XX = X.drop(columns=["has_card"])
-selected_fields = (
-    ["age", "gender", "region_client"]
-    + [f"volume_{i}" for i in range(1, 14)]
-    + [f"balance_{i}" for i in range(1, 14)]
-)
-XX = X[selected_fields]
-
-# Define categorical and numeric columns
-categorical_cols = XX.select_dtypes(include=["category", "object"]).columns
-numeric_cols = XX.select_dtypes(include=["int64", "float64"]).columns
-
-# Create transformers for numeric and categorical data
-numeric_transformer = Pipeline(
-    steps=[
-        ("imputer", SimpleImputer(strategy="median")),  # or mean, most_frequent
-        ("scaler", StandardScaler()),
-    ]
-)
-
-categorical_transformer = Pipeline(
-    steps=[
-        ("imputer", SimpleImputer(strategy="constant", fill_value="missing")),
-        ("onehot", OneHotEncoder(handle_unknown="ignore")),
-    ]
-)
-
-# Combine transformers into a preprocessor with ColumnTransformer
-preprocessor = ColumnTransformer(
-    transformers=[
-        ("num", numeric_transformer, numeric_cols),
-        ("cat", categorical_transformer, categorical_cols),
-    ]
-)
-
-# %% [markdown]
-# ## Test-Train-Split
-
-# %%
-# At the time not used because We use KFolds for cross validation instead of Train-Test-Split
-X_train, X_test, y_train, y_test = train_test_split(
-    XX, y, test_size=0.2, random_state=42, stratify=y
-)
+# plot distribution of has_card
+plt.figure(figsize=(10, 6))
+X["has_card"].value_counts().plot(kind="bar")
+plt.title("Verteilung der Kartenbesitzer")
+plt.xlabel("Kartenbesitzer")
+plt.ylabel("Anzahl")
+plt.show()
 
 
 # %% [markdown]
-# ## Drop Featrues
+# ## Feature Engineering
 
 # %%
-# Remove the Variable that can lead to data leakage
-def clean_data(df):
-    # Define unnecessary columns
-    unnecessary_cols = [
-        "disp_id",
-        "client_id",
-        "account_id",
-        "type_card",
-        "card_id",
-        "loan_id",
-        "district_id_account",
-        "district_id_client",
-    ]
-    # Drop these columns if they exist in the dataframe
-    df_cleaned = df.drop(columns=[col for col in unnecessary_cols if col in df.columns])
-    return df_cleaned
-
-
-X = clean_data(X)
-
-# %%
-print(X.columns)
-
-# %% [markdown]
-# ## Feature Engineering für Logistic Regression
-
-# %%
-df = X.copy()
-
-
 # Function to calculate features
 def calculate_features(df, prefix):
     monthly_values = df[[f"{prefix}_{i}" for i in range(1, 13)]]
@@ -1510,7 +1468,7 @@ columns_to_process = ["balance", "credit", "n_transactions", "withdrawal"]
 # Generating features for each prefix and merging them
 all_features = {}
 for prefix in columns_to_process:
-    all_features.update(calculate_features(df, prefix))
+    all_features.update(calculate_features(X, prefix))
 
 # Creating the final dataframe with new features
 df_features = pd.DataFrame(all_features)
@@ -1521,12 +1479,67 @@ X_feature_engineered = pd.concat([X, df_features], axis=1)
 display(X_feature_engineered.head(5))
 
 
+# %%
+# Remove the Variable that can lead to data leakage
+def clean_data(df):
+    # Define unnecessary columns
+    unnecessary_cols = [
+        "disp_id",
+        "client_id",
+        "account_id",
+        "type_card",
+        "card_id",
+        "loan_id",
+        "district_id_account",
+        "district_id_client",
+    ]
+    # Drop these columns if they exist in the dataframe
+    df_cleaned = df.drop(columns=[col for col in unnecessary_cols if col in df.columns])
+    return df_cleaned
+
+
+X = clean_data(X)
+X_feature_engineered = clean_data(X_feature_engineered)
+
 # %% [markdown]
-# # Models
+# # Evaluations Daten
+
+# %%
+# Assuming 'X' is your DataFrame and 'has_card' is the target variable
+y = X["has_card"]
+y_features = X_feature_engineered["has_card"]
+
+X.drop("has_card", axis=1, inplace=True)
+X_feature_engineered.drop("has_card", axis=1, inplace=True)
+# we use kfold for cross validation and then the X_test and y_test are used for evaluation on never seen data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.1, random_state=42, stratify=y
+)
+
+X_train_features, X_test_features, y_train_features, y_test_features = train_test_split(
+    X_feature_engineered, y, test_size=0.1, random_state=42, stratify=y
+)
+
+
+# %% [markdown]
+# ## Drop Featrues
+
+# %%
+print(X_train.columns)
+
+# %%
+# print length of X_train
+display(X_train)
+display(X_train_features)
+
+
+# %% [markdown]
+# # Modeling und Model Selection
+# Für die Model Selection benutzen wir einen StratifiedKFold mit 10 Folds in dem wir nur den Train split Folden, denn später brauchen wir die Test Daten für den Error Assesment.
 
 # %%
 class ModelEvaluator:
-    def __init__(self, models, param_grid, X, y, selected_fields=None):
+    def __init__(self, models, param_grid, X, y, X_test, y_test, selected_fields=None):
         """
         Initialize the evaluator with models, their parameter grids, and data.
 
@@ -1541,6 +1554,8 @@ class ModelEvaluator:
         self.param_grid = param_grid
         self.X = X[selected_fields]
         self.y = y
+        self.eval_data = X_test
+        self.eval_target = y_test
         self.fitted_models = {}
         self.best_models = {}
         self.cv_predictions = {}
@@ -1556,10 +1571,10 @@ class ModelEvaluator:
             # Prefix the parameters with the step name 'model'
             grid_search_params = {}
             for param, values in self.param_grid[name].items():
-                if "model__" in param:
-                    grid_search_params[param] = values
-                else:
-                    grid_search_params[f"model__{param}"] = values
+                grid_search_params = {
+                    f"model__{param}": values
+                    for param, values in self.param_grid[name].items()
+                }
 
             grid_search = GridSearchCV(
                 estimator=pipeline,
@@ -1614,7 +1629,7 @@ class ModelEvaluator:
 
             self.cv_predictions[name] = all_cv_preds
             self.fitted_models[name] = best_pipeline.fit(self.X, self.y)
-
+    
     def evaluate_models(self):
         if not self.fitted_models:
             self.fit_models()
@@ -1793,7 +1808,6 @@ class MetricsBenchmarker:
         plt.show()
 
 
-
 # %%
 # Example usage
 from sklearn.linear_model import LogisticRegression
@@ -1803,7 +1817,7 @@ models = {
     "Baseline Logistic Regression": LogisticRegression(solver="liblinear"),
 }
 param_grid = {
-    "Baseline Logistic Regression": {"model__C": [0.01, 0.1, 1, 10]},
+    "Baseline Logistic Regression": {"C": [0.01, 0.1, 1, 10]},
 }
 
 selected_fields = (
@@ -1812,8 +1826,15 @@ selected_fields = (
     + [f"balance_{i}" for i in range(1, 14)]
 )
 
+
 evaluator_baseline = ModelEvaluator(
-    models, param_grid, X, y, selected_fields=selected_fields
+    models,
+    param_grid,
+    X_train,
+    y_train,
+    X_test,
+    y_test,
+    selected_fields=selected_fields,
 )
 evaluator_baseline.evaluate_models()
 evaluator_baseline.plot_roc_curves()
@@ -1823,24 +1844,77 @@ evaluator_baseline.compare_top_n_customers("Baseline Logistic Regression", n=100
 # %%
 # Define models and their parameter grids
 models = {
+    "Logistic Regression Features": LogisticRegression(solver="liblinear"),
+}
+param_grid = {
+    "Logistic Regression Features": {"C": [0.01, 0.1, 1, 10]},
+}
+
+selected_fields = X_train_features.columns
+
+evaluator = ModelEvaluator(
+    models,
+    param_grid,
+    X_test_features,
+    y_test_features,
+    X_train_features,
+    y_train_features,
+    selected_fields=selected_fields,
+)
+evaluator.evaluate_models()
+evaluator.plot_roc_curves()
+evaluator.compare_top_n_customers("Logistic Regression Features", n=100)
+
+
+# Assuming X and y are defined
+#
+
+# %% [markdown]
+# ## Overfitting because of jagged ROC curve needs Regularization
+
+# %%
+# Define models and their parameter grids
+models = {
     "Logistic Regression Features added": LogisticRegression(solver="liblinear"),
 }
 param_grid = {
-    "Logistic Regression Features added": {"model__C": [0.001, 0.01, 0.1, 1, 10]},
+    "Logistic Regression Features added": {"C": [0.001, 0.01, 0.1, 1, 10]},
 }
 
-selected_fields = X_feature_engineered.columns
+selected_fields = X_train_features.columns
+
+# Fix the not converging models with LassoCV
+# for model_name, model in models.items():
+#    models[model_name] = Pipeline(
+#        [
+#            ("scaler", StandardScaler()),
+#            (
+#                "feature_selection",
+#                SelectFromModel(LassoCV(alphas=[0.01, 0.1, 1, 10], max_iter=10000)),
+#            ),
+#            ("model", model),
+#        ]
+#    )
+
 
 evaluator = ModelEvaluator(
-    models, param_grid, X_feature_engineered, y, selected_fields=selected_fields
+    models,
+    param_grid,
+    X_test_features,
+    y_test_features,
+    X_train_features,
+    y_train_features,
+    selected_fields=selected_fields,
 )
+
+
 evaluator.evaluate_models()
 evaluator.plot_roc_curves()
 evaluator.compare_top_n_customers("Logistic Regression Features added", n=100)
 
 
 # Assuming X and y are defined
-#
+
 
 # %%
 # check if there are any missing values
@@ -1873,22 +1947,20 @@ models = {
 
 param_grid = {
     "Random Forest": {
-        "model__n_estimators": [100, 200, 300],
-        "model__max_depth": [None, 5, 10],
+        "n_estimators": [100, 200, 300],
+        "max_depth": [None, 5, 10],
     },
     "Gradient Boosting": {
-        "model__n_estimators": [100, 200, 300],
-        "model__learning_rate": [0.1, 0.01, 0.001],
+        "n_estimators": [100, 200, 300],
+        "learning_rate": [0.1, 0.01, 0.001],
     },
-    "SVM": {"model__C": [0.1, 1, 10], "model__kernel": ["linear", "rbf"]},
-    "KNN": {"model__n_neighbors": [3, 5, 7], "model__weights": ["uniform", "distance"]},
+    "SVM": {"C": [0.1, 1, 10], "kernel": ["linear", "rbf"]},
+    "KNN": {"n_neighbors": [3, 5, 7], "weights": ["uniform", "distance"]},
     "Decision Tree": {
-        "model__max_depth": [None, 5, 10],
-        "model__min_samples_split": [2, 5, 10],
+        "max_depth": [None, 5, 10],
+        "min_samples_split": [2, 5, 10],
     },
-    "AdaBoost": {
-        
-    },
+    "AdaBoost": {},
 }
 
 
@@ -1898,22 +1970,26 @@ param_grid = {
 #        [("feature_selection", SelectFromModel(LassoCV(max_iter=1500))), ("model", model)]
 #    )
 
-selected_fields = X_feature_engineered.columns  # add the new features of df_features
+selected_fields = X_train_features.columns  # add the new features of df_features
 
 evaluator_models = ModelEvaluator(
-    models, param_grid, X_feature_engineered, y, selected_fields=selected_fields
+    models,
+    param_grid,
+    X_train_features,
+    y_train_features,
+    X_test_features,
+    y_test_features,
+    selected_fields=selected_fields,
 )
 results = evaluator_models.evaluate_models()
 evaluator_models.plot_roc_curves()
-evaluator_models.plot_confusion_matrices()
+# evaluator_models.plot_confusion_matrices()
 # compare top n customers for all models
-
 
 # %%
 # compare top n customers for all models
 for model_name in models.keys():
     evaluator_models.compare_top_n_customers(model_name, n=100)
-
 
 # %% [markdown]
 # ## Results Comparision
@@ -1946,6 +2022,53 @@ for model, metrics in benchmark.benchmark_results.items():
 best_model_name = max(weighted_scores, key=weighted_scores.get)
 best_model_score = weighted_scores[best_model_name]
 
+# %% [markdown]
+# # Model Assesment
+
+# %%
+# Evaluate the best model with the test set
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, cohen_kappa_score, matthews_corrcoef
+
+
+best_model = evaluator_models.fitted_models[best_model_name]
+y_pred = best_model.predict(X_test_features)
+
+print(f"Evaluation of the best model ({best_model_name}) using X_test:")
+
+# Confusion Matrix
+cm = confusion_matrix(y_test, y_pred)
+disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+disp.plot(cmap=plt.cm.Blues)
+plt.title(f"Confusion Matrix for {best_model_name} on X_test")
+plt.show()
+
+# ROC Curve
+y_scores = best_model.predict_proba(X_test_features)[:, 1]
+fpr, tpr, _ = roc_curve(y_test, y_scores)
+roc_auc = auc(fpr, tpr)
+plt.figure(figsize=(10, 8))
+plt.plot(fpr, tpr, label=f"{best_model_name} (area = {roc_auc:.2f})")
+plt.plot([0, 1], [0, 1], "k--")
+plt.xlabel("False Positive Rate")
+plt.ylabel("True Positive Rate")
+plt.title(f"ROC Curve for {best_model_name} on X_test")
+plt.legend(loc="lower right")
+plt.show()
+
+# Other Metrics
+accuracy = accuracy_score(y_test_features, y_pred)
+precision = precision_score(y_test_features, y_pred)
+recall = recall_score(y_test_features, y_pred)
+f1 = f1_score(y_test_features, y_pred)
+kappa = cohen_kappa_score(y_test_features, y_pred)
+mcc = matthews_corrcoef(y_test_features, y_pred)
+
+print(f"Accuracy: {accuracy:.2f}")
+print(f"Precision: {precision:.2f}")
+print(f"Recall: {recall:.2f}")
+print(f"F1 Score: {f1:.2f}")
+print(f"Cohen Kappa: {kappa:.2f}")
+print(f"Matthews Correlation Coefficient: {mcc:.2f}")
 
 # %% [markdown]
 # # Erklärbare Modelle
@@ -1989,13 +2112,12 @@ param_grid = {
 selected_fields = []
 
 evaluator_reduced = ModelEvaluator(
-    models, param_grid, X, y, selected_fields=selected_fields
+    models, param_grid, X, y, X_test, y_test, selected_fields=selected_fields
 )
 # evaluator_reduced.evaluate_models()
 # evaluator_reduced.plot_roc_curves()
 # evaluator_reduced.plot_confusion_matrices()
 # evaluator_reduced.compare_top_n_customers("Baseline Logistic Regression", n=100)
-
 
 # %% [markdown]
 # ### todo Explain model
