@@ -36,7 +36,6 @@
 # %pip install -r ../requirements.txt
 
 # %%
-from itables import show
 from itables import init_notebook_mode
 
 init_notebook_mode(all_interactive=True)
@@ -47,10 +46,8 @@ from datetime import datetime
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 import sklearn.metrics as metrics
 from IPython.display import display
-from itables import init_notebook_mode
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -60,8 +57,6 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.impute import SimpleImputer
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
-from sklearn.linear_model import LogisticRegression
-
 
 from sklearn.model_selection import (
     GridSearchCV,
@@ -74,8 +69,6 @@ from sklearn.metrics import (
     confusion_matrix,
     ConfusionMatrixDisplay,
     fbeta_score,
-    cohen_kappa_score,
-    matthews_corrcoef,
 )
 import lime.lime_tabular
 import shap
@@ -85,9 +78,6 @@ from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import AdaBoostClassifier
-from tqdm import tqdm
-from sklearn.linear_model import LassoCV
-from sklearn.feature_selection import SelectFromModel
 
 # %%
 # %%capture
@@ -170,10 +160,11 @@ data_frames = {}
 # %% [markdown]
 # ## Account
 # [//]: # (-.- .tabset)
-# Der Datensatz `accounts.csv` beinhaltet 4500 Observationen mit den folgenden Informationen über die Kontos der Bank:  
-# - `account_id`: die Kontonummer, 
-# - `district_id`: den Standort der entsprechenden Bankfiliale,
-# - `frequency`: die Frequenz der Ausstellung von Kontoauszügen (monatlich, wöchentlich, pro Transaktion) und 
+# Der Datensatz `accounts.csv` beinhaltet 4500 Observationen mit den folgenden Informationen über die Kontos der Bank: 
+#    
+# - `account_id`: die Kontonummer,  
+# - `district_id`: den Standort der entsprechenden Bankfiliale,  
+# - `frequency`: die Frequenz der Ausstellung von Kontoauszügen (monatlich, wöchentlich, pro Transaktion) und  
 # - `date`: das Erstellungsdatum
 
 # %%
@@ -263,9 +254,10 @@ data_frames["account.csv"] = account
 # [//]: # (-.- .tabset)
 #
 # Der Datensatz `card.csv` beinhaltet 892 Observationen mit den folgenden Informationen über die von der Bank herausgegebenen Kreditkarten:  
-# - `card_id`: die Kartennummer, 
-# - `disp_id`: die Zuordnung zum entsprechenden Bankkonto und -inhaber (Disposition),
-# - `type`: die Art der Kreditkarte (junior, classic, gold) und 
+#
+# - `card_id`: die Kartennummer,  
+# - `disp_id`: die Zuordnung zum entsprechenden Bankkonto und -inhaber (Disposition),  
+# - `type`: die Art der Kreditkarte (junior, classic, gold) und  
 # - `issued`: das Ausstellungsdatum
 
 # %%
@@ -333,9 +325,10 @@ data_frames["card.csv"] = card
 # [//]: # (-.- .tabset)
 #
 # Der Datensatz `client.csv` beinhaltet 5369 Observationen mit den folgenden Informationen über die Kunden der Bank:  
-# - `client_id`: die Kundennummer, 
-# - `birth_number`: eine Kombination aus Geburtsdatum und Geschlecht sowie
-# - `district_id`: die Adresse  
+#
+# - `client_id`: die Kundennummer,  
+# - `birth_number`: eine Kombination aus Geburtsdatum und Geschlecht sowie  
+# - `district_id`: die Adresse   
 
 # %%
 client.info()
@@ -405,10 +398,11 @@ data_frames["client.csv"] = client
 # ## Disp
 # [//]: # (-.- .tabset)
 #
-# Der Datensatz `disp.csv` beinhaltet 5369 Observationen mit den folgenden Informationen über die Dispositionen der Bank:  
-# - `disp_id`: der Identifikationsschlüssel der Disposition,
-# - `client_id`: die Kundennummer,
-# - `account_id`: die Kontonummer,
+# Der Datensatz `disp.csv` beinhaltet 5369 Observationen mit den folgenden Informationen über die Dispositionen der Bank:   
+#
+# - `disp_id`: der Identifikationsschlüssel der Disposition,  
+# - `client_id`: die Kundennummer,  
+# - `account_id`: die Kontonummer,  
 # - `type`: die Art der Disposition (Inhaber, Benutzer)
 
 # %%
@@ -462,23 +456,24 @@ data_frames["disp.csv"] = disp
 # ## District
 # [//]: # (-.- .tabset)
 #
-# Der Datensatz `district.csv` beinhaltet 77 Observationen mit den folgenden demografischen Informationen:  
-# - `A1`: die ID des Distrikts, 
-# - `A2`: der Name des Distrikts,
-# - `A3`: die Region,
-# - `A4`: die Anzahl der Einwohner,
-# - `A5`: die Anzahl der Gemeinden mit < 499 Einwohner,
-# - `A6`: die Anzahl der Gemeinden mit 500 - 1999 Einwohner,
-# - `A7`: die Anzahl der Gemeinden mit 2000 - 9999 Einwohner,
-# - `A8`: die Anzahl der Gemeinden mit >10000 Einwohner,
-# - `A9`: die Anzahl Städte,
-# - `A10`: das Verhältnis von städtischen Einwohnern,
-# - `A11`: das durchschnittliche Einkommen,
-# - `A12`: die Arbeitslosenrate vom Jahr 95,
-# - `A13`: die Arbeitslosenrate vom Jahr 96,
-# - `A14`: die Anzahl von Unternehmer pro 1000 Einwohner,
-# - `A15`: die Anzahl von begangenen Verbrechen im Jahr 95,
-# - `A16`: die Anzahl von begangenen Verbrechen im Jahr 96, 
+# Der Datensatz `district.csv` beinhaltet 77 Observationen mit den folgenden demografischen Informationen:   
+#
+# - `A1`: die ID des Distrikts,  
+# - `A2`: der Name des Distrikts,  
+# - `A3`: die Region,  
+# - `A4`: die Anzahl der Einwohner,  
+# - `A5`: die Anzahl der Gemeinden mit < 499 Einwohner,  
+# - `A6`: die Anzahl der Gemeinden mit 500 - 1999 Einwohner,  
+# - `A7`: die Anzahl der Gemeinden mit 2000 - 9999 Einwohner,  
+# - `A8`: die Anzahl der Gemeinden mit >10000 Einwohner,  
+# - `A9`: die Anzahl Städte,  
+# - `A10`: das Verhältnis von städtischen Einwohnern,  
+# - `A11`: das durchschnittliche Einkommen,  
+# - `A12`: die Arbeitslosenrate vom Jahr 95,  
+# - `A13`: die Arbeitslosenrate vom Jahr 96,  
+# - `A14`: die Anzahl von Unternehmer pro 1000 Einwohner,  
+# - `A15`: die Anzahl von begangenen Verbrechen im Jahr 95,  
+# - `A16`: die Anzahl von begangenen Verbrechen im Jahr 96,   
 
 # %%
 district.info()
@@ -649,12 +644,13 @@ data_frames["district.csv"] = district
 # [//]: # (-.- .tabset)
 #
 # Der Datensatz `loan.csv` beinhaltet 682 Observationen mit den folgenden Informationen über die vergebenen Darlehen der Bank:  
-# - `loan_id`: ID des Darlehens,
-# - `account_id`: die Kontonummer,
-# - `date`: das Datum, wann das Darlehen gewährt wurde,
-# - `amount`: der Betrag,
-# - `duration`: die Dauer des Darlehens,
-# - `payments`: die höhe der monatlichen Zahlungen und
+#
+# - `loan_id`: ID des Darlehens,  
+# - `account_id`: die Kontonummer,  
+# - `date`: das Datum, wann das Darlehen gewährt wurde,  
+# - `amount`: der Betrag,  
+# - `duration`: die Dauer des Darlehens,  
+# - `payments`: die höhe der monatlichen Zahlungen und  
 # - `status`: der Rückzahlungsstatus (A: ausgeglichen, B: Vertrag abgelaufen aber nicht fertig bezahlt, C: laufender Vertrag und alles in Ordnung, D: laufender Vertrag und Kunde verschuldet)
 #
 
@@ -788,11 +784,12 @@ data_frames["loan.csv"] = loan
 # [//]: # (-.- .tabset)
 #
 # Der Datensatz `order.csv` beinhaltet 6471 Observationen mit den folgenden Informationen über die Daueraufträge eines Kontos:  
-# - `order_id`: die Nummer des Dauerauftrags,
-# - `account_id`: die Kontonummer von welchem der Auftrag stammt,
-# - `bank_to`: die empfangende Bank,
-# - `account_to`: das empfangende Konto, 
-# - `amount`: der Betrag,
+#
+# - `order_id`: die Nummer des Dauerauftrags,  
+# - `account_id`: die Kontonummer von welchem der Auftrag stammt,  
+# - `bank_to`: die empfangende Bank,  
+# - `account_to`: das empfangende Konto,  
+# - `amount`: der Betrag,  
 # - `k_symbol`: die Art des Auftrags (Versicherungszahlung, Haushalt, Leasing, Darlehen)
 #
 
@@ -885,15 +882,16 @@ data_frames["order.csv"] = orders_pivot
 # [//]: # (-.- .tabset)
 #
 # Der Datensatz `trans.csv` beinhaltet 1056320 Observationen mit den folgenden Informationen über die Transaktionen eines Kontos:  
-# - `trans_id`: die ID der Transaktion,
-# - `account_id`: die Kontonummer des ausführenden Kontos,
-# - `date`: das Datum,
-# - `type`: der Typ (Einzahlung, Bezug)
-# - `operation`: die Art der Transaktion (Bezug Kreditkarte, Bareinzahlung, Bezug über eine andere Bank, Bezug Bar, Überweisung)
-# - `amount`: der Betrag der Transaktion,
-# - `balance`: der Kontostand nach ausführung der Transaktion,
-# - `k_symbol`: die Klassifikation der Transaktion (Versicherungszahlung, Kontoauszug, Zinsauszahlung, Zinszahlung bei negativem Kontostand, Haushalt, Pension, Darlehensauszahlung),
-# - `bank`: die empfangende Bank und 
+#
+# - `trans_id`: die ID der Transaktion,  
+# - `account_id`: die Kontonummer des ausführenden Kontos,  
+# - `date`: das Datum,  
+# - `type`: der Typ (Einzahlung, Bezug),  
+# - `operation`: die Art der Transaktion (Bezug Kreditkarte, Bareinzahlung, Bezug über eine andere Bank, Bezug Bar, Überweisung)  
+# - `amount`: der Betrag der Transaktion,  
+# - `balance`: der Kontostand nach ausführung der Transaktion,  
+# - `k_symbol`: die Klassifikation der Transaktion (Versicherungszahlung, Kontoauszug, Zinsauszahlung, Zinszahlung bei negativem Kontostand, Haushalt, Pension, Darlehensauszahlung),  
+# - `bank`: die empfangende Bank und   
 # - `account`: das empfangende Bankkonto
 #
 
@@ -1003,13 +1001,14 @@ data_frames["trans.csv"] = trans
 #  
 # ## Stammdaten
 # Die aufbereiteten Stammdaten aus den Dateien 
-# - `disp.csv`
-# - `account.csv`
-# - `client.csv`
-# - `card.csv`
-# - `loan.csv` 
-# - `order.csv`
-# - `districts.csv`
+#
+# - `disp.csv`  
+# - `account.csv`  
+# - `client.csv`  
+# - `card.csv`  
+# - `loan.csv`  
+# - `order.csv`  
+# - `districts.csv`  
 #
 # werden nachfolgend zu einem Datensatz kombiniert. 
 

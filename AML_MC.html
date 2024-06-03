@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.554">
+    <meta name="generator" content="quarto-1.5.40">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -34,7 +34,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -72,7 +72,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <script type="text/javascript">
@@ -484,8 +484,18 @@ document.querySelectorAll("#itables_init_notebook_mode_e3f13039_5150_42dd_97d4_5
 </div>
 <section id="account" class="level2">
 <h2 class="anchored" data-anchor-id="account">Account</h2>
-<p>Der Datensatz <code>accounts.csv</code> beinhaltet 4500 Observationen mit den folgenden Informationen über die Kontos der Bank:<br>
-- <code>account_id</code>: die Kontonummer, - <code>district_id</code>: den Standort der entsprechenden Bankfiliale, - <code>frequency</code>: die Frequenz der Ausstellung von Kontoauszügen (monatlich, wöchentlich, pro Transaktion) und - <code>date</code>: das Erstellungsdatum</p>
+    <p>Der Datensatz <code>accounts.csv</code> beinhaltet 4500 Observationen mit den folgenden Informationen über die
+        Kontos der Bank:</p>
+    <ul>
+        <li><code>account_id</code>: die Kontonummer,<br>
+        </li>
+        <li><code>district_id</code>: den Standort der entsprechenden Bankfiliale,<br>
+        </li>
+        <li><code>frequency</code>: die Frequenz der Ausstellung von Kontoauszügen (monatlich, wöchentlich, pro
+            Transaktion) und<br>
+        </li>
+        <li><code>date</code>: das Erstellungsdatum</li>
+    </ul>
 <div id="cf7c9a96" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>account.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -703,8 +713,17 @@ Loading ITables v2.1.0 from the <code>init_notebook_mode</code> cell...
 </section>
 <section id="card" class="level2">
 <h2 class="anchored" data-anchor-id="card">Card</h2>
-<p>Der Datensatz <code>card.csv</code> beinhaltet 892 Observationen mit den folgenden Informationen über die von der Bank herausgegebenen Kreditkarten:<br>
-- <code>card_id</code>: die Kartennummer, - <code>disp_id</code>: die Zuordnung zum entsprechenden Bankkonto und -inhaber (Disposition), - <code>type</code>: die Art der Kreditkarte (junior, classic, gold) und - <code>issued</code>: das Ausstellungsdatum</p>
+    <p>Der Datensatz <code>card.csv</code> beinhaltet 892 Observationen mit den folgenden Informationen über die von der
+        Bank herausgegebenen Kreditkarten:</p>
+    <ul>
+        <li><code>card_id</code>: die Kartennummer,<br>
+        </li>
+        <li><code>disp_id</code>: die Zuordnung zum entsprechenden Bankkonto und -inhaber (Disposition),<br>
+        </li>
+        <li><code>type</code>: die Art der Kreditkarte (junior, classic, gold) und<br>
+        </li>
+        <li><code>issued</code>: das Ausstellungsdatum</li>
+    </ul>
 <div id="2e84210c" class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>card.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -893,8 +912,15 @@ Loading ITables v2.1.0 from the <code>init_notebook_mode</code> cell...
 </section>
 <section id="client" class="level2">
 <h2 class="anchored" data-anchor-id="client">Client</h2>
-<p>Der Datensatz <code>client.csv</code> beinhaltet 5369 Observationen mit den folgenden Informationen über die Kunden der Bank:<br>
-- <code>client_id</code>: die Kundennummer, - <code>birth_number</code>: eine Kombination aus Geburtsdatum und Geschlecht sowie - <code>district_id</code>: die Adresse</p>
+    <p>Der Datensatz <code>client.csv</code> beinhaltet 5369 Observationen mit den folgenden Informationen über die
+        Kunden der Bank:</p>
+    <ul>
+        <li><code>client_id</code>: die Kundennummer,<br>
+        </li>
+        <li><code>birth_number</code>: eine Kombination aus Geburtsdatum und Geschlecht sowie<br>
+        </li>
+        <li><code>district_id</code>: die Adresse</li>
+    </ul>
 <div id="7e95b3ba" class="cell" data-execution_count="23">
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>client.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -1087,8 +1113,17 @@ Loading ITables v2.1.0 from the <code>init_notebook_mode</code> cell...
 </section>
 <section id="disp" class="level2">
 <h2 class="anchored" data-anchor-id="disp">Disp</h2>
-<p>Der Datensatz <code>disp.csv</code> beinhaltet 5369 Observationen mit den folgenden Informationen über die Dispositionen der Bank:<br>
-- <code>disp_id</code>: der Identifikationsschlüssel der Disposition, - <code>client_id</code>: die Kundennummer, - <code>account_id</code>: die Kontonummer, - <code>type</code>: die Art der Disposition (Inhaber, Benutzer)</p>
+    <p>Der Datensatz <code>disp.csv</code> beinhaltet 5369 Observationen mit den folgenden Informationen über die
+        Dispositionen der Bank:</p>
+    <ul>
+        <li><code>disp_id</code>: der Identifikationsschlüssel der Disposition,<br>
+        </li>
+        <li><code>client_id</code>: die Kundennummer,<br>
+        </li>
+        <li><code>account_id</code>: die Kontonummer,<br>
+        </li>
+        <li><code>type</code>: die Art der Disposition (Inhaber, Benutzer)</li>
+    </ul>
 <div id="0a5e6a15" class="cell" data-execution_count="30">
 <div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>disp.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -1257,8 +1292,41 @@ Loading ITables v2.1.0 from the <code>init_notebook_mode</code> cell...
 </section>
 <section id="district" class="level2">
 <h2 class="anchored" data-anchor-id="district">District</h2>
-<p>Der Datensatz <code>district.csv</code> beinhaltet 77 Observationen mit den folgenden demografischen Informationen:<br>
-- <code>A1</code>: die ID des Distrikts, - <code>A2</code>: der Name des Distrikts, - <code>A3</code>: die Region, - <code>A4</code>: die Anzahl der Einwohner, - <code>A5</code>: die Anzahl der Gemeinden mit &lt; 499 Einwohner, - <code>A6</code>: die Anzahl der Gemeinden mit 500 - 1999 Einwohner, - <code>A7</code>: die Anzahl der Gemeinden mit 2000 - 9999 Einwohner, - <code>A8</code>: die Anzahl der Gemeinden mit &gt;10000 Einwohner, - <code>A9</code>: die Anzahl Städte, - <code>A10</code>: das Verhältnis von städtischen Einwohnern, - <code>A11</code>: das durchschnittliche Einkommen, - <code>A12</code>: die Arbeitslosenrate vom Jahr 95, - <code>A13</code>: die Arbeitslosenrate vom Jahr 96, - <code>A14</code>: die Anzahl von Unternehmer pro 1000 Einwohner, - <code>A15</code>: die Anzahl von begangenen Verbrechen im Jahr 95, - <code>A16</code>: die Anzahl von begangenen Verbrechen im Jahr 96,</p>
+    <p>Der Datensatz <code>district.csv</code> beinhaltet 77 Observationen mit den folgenden demografischen
+        Informationen:</p>
+    <ul>
+        <li><code>A1</code>: die ID des Distrikts,<br>
+        </li>
+        <li><code>A2</code>: der Name des Distrikts,<br>
+        </li>
+        <li><code>A3</code>: die Region,<br>
+        </li>
+        <li><code>A4</code>: die Anzahl der Einwohner,<br>
+        </li>
+        <li><code>A5</code>: die Anzahl der Gemeinden mit &lt; 499 Einwohner,<br>
+        </li>
+        <li><code>A6</code>: die Anzahl der Gemeinden mit 500 - 1999 Einwohner,<br>
+        </li>
+        <li><code>A7</code>: die Anzahl der Gemeinden mit 2000 - 9999 Einwohner,<br>
+        </li>
+        <li><code>A8</code>: die Anzahl der Gemeinden mit &gt;10000 Einwohner,<br>
+        </li>
+        <li><code>A9</code>: die Anzahl Städte,<br>
+        </li>
+        <li><code>A10</code>: das Verhältnis von städtischen Einwohnern,<br>
+        </li>
+        <li><code>A11</code>: das durchschnittliche Einkommen,<br>
+        </li>
+        <li><code>A12</code>: die Arbeitslosenrate vom Jahr 95,<br>
+        </li>
+        <li><code>A13</code>: die Arbeitslosenrate vom Jahr 96,<br>
+        </li>
+        <li><code>A14</code>: die Anzahl von Unternehmer pro 1000 Einwohner,<br>
+        </li>
+        <li><code>A15</code>: die Anzahl von begangenen Verbrechen im Jahr 95,<br>
+        </li>
+        <li><code>A16</code>: die Anzahl von begangenen Verbrechen im Jahr 96,</li>
+    </ul>
 <div id="2f6900b6" class="cell" data-execution_count="37">
 <div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>district.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -1947,8 +2015,25 @@ Loading ITables v2.1.0 from the <code>init_notebook_mode</code> cell...
 </section>
 <section id="loan" class="level2">
 <h2 class="anchored" data-anchor-id="loan">Loan</h2>
-<p>Der Datensatz <code>loan.csv</code> beinhaltet 682 Observationen mit den folgenden Informationen über die vergebenen Darlehen der Bank:<br>
-- <code>loan_id</code>: ID des Darlehens, - <code>account_id</code>: die Kontonummer, - <code>date</code>: das Datum, wann das Darlehen gewährt wurde, - <code>amount</code>: der Betrag, - <code>duration</code>: die Dauer des Darlehens, - <code>payments</code>: die höhe der monatlichen Zahlungen und - <code>status</code>: der Rückzahlungsstatus (A: ausgeglichen, B: Vertrag abgelaufen aber nicht fertig bezahlt, C: laufender Vertrag und alles in Ordnung, D: laufender Vertrag und Kunde verschuldet)</p>
+    <p>Der Datensatz <code>loan.csv</code> beinhaltet 682 Observationen mit den folgenden Informationen über die
+        vergebenen Darlehen der Bank:</p>
+    <ul>
+        <li><code>loan_id</code>: ID des Darlehens,<br>
+        </li>
+        <li><code>account_id</code>: die Kontonummer,<br>
+        </li>
+        <li><code>date</code>: das Datum, wann das Darlehen gewährt wurde,<br>
+        </li>
+        <li><code>amount</code>: der Betrag,<br>
+        </li>
+        <li><code>duration</code>: die Dauer des Darlehens,<br>
+        </li>
+        <li><code>payments</code>: die höhe der monatlichen Zahlungen und<br>
+        </li>
+        <li><code>status</code>: der Rückzahlungsstatus (A: ausgeglichen, B: Vertrag abgelaufen aber nicht fertig
+            bezahlt, C: laufender Vertrag und alles in Ordnung, D: laufender Vertrag und Kunde verschuldet)
+        </li>
+    </ul>
 <div id="8d25bc1e" class="cell" data-execution_count="51">
 <div class="sourceCode cell-code" id="cb63"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>loan.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -2322,8 +2407,21 @@ Loading ITables v2.1.0 from the <code>init_notebook_mode</code> cell...
 </section>
 <section id="order" class="level2">
 <h2 class="anchored" data-anchor-id="order">Order</h2>
-<p>Der Datensatz <code>order.csv</code> beinhaltet 6471 Observationen mit den folgenden Informationen über die Daueraufträge eines Kontos:<br>
-- <code>order_id</code>: die Nummer des Dauerauftrags, - <code>account_id</code>: die Kontonummer von welchem der Auftrag stammt, - <code>bank_to</code>: die empfangende Bank, - <code>account_to</code>: das empfangende Konto, - <code>amount</code>: der Betrag, - <code>k_symbol</code>: die Art des Auftrags (Versicherungszahlung, Haushalt, Leasing, Darlehen)</p>
+    <p>Der Datensatz <code>order.csv</code> beinhaltet 6471 Observationen mit den folgenden Informationen über die
+        Daueraufträge eines Kontos:</p>
+    <ul>
+        <li><code>order_id</code>: die Nummer des Dauerauftrags,<br>
+        </li>
+        <li><code>account_id</code>: die Kontonummer von welchem der Auftrag stammt,<br>
+        </li>
+        <li><code>bank_to</code>: die empfangende Bank,<br>
+        </li>
+        <li><code>account_to</code>: das empfangende Konto,<br>
+        </li>
+        <li><code>amount</code>: der Betrag,<br>
+        </li>
+        <li><code>k_symbol</code>: die Art des Auftrags (Versicherungszahlung, Haushalt, Leasing, Darlehen)</li>
+    </ul>
 <div id="342e7904" class="cell" data-execution_count="64">
 <div class="sourceCode cell-code" id="cb78"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a>order.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -2526,8 +2624,31 @@ Loading ITables v2.1.0 from the <code>init_notebook_mode</code> cell...
 </section>
 <section id="trans" class="level2">
 <h2 class="anchored" data-anchor-id="trans">Trans</h2>
-<p>Der Datensatz <code>trans.csv</code> beinhaltet 1056320 Observationen mit den folgenden Informationen über die Transaktionen eines Kontos:<br>
-- <code>trans_id</code>: die ID der Transaktion, - <code>account_id</code>: die Kontonummer des ausführenden Kontos, - <code>date</code>: das Datum, - <code>type</code>: der Typ (Einzahlung, Bezug) - <code>operation</code>: die Art der Transaktion (Bezug Kreditkarte, Bareinzahlung, Bezug über eine andere Bank, Bezug Bar, Überweisung) - <code>amount</code>: der Betrag der Transaktion, - <code>balance</code>: der Kontostand nach ausführung der Transaktion, - <code>k_symbol</code>: die Klassifikation der Transaktion (Versicherungszahlung, Kontoauszug, Zinsauszahlung, Zinszahlung bei negativem Kontostand, Haushalt, Pension, Darlehensauszahlung), - <code>bank</code>: die empfangende Bank und - <code>account</code>: das empfangende Bankkonto</p>
+    <p>Der Datensatz <code>trans.csv</code> beinhaltet 1056320 Observationen mit den folgenden Informationen über die
+        Transaktionen eines Kontos:</p>
+    <ul>
+        <li><code>trans_id</code>: die ID der Transaktion,<br>
+        </li>
+        <li><code>account_id</code>: die Kontonummer des ausführenden Kontos,<br>
+        </li>
+        <li><code>date</code>: das Datum,<br>
+        </li>
+        <li><code>type</code>: der Typ (Einzahlung, Bezug),<br>
+        </li>
+        <li><code>operation</code>: die Art der Transaktion (Bezug Kreditkarte, Bareinzahlung, Bezug über eine andere
+            Bank, Bezug Bar, Überweisung)<br>
+        </li>
+        <li><code>amount</code>: der Betrag der Transaktion,<br>
+        </li>
+        <li><code>balance</code>: der Kontostand nach ausführung der Transaktion,<br>
+        </li>
+        <li><code>k_symbol</code>: die Klassifikation der Transaktion (Versicherungszahlung, Kontoauszug,
+            Zinsauszahlung, Zinszahlung bei negativem Kontostand, Haushalt, Pension, Darlehensauszahlung),<br>
+        </li>
+        <li><code>bank</code>: die empfangende Bank und<br>
+        </li>
+        <li><code>account</code>: das empfangende Bankkonto</li>
+    </ul>
 <div id="a399de3b" class="cell" data-execution_count="70">
 <div class="sourceCode cell-code" id="cb86"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a>trans.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -2772,7 +2893,22 @@ Loading ITables v2.1.0 from the <code>init_notebook_mode</code> cell...
 <p>Im nachfolgenden Abschnitt werden die Daten zu statischen (Kunden-) Daten und transaktionellen (Bankdienstleistungs-) Daten kombiniert um diese anschliessend zu einem Datensatz für die Modellierung zusammenzufügen.</p>
 <section id="stammdaten" class="level2">
 <h2 class="anchored" data-anchor-id="stammdaten">Stammdaten</h2>
-<p>Die aufbereiteten Stammdaten aus den Dateien - <code>disp.csv</code> - <code>account.csv</code> - <code>client.csv</code> - <code>card.csv</code> - <code>loan.csv</code> - <code>order.csv</code> - <code>districts.csv</code></p>
+    <p>Die aufbereiteten Stammdaten aus den Dateien</p>
+    <ul>
+        <li><code>disp.csv</code><br>
+        </li>
+        <li><code>account.csv</code><br>
+        </li>
+        <li><code>client.csv</code><br>
+        </li>
+        <li><code>card.csv</code><br>
+        </li>
+        <li><code>loan.csv</code><br>
+        </li>
+        <li><code>order.csv</code><br>
+        </li>
+        <li><code>districts.csv</code></li>
+    </ul>
 <p>werden nachfolgend zu einem Datensatz kombiniert.</p>
 <div id="402a6370" class="cell" data-execution_count="78">
 <div class="sourceCode cell-code" id="cb96"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a><span class="co"># merge dataframes</span></span>
@@ -4778,8 +4914,7 @@ Baseline Logistic Regression: recall = 0.79
 Baseline Logistic Regression: accuracy = 0.78
 Baseline Logistic Regression: f1 = 0.78
 Baseline Logistic Regression: kappa = 0.55
-Baseline Logistic Regression: mcc = 0.55
-Comparing top 100 customers for Baseline Logistic Regression</code></pre>
+Baseline Logistic Regression: mcc = 0.55</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <div>
@@ -4795,41 +4930,53 @@ Comparing top 100 customers for Baseline Logistic Regression</code></pre>
 </figure>
 </div>
 </div>
+    <div class="cell-output cell-output-stdout">
+        <pre><code>Comparing top 100 customers for Baseline Logistic Regression</code></pre>
+</div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="AML_MC_files/figure-html/cell-114-output-4.png" class="img-fluid figure-img"></p>
+    <p><img src="AML_MC_files/figure-html/cell-114-output-5.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
 <div id="a9fca738" class="cell" data-execution_count="114">
-<div class="sourceCode cell-code" id="cb143"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb143-1"><a href="#cb143-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define models and their parameter grids</span></span>
-<span id="cb143-2"><a href="#cb143-2" aria-hidden="true" tabindex="-1"></a>models <span class="op">=</span> {</span>
-<span id="cb143-3"><a href="#cb143-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Logistic Regression Features"</span>: LogisticRegression(solver<span class="op">=</span><span class="st">"liblinear"</span>),</span>
-<span id="cb143-4"><a href="#cb143-4" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb143-5"><a href="#cb143-5" aria-hidden="true" tabindex="-1"></a>param_grid <span class="op">=</span> {</span>
-<span id="cb143-6"><a href="#cb143-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Logistic Regression Features"</span>: {<span class="st">"C"</span>: [<span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="dv">1</span>, <span class="dv">10</span>]},</span>
-<span id="cb143-7"><a href="#cb143-7" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb143-8"><a href="#cb143-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb143-9"><a href="#cb143-9" aria-hidden="true" tabindex="-1"></a>selected_fields <span class="op">=</span> X_train_features.columns</span>
-<span id="cb143-10"><a href="#cb143-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb143-11"><a href="#cb143-11" aria-hidden="true" tabindex="-1"></a>evaluator <span class="op">=</span> ModelEvaluator(</span>
-<span id="cb143-12"><a href="#cb143-12" aria-hidden="true" tabindex="-1"></a>    models,</span>
-<span id="cb143-13"><a href="#cb143-13" aria-hidden="true" tabindex="-1"></a>    param_grid,</span>
-<span id="cb143-14"><a href="#cb143-14" aria-hidden="true" tabindex="-1"></a>    X_test_features,</span>
-<span id="cb143-15"><a href="#cb143-15" aria-hidden="true" tabindex="-1"></a>    y_test_features,</span>
-<span id="cb143-16"><a href="#cb143-16" aria-hidden="true" tabindex="-1"></a>    X_train_features,</span>
-<span id="cb143-17"><a href="#cb143-17" aria-hidden="true" tabindex="-1"></a>    y_train_features,</span>
-<span id="cb143-18"><a href="#cb143-18" aria-hidden="true" tabindex="-1"></a>    selected_fields<span class="op">=</span>selected_fields,</span>
-<span id="cb143-19"><a href="#cb143-19" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb143-20"><a href="#cb143-20" aria-hidden="true" tabindex="-1"></a>evaluator.evaluate_models()</span>
-<span id="cb143-21"><a href="#cb143-21" aria-hidden="true" tabindex="-1"></a>evaluator.plot_roc_curves()</span>
-<span id="cb143-22"><a href="#cb143-22" aria-hidden="true" tabindex="-1"></a>evaluator.compare_top_n_customers(<span class="st">"Logistic Regression Features"</span>, n<span class="op">=</span><span class="dv">100</span>)</span>
-<span id="cb143-23"><a href="#cb143-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb143-24"><a href="#cb143-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb143-25"><a href="#cb143-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Assuming X and y are defined</span></span>
-<span id="cb143-26"><a href="#cb143-26" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+    <div class="sourceCode cell-code" id="cb144"><pre class="sourceCode python code-with-copy"><code
+            class="sourceCode python"><span id="cb144-1"><a href="#cb144-1" aria-hidden="true" tabindex="-1"></a><span
+            class="co"># Define models and their parameter grids</span></span>
+<span id="cb144-2"><a href="#cb144-2" aria-hidden="true" tabindex="-1"></a>models <span class="op">=</span> {</span>
+<span id="cb144-3"><a href="#cb144-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Logistic Regression Features"</span>: LogisticRegression(solver<span
+        class="op">=</span><span class="st">"liblinear"</span>),</span>
+<span id="cb144-4"><a href="#cb144-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb144-5"><a href="#cb144-5" aria-hidden="true" tabindex="-1"></a>param_grid <span class="op">=</span> {</span>
+<span id="cb144-6"><a href="#cb144-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Logistic Regression Features"</span>: {<span
+        class="st">"C"</span>: [<span class="fl">0.01</span>, <span class="fl">0.1</span>, <span
+        class="dv">1</span>, <span class="dv">10</span>]},</span>
+<span id="cb144-7"><a href="#cb144-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb144-8"><a href="#cb144-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb144-9"><a href="#cb144-9" aria-hidden="true" tabindex="-1"></a>selected_fields <span class="op">=</span> X_train_features.columns</span>
+<span id="cb144-10"><a href="#cb144-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb144-11"><a href="#cb144-11" aria-hidden="true" tabindex="-1"></a>evaluator <span class="op">=</span> ModelEvaluator(</span>
+<span id="cb144-12"><a href="#cb144-12" aria-hidden="true" tabindex="-1"></a>    models,</span>
+<span id="cb144-13"><a href="#cb144-13" aria-hidden="true" tabindex="-1"></a>    param_grid,</span>
+<span id="cb144-14"><a href="#cb144-14" aria-hidden="true" tabindex="-1"></a>    X_test_features,</span>
+<span id="cb144-15"><a href="#cb144-15" aria-hidden="true" tabindex="-1"></a>    y_test_features,</span>
+<span id="cb144-16"><a href="#cb144-16" aria-hidden="true" tabindex="-1"></a>    X_train_features,</span>
+<span id="cb144-17"><a href="#cb144-17" aria-hidden="true" tabindex="-1"></a>    y_train_features,</span>
+<span id="cb144-18"><a href="#cb144-18" aria-hidden="true" tabindex="-1"></a>    selected_fields<span
+        class="op">=</span>selected_fields,</span>
+<span id="cb144-19"><a href="#cb144-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb144-20"><a href="#cb144-20" aria-hidden="true" tabindex="-1"></a>evaluator.evaluate_models()</span>
+<span id="cb144-21"><a href="#cb144-21" aria-hidden="true" tabindex="-1"></a>evaluator.plot_roc_curves()</span>
+<span id="cb144-22"><a href="#cb144-22" aria-hidden="true" tabindex="-1"></a>evaluator.compare_top_n_customers(<span
+        class="st">"Logistic Regression Features"</span>, n<span class="op">=</span><span class="dv">100</span>)</span>
+<span id="cb144-23"><a href="#cb144-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb144-24"><a href="#cb144-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb144-25"><a href="#cb144-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Assuming X and y are defined</span></span>
+<span id="cb144-26"><a href="#cb144-26" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span></code><button
+            title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre>
+    </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Fitting 10 folds for each of 4 candidates, totalling 40 fits
 Best parameters for Logistic Regression Features: {'model__C': 1}
@@ -4839,8 +4986,7 @@ Logistic Regression Features: recall = 0.79
 Logistic Regression Features: accuracy = 0.79
 Logistic Regression Features: f1 = 0.79
 Logistic Regression Features: kappa = 0.59
-Logistic Regression Features: mcc = 0.61
-Comparing top 100 customers for Logistic Regression Features</code></pre>
+Logistic Regression Features: mcc = 0.61</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <div>
@@ -4849,10 +4995,13 @@ Comparing top 100 customers for Logistic Regression Features</code></pre>
 </figure>
 </div>
 </div>
+    <div class="cell-output cell-output-stdout">
+        <pre><code>Comparing top 100 customers for Logistic Regression Features</code></pre>
+</div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="AML_MC_files/figure-html/cell-115-output-3.png" class="img-fluid figure-img"></p>
+    <p><img src="AML_MC_files/figure-html/cell-115-output-4.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -4860,47 +5009,59 @@ Comparing top 100 customers for Logistic Regression Features</code></pre>
 <section id="overfitting-because-of-jagged-roc-curve-needs-regularization" class="level2">
 <h2 class="anchored" data-anchor-id="overfitting-because-of-jagged-roc-curve-needs-regularization">Overfitting because of jagged ROC curve needs Regularization</h2>
 <div id="8887ee1d" class="cell" data-execution_count="115">
-<div class="sourceCode cell-code" id="cb145"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb145-1"><a href="#cb145-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define models and their parameter grids</span></span>
-<span id="cb145-2"><a href="#cb145-2" aria-hidden="true" tabindex="-1"></a>models <span class="op">=</span> {</span>
-<span id="cb145-3"><a href="#cb145-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Logistic Regression Features added"</span>: LogisticRegression(solver<span class="op">=</span><span class="st">"liblinear"</span>),</span>
-<span id="cb145-4"><a href="#cb145-4" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb145-5"><a href="#cb145-5" aria-hidden="true" tabindex="-1"></a>param_grid <span class="op">=</span> {</span>
-<span id="cb145-6"><a href="#cb145-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Logistic Regression Features added"</span>: {<span class="st">"C"</span>: [<span class="fl">0.001</span>, <span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="dv">1</span>, <span class="dv">10</span>]},</span>
-<span id="cb145-7"><a href="#cb145-7" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb145-8"><a href="#cb145-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb145-9"><a href="#cb145-9" aria-hidden="true" tabindex="-1"></a>selected_fields <span class="op">=</span> X_train_features.columns</span>
-<span id="cb145-10"><a href="#cb145-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb145-11"><a href="#cb145-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Fix the not converging models with LassoCV</span></span>
-<span id="cb145-12"><a href="#cb145-12" aria-hidden="true" tabindex="-1"></a><span class="co"># for model_name, model in models.items():</span></span>
-<span id="cb145-13"><a href="#cb145-13" aria-hidden="true" tabindex="-1"></a><span class="co">#    models[model_name] = Pipeline(</span></span>
-<span id="cb145-14"><a href="#cb145-14" aria-hidden="true" tabindex="-1"></a><span class="co">#        [</span></span>
-<span id="cb145-15"><a href="#cb145-15" aria-hidden="true" tabindex="-1"></a><span class="co">#            ("scaler", StandardScaler()),</span></span>
-<span id="cb145-16"><a href="#cb145-16" aria-hidden="true" tabindex="-1"></a><span class="co">#            (</span></span>
-<span id="cb145-17"><a href="#cb145-17" aria-hidden="true" tabindex="-1"></a><span class="co">#                "feature_selection",</span></span>
-<span id="cb145-18"><a href="#cb145-18" aria-hidden="true" tabindex="-1"></a><span class="co">#                SelectFromModel(LassoCV(alphas=[0.01, 0.1, 1, 10], max_iter=10000)),</span></span>
-<span id="cb145-19"><a href="#cb145-19" aria-hidden="true" tabindex="-1"></a><span class="co">#            ),</span></span>
-<span id="cb145-20"><a href="#cb145-20" aria-hidden="true" tabindex="-1"></a><span class="co">#            ("model", model),</span></span>
-<span id="cb145-21"><a href="#cb145-21" aria-hidden="true" tabindex="-1"></a><span class="co">#        ]</span></span>
-<span id="cb145-22"><a href="#cb145-22" aria-hidden="true" tabindex="-1"></a><span class="co">#    )</span></span>
-<span id="cb145-23"><a href="#cb145-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb145-24"><a href="#cb145-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb145-25"><a href="#cb145-25" aria-hidden="true" tabindex="-1"></a>evaluator <span class="op">=</span> ModelEvaluator(</span>
-<span id="cb145-26"><a href="#cb145-26" aria-hidden="true" tabindex="-1"></a>    models,</span>
-<span id="cb145-27"><a href="#cb145-27" aria-hidden="true" tabindex="-1"></a>    param_grid,</span>
-<span id="cb145-28"><a href="#cb145-28" aria-hidden="true" tabindex="-1"></a>    X_test_features,</span>
-<span id="cb145-29"><a href="#cb145-29" aria-hidden="true" tabindex="-1"></a>    y_test_features,</span>
-<span id="cb145-30"><a href="#cb145-30" aria-hidden="true" tabindex="-1"></a>    X_train_features,</span>
-<span id="cb145-31"><a href="#cb145-31" aria-hidden="true" tabindex="-1"></a>    y_train_features,</span>
-<span id="cb145-32"><a href="#cb145-32" aria-hidden="true" tabindex="-1"></a>    selected_fields<span class="op">=</span>selected_fields,</span>
-<span id="cb145-33"><a href="#cb145-33" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb145-34"><a href="#cb145-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb145-35"><a href="#cb145-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb145-36"><a href="#cb145-36" aria-hidden="true" tabindex="-1"></a>evaluator.evaluate_models()</span>
-<span id="cb145-37"><a href="#cb145-37" aria-hidden="true" tabindex="-1"></a>evaluator.plot_roc_curves()</span>
-<span id="cb145-38"><a href="#cb145-38" aria-hidden="true" tabindex="-1"></a>evaluator.compare_top_n_customers(<span class="st">"Logistic Regression Features added"</span>, n<span class="op">=</span><span class="dv">100</span>)</span>
-<span id="cb145-39"><a href="#cb145-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb145-40"><a href="#cb145-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb145-41"><a href="#cb145-41" aria-hidden="true" tabindex="-1"></a><span class="co"># Assuming X and y are defined</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+    <div class="sourceCode cell-code" id="cb147"><pre class="sourceCode python code-with-copy"><code
+            class="sourceCode python"><span id="cb147-1"><a href="#cb147-1" aria-hidden="true" tabindex="-1"></a><span
+            class="co"># Define models and their parameter grids</span></span>
+<span id="cb147-2"><a href="#cb147-2" aria-hidden="true" tabindex="-1"></a>models <span class="op">=</span> {</span>
+<span id="cb147-3"><a href="#cb147-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Logistic Regression Features added"</span>: LogisticRegression(solver<span
+        class="op">=</span><span class="st">"liblinear"</span>),</span>
+<span id="cb147-4"><a href="#cb147-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb147-5"><a href="#cb147-5" aria-hidden="true" tabindex="-1"></a>param_grid <span class="op">=</span> {</span>
+<span id="cb147-6"><a href="#cb147-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Logistic Regression Features added"</span>: {<span
+        class="st">"C"</span>: [<span class="fl">0.001</span>, <span class="fl">0.01</span>, <span class="fl">0.1</span>, <span
+        class="dv">1</span>, <span class="dv">10</span>]},</span>
+<span id="cb147-7"><a href="#cb147-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb147-8"><a href="#cb147-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb147-9"><a href="#cb147-9" aria-hidden="true" tabindex="-1"></a>selected_fields <span class="op">=</span> X_train_features.columns</span>
+<span id="cb147-10"><a href="#cb147-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb147-11"><a href="#cb147-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Fix the not converging models with LassoCV</span></span>
+<span id="cb147-12"><a href="#cb147-12" aria-hidden="true" tabindex="-1"></a><span class="co"># for model_name, model in models.items():</span></span>
+<span id="cb147-13"><a href="#cb147-13" aria-hidden="true" tabindex="-1"></a><span class="co">#    models[model_name] = Pipeline(</span></span>
+<span id="cb147-14"><a href="#cb147-14" aria-hidden="true" tabindex="-1"></a><span class="co">#        [</span></span>
+<span id="cb147-15"><a href="#cb147-15" aria-hidden="true" tabindex="-1"></a><span class="co">#            ("scaler", StandardScaler()),</span></span>
+<span id="cb147-16"><a href="#cb147-16" aria-hidden="true" tabindex="-1"></a><span
+        class="co">#            (</span></span>
+<span id="cb147-17"><a href="#cb147-17" aria-hidden="true" tabindex="-1"></a><span class="co">#                "feature_selection",</span></span>
+<span id="cb147-18"><a href="#cb147-18" aria-hidden="true" tabindex="-1"></a><span class="co">#                SelectFromModel(LassoCV(alphas=[0.01, 0.1, 1, 10], max_iter=10000)),</span></span>
+<span id="cb147-19"><a href="#cb147-19" aria-hidden="true" tabindex="-1"></a><span
+        class="co">#            ),</span></span>
+<span id="cb147-20"><a href="#cb147-20" aria-hidden="true" tabindex="-1"></a><span class="co">#            ("model", model),</span></span>
+<span id="cb147-21"><a href="#cb147-21" aria-hidden="true" tabindex="-1"></a><span class="co">#        ]</span></span>
+<span id="cb147-22"><a href="#cb147-22" aria-hidden="true" tabindex="-1"></a><span class="co">#    )</span></span>
+<span id="cb147-23"><a href="#cb147-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb147-24"><a href="#cb147-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb147-25"><a href="#cb147-25" aria-hidden="true" tabindex="-1"></a>evaluator <span class="op">=</span> ModelEvaluator(</span>
+<span id="cb147-26"><a href="#cb147-26" aria-hidden="true" tabindex="-1"></a>    models,</span>
+<span id="cb147-27"><a href="#cb147-27" aria-hidden="true" tabindex="-1"></a>    param_grid,</span>
+<span id="cb147-28"><a href="#cb147-28" aria-hidden="true" tabindex="-1"></a>    X_test_features,</span>
+<span id="cb147-29"><a href="#cb147-29" aria-hidden="true" tabindex="-1"></a>    y_test_features,</span>
+<span id="cb147-30"><a href="#cb147-30" aria-hidden="true" tabindex="-1"></a>    X_train_features,</span>
+<span id="cb147-31"><a href="#cb147-31" aria-hidden="true" tabindex="-1"></a>    y_train_features,</span>
+<span id="cb147-32"><a href="#cb147-32" aria-hidden="true" tabindex="-1"></a>    selected_fields<span
+        class="op">=</span>selected_fields,</span>
+<span id="cb147-33"><a href="#cb147-33" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb147-34"><a href="#cb147-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb147-35"><a href="#cb147-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb147-36"><a href="#cb147-36" aria-hidden="true" tabindex="-1"></a>evaluator.evaluate_models()</span>
+<span id="cb147-37"><a href="#cb147-37" aria-hidden="true" tabindex="-1"></a>evaluator.plot_roc_curves()</span>
+<span id="cb147-38"><a href="#cb147-38" aria-hidden="true" tabindex="-1"></a>evaluator.compare_top_n_customers(<span
+        class="st">"Logistic Regression Features added"</span>, n<span class="op">=</span><span
+        class="dv">100</span>)</span>
+<span id="cb147-39"><a href="#cb147-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb147-40"><a href="#cb147-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb147-41"><a href="#cb147-41" aria-hidden="true" tabindex="-1"></a><span class="co"># Assuming X and y are defined</span></span></code><button
+            title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre>
+    </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Fitting 10 folds for each of 5 candidates, totalling 50 fits
 Best parameters for Logistic Regression Features added: {'model__C': 1}
@@ -4910,8 +5071,7 @@ Logistic Regression Features added: recall = 0.79
 Logistic Regression Features added: accuracy = 0.79
 Logistic Regression Features added: f1 = 0.79
 Logistic Regression Features added: kappa = 0.59
-Logistic Regression Features added: mcc = 0.61
-Comparing top 100 customers for Logistic Regression Features added</code></pre>
+Logistic Regression Features added: mcc = 0.61</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <div>
@@ -4920,30 +5080,42 @@ Comparing top 100 customers for Logistic Regression Features added</code></pre>
 </figure>
 </div>
 </div>
+    <div class="cell-output cell-output-stdout">
+        <pre><code>Comparing top 100 customers for Logistic Regression Features added</code></pre>
+    </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="AML_MC_files/figure-html/cell-116-output-3.png" class="img-fluid figure-img"></p>
+    <p><img src="AML_MC_files/figure-html/cell-116-output-4.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
 <div id="74aba5aa" class="cell" data-execution_count="116">
-<div class="sourceCode cell-code" id="cb147"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb147-1"><a href="#cb147-1" aria-hidden="true" tabindex="-1"></a><span class="co"># check if there are any missing values</span></span>
-<span id="cb147-2"><a href="#cb147-2" aria-hidden="true" tabindex="-1"></a><span class="co"># print the missing values of withdrawal mean ration last3 first3</span></span>
-<span id="cb147-3"><a href="#cb147-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(X_feature_engineered[<span class="st">"withdrawal_mean_ratio_last3_first3"</span>].isnull().<span class="bu">sum</span>())</span>
-<span id="cb147-4"><a href="#cb147-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb147-5"><a href="#cb147-5" aria-hidden="true" tabindex="-1"></a><span class="co"># get the index of the missing values</span></span>
-<span id="cb147-6"><a href="#cb147-6" aria-hidden="true" tabindex="-1"></a>missing_values <span class="op">=</span> X_feature_engineered[<span class="st">"withdrawal_mean_ratio_last3_first3"</span>].isnull()</span>
-<span id="cb147-7"><a href="#cb147-7" aria-hidden="true" tabindex="-1"></a>missing_values_index <span class="op">=</span> X_feature_engineered[missing_values].index</span>
-<span id="cb147-8"><a href="#cb147-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(missing_values_index)</span>
-<span id="cb147-9"><a href="#cb147-9" aria-hidden="true" tabindex="-1"></a>X_feature_engineered.loc[missing_values_index]</span>
-<span id="cb147-10"><a href="#cb147-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Transform the missing values to the mean of the column</span></span>
-<span id="cb147-11"><a href="#cb147-11" aria-hidden="true" tabindex="-1"></a>X_feature_engineered[<span class="st">"withdrawal_mean_ratio_last3_first3"</span>] <span class="op">=</span> X_feature_engineered[</span>
-<span id="cb147-12"><a href="#cb147-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"withdrawal_mean_ratio_last3_first3"</span></span>
-<span id="cb147-13"><a href="#cb147-13" aria-hidden="true" tabindex="-1"></a>].fillna(X_feature_engineered[<span class="st">"withdrawal_mean_ratio_last3_first3"</span>].mean())</span>
-<span id="cb147-14"><a href="#cb147-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb147-15"><a href="#cb147-15" aria-hidden="true" tabindex="-1"></a>display(X_feature_engineered.head(<span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+    <div class="sourceCode cell-code" id="cb150"><pre class="sourceCode python code-with-copy"><code
+            class="sourceCode python"><span id="cb150-1"><a href="#cb150-1" aria-hidden="true" tabindex="-1"></a><span
+            class="co"># check if there are any missing values</span></span>
+<span id="cb150-2"><a href="#cb150-2" aria-hidden="true" tabindex="-1"></a><span class="co"># print the missing values of withdrawal mean ration last3 first3</span></span>
+<span id="cb150-3"><a href="#cb150-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(X_feature_engineered[<span
+        class="st">"withdrawal_mean_ratio_last3_first3"</span>].isnull().<span class="bu">sum</span>())</span>
+<span id="cb150-4"><a href="#cb150-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb150-5"><a href="#cb150-5" aria-hidden="true" tabindex="-1"></a><span class="co"># get the index of the missing values</span></span>
+<span id="cb150-6"><a href="#cb150-6" aria-hidden="true" tabindex="-1"></a>missing_values <span class="op">=</span> X_feature_engineered[<span
+        class="st">"withdrawal_mean_ratio_last3_first3"</span>].isnull()</span>
+<span id="cb150-7"><a href="#cb150-7" aria-hidden="true" tabindex="-1"></a>missing_values_index <span
+        class="op">=</span> X_feature_engineered[missing_values].index</span>
+<span id="cb150-8"><a href="#cb150-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(missing_values_index)</span>
+<span id="cb150-9"><a href="#cb150-9" aria-hidden="true" tabindex="-1"></a>X_feature_engineered.loc[missing_values_index]</span>
+<span id="cb150-10"><a href="#cb150-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Transform the missing values to the mean of the column</span></span>
+<span id="cb150-11"><a href="#cb150-11" aria-hidden="true" tabindex="-1"></a>X_feature_engineered[<span class="st">"withdrawal_mean_ratio_last3_first3"</span>] <span
+        class="op">=</span> X_feature_engineered[</span>
+<span id="cb150-12"><a href="#cb150-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"withdrawal_mean_ratio_last3_first3"</span></span>
+<span id="cb150-13"><a href="#cb150-13" aria-hidden="true" tabindex="-1"></a>].fillna(X_feature_engineered[<span
+        class="st">"withdrawal_mean_ratio_last3_first3"</span>].mean())</span>
+<span id="cb150-14"><a href="#cb150-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb150-15"><a href="#cb150-15" aria-hidden="true" tabindex="-1"></a>display(X_feature_engineered.head(<span
+        class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre>
+    </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>0
 Index([], dtype='int64')</code></pre>
@@ -5176,57 +5348,78 @@ Loading ITables v2.1.0 from the <code>init_notebook_mode</code> cell...
 </div>
 </div>
 <div id="7c4705b9" class="cell" data-execution_count="117">
-<div class="sourceCode cell-code" id="cb149"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb149-1"><a href="#cb149-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Usage example:</span></span>
-<span id="cb149-2"><a href="#cb149-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Define models and their parameter grids</span></span>
-<span id="cb149-3"><a href="#cb149-3" aria-hidden="true" tabindex="-1"></a>models <span class="op">=</span> {</span>
-<span id="cb149-4"><a href="#cb149-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Random Forest"</span>: RandomForestClassifier(),</span>
-<span id="cb149-5"><a href="#cb149-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Gradient Boosting"</span>: GradientBoostingClassifier(),</span>
-<span id="cb149-6"><a href="#cb149-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"SVM"</span>: SVC(probability<span class="op">=</span><span class="va">True</span>),</span>
-<span id="cb149-7"><a href="#cb149-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"KNN"</span>: KNeighborsClassifier(),</span>
-<span id="cb149-8"><a href="#cb149-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Decision Tree"</span>: DecisionTreeClassifier(),</span>
-<span id="cb149-9"><a href="#cb149-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"AdaBoost"</span>: AdaBoostClassifier(algorithm<span class="op">=</span><span class="st">"SAMME"</span>),</span>
-<span id="cb149-10"><a href="#cb149-10" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb149-11"><a href="#cb149-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb149-12"><a href="#cb149-12" aria-hidden="true" tabindex="-1"></a>param_grid <span class="op">=</span> {</span>
-<span id="cb149-13"><a href="#cb149-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Random Forest"</span>: {</span>
-<span id="cb149-14"><a href="#cb149-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"n_estimators"</span>: [<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">300</span>],</span>
-<span id="cb149-15"><a href="#cb149-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">"max_depth"</span>: [<span class="va">None</span>, <span class="dv">5</span>, <span class="dv">10</span>],</span>
-<span id="cb149-16"><a href="#cb149-16" aria-hidden="true" tabindex="-1"></a>    },</span>
-<span id="cb149-17"><a href="#cb149-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Gradient Boosting"</span>: {</span>
-<span id="cb149-18"><a href="#cb149-18" aria-hidden="true" tabindex="-1"></a>        <span class="st">"n_estimators"</span>: [<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">300</span>],</span>
-<span id="cb149-19"><a href="#cb149-19" aria-hidden="true" tabindex="-1"></a>        <span class="st">"learning_rate"</span>: [<span class="fl">0.1</span>, <span class="fl">0.01</span>, <span class="fl">0.001</span>],</span>
-<span id="cb149-20"><a href="#cb149-20" aria-hidden="true" tabindex="-1"></a>    },</span>
-<span id="cb149-21"><a href="#cb149-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">"SVM"</span>: {<span class="st">"C"</span>: [<span class="fl">0.1</span>, <span class="dv">1</span>, <span class="dv">10</span>], <span class="st">"kernel"</span>: [<span class="st">"linear"</span>, <span class="st">"rbf"</span>]},</span>
-<span id="cb149-22"><a href="#cb149-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"KNN"</span>: {<span class="st">"n_neighbors"</span>: [<span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">7</span>], <span class="st">"weights"</span>: [<span class="st">"uniform"</span>, <span class="st">"distance"</span>]},</span>
-<span id="cb149-23"><a href="#cb149-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Decision Tree"</span>: {</span>
-<span id="cb149-24"><a href="#cb149-24" aria-hidden="true" tabindex="-1"></a>        <span class="st">"max_depth"</span>: [<span class="va">None</span>, <span class="dv">5</span>, <span class="dv">10</span>],</span>
-<span id="cb149-25"><a href="#cb149-25" aria-hidden="true" tabindex="-1"></a>        <span class="st">"min_samples_split"</span>: [<span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">10</span>],</span>
-<span id="cb149-26"><a href="#cb149-26" aria-hidden="true" tabindex="-1"></a>    },</span>
-<span id="cb149-27"><a href="#cb149-27" aria-hidden="true" tabindex="-1"></a>    <span class="st">"AdaBoost"</span>: {},</span>
-<span id="cb149-28"><a href="#cb149-28" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb149-29"><a href="#cb149-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb149-30"><a href="#cb149-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb149-31"><a href="#cb149-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Fix the not converging models with LassoCV</span></span>
-<span id="cb149-32"><a href="#cb149-32" aria-hidden="true" tabindex="-1"></a><span class="co"># for model_name, model in models.items():</span></span>
-<span id="cb149-33"><a href="#cb149-33" aria-hidden="true" tabindex="-1"></a><span class="co">#    models[model_name] = Pipeline(</span></span>
-<span id="cb149-34"><a href="#cb149-34" aria-hidden="true" tabindex="-1"></a><span class="co">#        [("feature_selection", SelectFromModel(LassoCV(max_iter=1500))), ("model", model)]</span></span>
-<span id="cb149-35"><a href="#cb149-35" aria-hidden="true" tabindex="-1"></a><span class="co">#    )</span></span>
-<span id="cb149-36"><a href="#cb149-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb149-37"><a href="#cb149-37" aria-hidden="true" tabindex="-1"></a>selected_fields <span class="op">=</span> X_train_features.columns  <span class="co"># add the new features of df_features</span></span>
-<span id="cb149-38"><a href="#cb149-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb149-39"><a href="#cb149-39" aria-hidden="true" tabindex="-1"></a>evaluator_models <span class="op">=</span> ModelEvaluator(</span>
-<span id="cb149-40"><a href="#cb149-40" aria-hidden="true" tabindex="-1"></a>    models,</span>
-<span id="cb149-41"><a href="#cb149-41" aria-hidden="true" tabindex="-1"></a>    param_grid,</span>
-<span id="cb149-42"><a href="#cb149-42" aria-hidden="true" tabindex="-1"></a>    X_train_features,</span>
-<span id="cb149-43"><a href="#cb149-43" aria-hidden="true" tabindex="-1"></a>    y_train_features,</span>
-<span id="cb149-44"><a href="#cb149-44" aria-hidden="true" tabindex="-1"></a>    X_test_features,</span>
-<span id="cb149-45"><a href="#cb149-45" aria-hidden="true" tabindex="-1"></a>    y_test_features,</span>
-<span id="cb149-46"><a href="#cb149-46" aria-hidden="true" tabindex="-1"></a>    selected_fields<span class="op">=</span>selected_fields,</span>
-<span id="cb149-47"><a href="#cb149-47" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb149-48"><a href="#cb149-48" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> evaluator_models.evaluate_models()</span>
-<span id="cb149-49"><a href="#cb149-49" aria-hidden="true" tabindex="-1"></a>evaluator_models.plot_roc_curves()</span>
-<span id="cb149-50"><a href="#cb149-50" aria-hidden="true" tabindex="-1"></a><span class="co"># evaluator_models.plot_confusion_matrices()</span></span>
-<span id="cb149-51"><a href="#cb149-51" aria-hidden="true" tabindex="-1"></a><span class="co"># compare top n customers for all models</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+    <div class="sourceCode cell-code" id="cb152"><pre class="sourceCode python code-with-copy"><code
+            class="sourceCode python"><span id="cb152-1"><a href="#cb152-1" aria-hidden="true" tabindex="-1"></a><span
+            class="co"># Usage example:</span></span>
+<span id="cb152-2"><a href="#cb152-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Define models and their parameter grids</span></span>
+<span id="cb152-3"><a href="#cb152-3" aria-hidden="true" tabindex="-1"></a>models <span class="op">=</span> {</span>
+<span id="cb152-4"><a href="#cb152-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Random Forest"</span>: RandomForestClassifier(),</span>
+<span id="cb152-5"><a href="#cb152-5" aria-hidden="true" tabindex="-1"></a>    <span
+        class="st">"Gradient Boosting"</span>: GradientBoostingClassifier(),</span>
+<span id="cb152-6"><a href="#cb152-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"SVM"</span>: SVC(probability<span
+        class="op">=</span><span class="va">True</span>),</span>
+<span id="cb152-7"><a href="#cb152-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"KNN"</span>: KNeighborsClassifier(),</span>
+<span id="cb152-8"><a href="#cb152-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Decision Tree"</span>: DecisionTreeClassifier(),</span>
+<span id="cb152-9"><a href="#cb152-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"AdaBoost"</span>: AdaBoostClassifier(algorithm<span
+        class="op">=</span><span class="st">"SAMME"</span>),</span>
+<span id="cb152-10"><a href="#cb152-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb152-11"><a href="#cb152-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb152-12"><a href="#cb152-12" aria-hidden="true" tabindex="-1"></a>param_grid <span
+        class="op">=</span> {</span>
+<span id="cb152-13"><a href="#cb152-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Random Forest"</span>: {</span>
+<span id="cb152-14"><a href="#cb152-14" aria-hidden="true" tabindex="-1"></a>        <span
+        class="st">"n_estimators"</span>: [<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">300</span>],</span>
+<span id="cb152-15"><a href="#cb152-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">"max_depth"</span>: [<span
+        class="va">None</span>, <span class="dv">5</span>, <span class="dv">10</span>],</span>
+<span id="cb152-16"><a href="#cb152-16" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb152-17"><a href="#cb152-17" aria-hidden="true" tabindex="-1"></a>    <span
+        class="st">"Gradient Boosting"</span>: {</span>
+<span id="cb152-18"><a href="#cb152-18" aria-hidden="true" tabindex="-1"></a>        <span
+        class="st">"n_estimators"</span>: [<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">300</span>],</span>
+<span id="cb152-19"><a href="#cb152-19" aria-hidden="true" tabindex="-1"></a>        <span
+        class="st">"learning_rate"</span>: [<span class="fl">0.1</span>, <span class="fl">0.01</span>, <span class="fl">0.001</span>],</span>
+<span id="cb152-20"><a href="#cb152-20" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb152-21"><a href="#cb152-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">"SVM"</span>: {<span
+        class="st">"C"</span>: [<span class="fl">0.1</span>, <span class="dv">1</span>, <span
+        class="dv">10</span>], <span class="st">"kernel"</span>: [<span class="st">"linear"</span>, <span class="st">"rbf"</span>]},</span>
+<span id="cb152-22"><a href="#cb152-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"KNN"</span>: {<span
+        class="st">"n_neighbors"</span>: [<span class="dv">3</span>, <span class="dv">5</span>, <span
+        class="dv">7</span>], <span class="st">"weights"</span>: [<span class="st">"uniform"</span>, <span class="st">"distance"</span>]},</span>
+<span id="cb152-23"><a href="#cb152-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Decision Tree"</span>: {</span>
+<span id="cb152-24"><a href="#cb152-24" aria-hidden="true" tabindex="-1"></a>        <span class="st">"max_depth"</span>: [<span
+        class="va">None</span>, <span class="dv">5</span>, <span class="dv">10</span>],</span>
+<span id="cb152-25"><a href="#cb152-25" aria-hidden="true" tabindex="-1"></a>        <span class="st">"min_samples_split"</span>: [<span
+        class="dv">2</span>, <span class="dv">5</span>, <span class="dv">10</span>],</span>
+<span id="cb152-26"><a href="#cb152-26" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb152-27"><a href="#cb152-27" aria-hidden="true" tabindex="-1"></a>    <span class="st">"AdaBoost"</span>: {},</span>
+<span id="cb152-28"><a href="#cb152-28" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb152-29"><a href="#cb152-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb152-30"><a href="#cb152-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb152-31"><a href="#cb152-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Fix the not converging models with LassoCV</span></span>
+<span id="cb152-32"><a href="#cb152-32" aria-hidden="true" tabindex="-1"></a><span class="co"># for model_name, model in models.items():</span></span>
+<span id="cb152-33"><a href="#cb152-33" aria-hidden="true" tabindex="-1"></a><span class="co">#    models[model_name] = Pipeline(</span></span>
+<span id="cb152-34"><a href="#cb152-34" aria-hidden="true" tabindex="-1"></a><span class="co">#        [("feature_selection", SelectFromModel(LassoCV(max_iter=1500))), ("model", model)]</span></span>
+<span id="cb152-35"><a href="#cb152-35" aria-hidden="true" tabindex="-1"></a><span class="co">#    )</span></span>
+<span id="cb152-36"><a href="#cb152-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb152-37"><a href="#cb152-37" aria-hidden="true" tabindex="-1"></a>selected_fields <span class="op">=</span> X_train_features.columns  <span
+        class="co"># add the new features of df_features</span></span>
+<span id="cb152-38"><a href="#cb152-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb152-39"><a href="#cb152-39" aria-hidden="true" tabindex="-1"></a>evaluator_models <span class="op">=</span> ModelEvaluator(</span>
+<span id="cb152-40"><a href="#cb152-40" aria-hidden="true" tabindex="-1"></a>    models,</span>
+<span id="cb152-41"><a href="#cb152-41" aria-hidden="true" tabindex="-1"></a>    param_grid,</span>
+<span id="cb152-42"><a href="#cb152-42" aria-hidden="true" tabindex="-1"></a>    X_train_features,</span>
+<span id="cb152-43"><a href="#cb152-43" aria-hidden="true" tabindex="-1"></a>    y_train_features,</span>
+<span id="cb152-44"><a href="#cb152-44" aria-hidden="true" tabindex="-1"></a>    X_test_features,</span>
+<span id="cb152-45"><a href="#cb152-45" aria-hidden="true" tabindex="-1"></a>    y_test_features,</span>
+<span id="cb152-46"><a href="#cb152-46" aria-hidden="true" tabindex="-1"></a>    selected_fields<span
+        class="op">=</span>selected_fields,</span>
+<span id="cb152-47"><a href="#cb152-47" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb152-48"><a href="#cb152-48" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> evaluator_models.evaluate_models()</span>
+<span id="cb152-49"><a href="#cb152-49" aria-hidden="true" tabindex="-1"></a>evaluator_models.plot_roc_curves()</span>
+<span id="cb152-50"><a href="#cb152-50" aria-hidden="true" tabindex="-1"></a><span class="co"># evaluator_models.plot_confusion_matrices()</span></span>
+<span id="cb152-51"><a href="#cb152-51" aria-hidden="true" tabindex="-1"></a><span class="co"># compare top n customers for all models</span></span></code><button
+            title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre>
+    </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Fitting 10 folds for each of 9 candidates, totalling 90 fits
 Best parameters for Random Forest: {'model__max_depth': 10, 'model__n_estimators': 300}
@@ -5292,16 +5485,17 @@ AdaBoost: mcc = 0.64</code></pre>
 </div>
 </div>
 <div id="9709d973" class="cell" data-execution_count="118">
-<div class="sourceCode cell-code" id="cb151"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb151-1"><a href="#cb151-1" aria-hidden="true" tabindex="-1"></a><span class="co"># compare top n customers for all models</span></span>
-<span id="cb151-2"><a href="#cb151-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> model_name <span class="kw">in</span> models.keys():</span>
-<span id="cb151-3"><a href="#cb151-3" aria-hidden="true" tabindex="-1"></a>    evaluator_models.compare_top_n_customers(model_name, n<span class="op">=</span><span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+    <div class="sourceCode cell-code" id="cb154"><pre class="sourceCode python code-with-copy"><code
+            class="sourceCode python"><span id="cb154-1"><a href="#cb154-1" aria-hidden="true" tabindex="-1"></a><span
+            class="co"># compare top n customers for all models</span></span>
+<span id="cb154-2"><a href="#cb154-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> model_name <span
+        class="kw">in</span> models.keys():</span>
+<span id="cb154-3"><a href="#cb154-3" aria-hidden="true" tabindex="-1"></a>    evaluator_models.compare_top_n_customers(model_name, n<span
+        class="op">=</span><span class="dv">100</span>)</span></code><button title="Copy to Clipboard"
+                                                                             class="code-copy-button"><i class="bi"></i></button></pre>
+    </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Comparing top 100 customers for Random Forest
-Comparing top 100 customers for Gradient Boosting
-Comparing top 100 customers for SVM
-Comparing top 100 customers for KNN
-Comparing top 100 customers for Decision Tree
-Comparing top 100 customers for AdaBoost</code></pre>
+    <pre><code>Comparing top 100 customers for Random Forest</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <div>
@@ -5310,38 +5504,53 @@ Comparing top 100 customers for AdaBoost</code></pre>
 </figure>
 </div>
 </div>
+    <div class="cell-output cell-output-stdout">
+        <pre><code>Comparing top 100 customers for Gradient Boosting</code></pre>
+</div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="AML_MC_files/figure-html/cell-119-output-3.png" class="img-fluid figure-img"></p>
+    <p><img src="AML_MC_files/figure-html/cell-119-output-4.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
+    <div class="cell-output cell-output-stdout">
+        <pre><code>Comparing top 100 customers for SVM</code></pre>
+    </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="AML_MC_files/figure-html/cell-119-output-4.png" class="img-fluid figure-img"></p>
+    <p><img src="AML_MC_files/figure-html/cell-119-output-6.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
+    <div class="cell-output cell-output-stdout">
+        <pre><code>Comparing top 100 customers for KNN</code></pre>
+</div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="AML_MC_files/figure-html/cell-119-output-5.png" class="img-fluid figure-img"></p>
+    <p><img src="AML_MC_files/figure-html/cell-119-output-8.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
+    <div class="cell-output cell-output-stdout">
+        <pre><code>Comparing top 100 customers for Decision Tree</code></pre>
+</div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="AML_MC_files/figure-html/cell-119-output-6.png" class="img-fluid figure-img"></p>
+    <p><img src="AML_MC_files/figure-html/cell-119-output-10.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
+    <div class="cell-output cell-output-stdout">
+        <pre><code>Comparing top 100 customers for AdaBoost</code></pre>
+</div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="AML_MC_files/figure-html/cell-119-output-7.png" class="img-fluid figure-img"></p>
+    <p><img src="AML_MC_files/figure-html/cell-119-output-12.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -5350,13 +5559,20 @@ Comparing top 100 customers for AdaBoost</code></pre>
 <section id="results-comparision" class="level2">
 <h2 class="anchored" data-anchor-id="results-comparision">Results Comparision</h2>
 <div id="6e4d1afc" class="cell" data-execution_count="119">
-<div class="sourceCode cell-code" id="cb153"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb153-1"><a href="#cb153-1" aria-hidden="true" tabindex="-1"></a>benchmark <span class="op">=</span> MetricsBenchmarker()</span>
-<span id="cb153-2"><a href="#cb153-2" aria-hidden="true" tabindex="-1"></a>benchmark.add_evaluator(evaluator_baseline)</span>
-<span id="cb153-3"><a href="#cb153-3" aria-hidden="true" tabindex="-1"></a>benchmark.add_evaluator(evaluator_models)</span>
-<span id="cb153-4"><a href="#cb153-4" aria-hidden="true" tabindex="-1"></a>benchmark.add_evaluator(evaluator)</span>
-<span id="cb153-5"><a href="#cb153-5" aria-hidden="true" tabindex="-1"></a>benchmark.set_benchmark_results()</span>
-<span id="cb153-6"><a href="#cb153-6" aria-hidden="true" tabindex="-1"></a>benchmark.display_benchmark_results_table()</span>
-<span id="cb153-7"><a href="#cb153-7" aria-hidden="true" tabindex="-1"></a>benchmark.plot_benchmark_results_bar_chart()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+    <div class="sourceCode cell-code" id="cb161"><pre class="sourceCode python code-with-copy"><code
+            class="sourceCode python"><span id="cb161-1"><a href="#cb161-1" aria-hidden="true" tabindex="-1"></a>benchmark <span
+            class="op">=</span> MetricsBenchmarker()</span>
+<span id="cb161-2"><a href="#cb161-2" aria-hidden="true"
+                      tabindex="-1"></a>benchmark.add_evaluator(evaluator_baseline)</span>
+<span id="cb161-3"><a href="#cb161-3" aria-hidden="true"
+                      tabindex="-1"></a>benchmark.add_evaluator(evaluator_models)</span>
+<span id="cb161-4"><a href="#cb161-4" aria-hidden="true" tabindex="-1"></a>benchmark.add_evaluator(evaluator)</span>
+<span id="cb161-5"><a href="#cb161-5" aria-hidden="true" tabindex="-1"></a>benchmark.set_benchmark_results()</span>
+<span id="cb161-6"><a href="#cb161-6" aria-hidden="true"
+                      tabindex="-1"></a>benchmark.display_benchmark_results_table()</span>
+<span id="cb161-7"><a href="#cb161-7" aria-hidden="true" tabindex="-1"></a>benchmark.plot_benchmark_results_bar_chart()</span></code><button
+            title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre>
+    </div>
 <div class="cell-output cell-output-display">
 <table id="itables_395eed53_009f_4403_87e3_789f8e679759" class="display nowrap" data-quarto-disable-processing="true" style="table-layout:auto;width:auto;margin:auto;caption-side:bottom">
 <thead>
@@ -5463,80 +5679,120 @@ Loading ITables v2.1.0 from the <code>init_notebook_mode</code> cell...
 </div>
 </div>
 <div id="af0eec4b" class="cell" data-execution_count="120">
-<div class="sourceCode cell-code" id="cb154"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb154-1"><a href="#cb154-1" aria-hidden="true" tabindex="-1"></a><span class="co"># best model</span></span>
-<span id="cb154-2"><a href="#cb154-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Define weights for the metrics</span></span>
-<span id="cb154-3"><a href="#cb154-3" aria-hidden="true" tabindex="-1"></a>weights <span class="op">=</span> {<span class="st">"roc_auc"</span>: <span class="fl">0.25</span>, <span class="st">"precision"</span>: <span class="fl">0.25</span>, <span class="st">"recall"</span>: <span class="fl">0.25</span>, <span class="st">"f1"</span>: <span class="fl">0.25</span>}</span>
-<span id="cb154-4"><a href="#cb154-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb154-5"><a href="#cb154-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate weighted scores for each model</span></span>
-<span id="cb154-6"><a href="#cb154-6" aria-hidden="true" tabindex="-1"></a>weighted_scores <span class="op">=</span> {}</span>
-<span id="cb154-7"><a href="#cb154-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> model, metrics <span class="kw">in</span> benchmark.benchmark_results.items():</span>
-<span id="cb154-8"><a href="#cb154-8" aria-hidden="true" tabindex="-1"></a>    weighted_score <span class="op">=</span> <span class="bu">sum</span>(</span>
-<span id="cb154-9"><a href="#cb154-9" aria-hidden="true" tabindex="-1"></a>        weights[metric] <span class="op">*</span> score</span>
-<span id="cb154-10"><a href="#cb154-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> metric, score <span class="kw">in</span> metrics.items()</span>
-<span id="cb154-11"><a href="#cb154-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> metric <span class="kw">in</span> weights</span>
-<span id="cb154-12"><a href="#cb154-12" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb154-13"><a href="#cb154-13" aria-hidden="true" tabindex="-1"></a>    weighted_scores[model] <span class="op">=</span> weighted_score</span>
-<span id="cb154-14"><a href="#cb154-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb154-15"><a href="#cb154-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Find the best model based on weighted score</span></span>
-<span id="cb154-16"><a href="#cb154-16" aria-hidden="true" tabindex="-1"></a>best_model_name <span class="op">=</span> <span class="bu">max</span>(weighted_scores, key<span class="op">=</span>weighted_scores.get)</span>
-<span id="cb154-17"><a href="#cb154-17" aria-hidden="true" tabindex="-1"></a>best_model_score <span class="op">=</span> weighted_scores[best_model_name]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+    <div class="sourceCode cell-code" id="cb162"><pre class="sourceCode python code-with-copy"><code
+            class="sourceCode python"><span id="cb162-1"><a href="#cb162-1" aria-hidden="true" tabindex="-1"></a><span
+            class="co"># best model</span></span>
+<span id="cb162-2"><a href="#cb162-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Define weights for the metrics</span></span>
+<span id="cb162-3"><a href="#cb162-3" aria-hidden="true" tabindex="-1"></a>weights <span class="op">=</span> {<span
+        class="st">"roc_auc"</span>: <span class="fl">0.25</span>, <span class="st">"precision"</span>: <span
+        class="fl">0.25</span>, <span class="st">"recall"</span>: <span class="fl">0.25</span>, <span
+        class="st">"f1"</span>: <span class="fl">0.25</span>}</span>
+<span id="cb162-4"><a href="#cb162-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb162-5"><a href="#cb162-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate weighted scores for each model</span></span>
+<span id="cb162-6"><a href="#cb162-6" aria-hidden="true" tabindex="-1"></a>weighted_scores <span class="op">=</span> {}</span>
+<span id="cb162-7"><a href="#cb162-7" aria-hidden="true" tabindex="-1"></a><span
+        class="cf">for</span> model, metrics <span class="kw">in</span> benchmark.benchmark_results.items():</span>
+<span id="cb162-8"><a href="#cb162-8" aria-hidden="true" tabindex="-1"></a>    weighted_score <span class="op">=</span> <span
+        class="bu">sum</span>(</span>
+<span id="cb162-9"><a href="#cb162-9" aria-hidden="true" tabindex="-1"></a>        weights[metric] <span
+        class="op">*</span> score</span>
+<span id="cb162-10"><a href="#cb162-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> metric, score <span
+        class="kw">in</span> metrics.items()</span>
+<span id="cb162-11"><a href="#cb162-11" aria-hidden="true" tabindex="-1"></a>        <span
+        class="cf">if</span> metric <span class="kw">in</span> weights</span>
+<span id="cb162-12"><a href="#cb162-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb162-13"><a href="#cb162-13" aria-hidden="true" tabindex="-1"></a>    weighted_scores[model] <span
+        class="op">=</span> weighted_score</span>
+<span id="cb162-14"><a href="#cb162-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb162-15"><a href="#cb162-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Find the best model based on weighted score</span></span>
+<span id="cb162-16"><a href="#cb162-16" aria-hidden="true" tabindex="-1"></a>best_model_name <span
+        class="op">=</span> <span class="bu">max</span>(weighted_scores, key<span class="op">=</span>weighted_scores.get)</span>
+<span id="cb162-17"><a href="#cb162-17" aria-hidden="true" tabindex="-1"></a>best_model_score <span class="op">=</span> weighted_scores[best_model_name]</span></code><button
+            title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre>
+    </div>
 </div>
 </section>
 </section>
 <section id="model-assesment" class="level1">
 <h1>Model Assesment</h1>
 <div id="b3ada034" class="cell" data-execution_count="127">
-<div class="sourceCode cell-code" id="cb155"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb155-1"><a href="#cb155-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Evaluate the best model with the test set</span></span>
-<span id="cb155-2"><a href="#cb155-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> accuracy_score, precision_score, recall_score, f1_score, cohen_kappa_score, matthews_corrcoef</span>
-<span id="cb155-3"><a href="#cb155-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb155-4"><a href="#cb155-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb155-5"><a href="#cb155-5" aria-hidden="true" tabindex="-1"></a>best_model <span class="op">=</span> evaluator_models.fitted_models[best_model_name]</span>
-<span id="cb155-6"><a href="#cb155-6" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> best_model.predict(X_test_features)</span>
-<span id="cb155-7"><a href="#cb155-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb155-8"><a href="#cb155-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Evaluation of the best model (</span><span class="sc">{</span>best_model_name<span class="sc">}</span><span class="ss">) using X_test:"</span>)</span>
-<span id="cb155-9"><a href="#cb155-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb155-10"><a href="#cb155-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Confusion Matrix</span></span>
-<span id="cb155-11"><a href="#cb155-11" aria-hidden="true" tabindex="-1"></a>cm <span class="op">=</span> confusion_matrix(y_test, y_pred)</span>
-<span id="cb155-12"><a href="#cb155-12" aria-hidden="true" tabindex="-1"></a>disp <span class="op">=</span> ConfusionMatrixDisplay(confusion_matrix<span class="op">=</span>cm)</span>
-<span id="cb155-13"><a href="#cb155-13" aria-hidden="true" tabindex="-1"></a>disp.plot(cmap<span class="op">=</span>plt.cm.Blues)</span>
-<span id="cb155-14"><a href="#cb155-14" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="ss">f"Confusion Matrix for </span><span class="sc">{</span>best_model_name<span class="sc">}</span><span class="ss"> on X_test"</span>)</span>
-<span id="cb155-15"><a href="#cb155-15" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb155-16"><a href="#cb155-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb155-17"><a href="#cb155-17" aria-hidden="true" tabindex="-1"></a><span class="co"># ROC Curve</span></span>
-<span id="cb155-18"><a href="#cb155-18" aria-hidden="true" tabindex="-1"></a>y_scores <span class="op">=</span> best_model.predict_proba(X_test_features)[:, <span class="dv">1</span>]</span>
-<span id="cb155-19"><a href="#cb155-19" aria-hidden="true" tabindex="-1"></a>fpr, tpr, _ <span class="op">=</span> roc_curve(y_test, y_scores)</span>
-<span id="cb155-20"><a href="#cb155-20" aria-hidden="true" tabindex="-1"></a>roc_auc <span class="op">=</span> auc(fpr, tpr)</span>
-<span id="cb155-21"><a href="#cb155-21" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">8</span>))</span>
-<span id="cb155-22"><a href="#cb155-22" aria-hidden="true" tabindex="-1"></a>plt.plot(fpr, tpr, label<span class="op">=</span><span class="ss">f"</span><span class="sc">{</span>best_model_name<span class="sc">}</span><span class="ss"> (area = </span><span class="sc">{</span>roc_auc<span class="sc">:.2f}</span><span class="ss">)"</span>)</span>
-<span id="cb155-23"><a href="#cb155-23" aria-hidden="true" tabindex="-1"></a>plt.plot([<span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">0</span>, <span class="dv">1</span>], <span class="st">"k--"</span>)</span>
-<span id="cb155-24"><a href="#cb155-24" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"False Positive Rate"</span>)</span>
-<span id="cb155-25"><a href="#cb155-25" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"True Positive Rate"</span>)</span>
-<span id="cb155-26"><a href="#cb155-26" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="ss">f"ROC Curve for </span><span class="sc">{</span>best_model_name<span class="sc">}</span><span class="ss"> on X_test"</span>)</span>
-<span id="cb155-27"><a href="#cb155-27" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">"lower right"</span>)</span>
-<span id="cb155-28"><a href="#cb155-28" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb155-29"><a href="#cb155-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb155-30"><a href="#cb155-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Other Metrics</span></span>
-<span id="cb155-31"><a href="#cb155-31" aria-hidden="true" tabindex="-1"></a>accuracy <span class="op">=</span> accuracy_score(y_test_features, y_pred)</span>
-<span id="cb155-32"><a href="#cb155-32" aria-hidden="true" tabindex="-1"></a>precision <span class="op">=</span> precision_score(y_test_features, y_pred)</span>
-<span id="cb155-33"><a href="#cb155-33" aria-hidden="true" tabindex="-1"></a>recall <span class="op">=</span> recall_score(y_test_features, y_pred)</span>
-<span id="cb155-34"><a href="#cb155-34" aria-hidden="true" tabindex="-1"></a>f1 <span class="op">=</span> f1_score(y_test_features, y_pred)</span>
-<span id="cb155-35"><a href="#cb155-35" aria-hidden="true" tabindex="-1"></a>kappa <span class="op">=</span> cohen_kappa_score(y_test_features, y_pred)</span>
-<span id="cb155-36"><a href="#cb155-36" aria-hidden="true" tabindex="-1"></a>mcc <span class="op">=</span> matthews_corrcoef(y_test_features, y_pred)</span>
-<span id="cb155-37"><a href="#cb155-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb155-38"><a href="#cb155-38" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Accuracy: </span><span class="sc">{</span>accuracy<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
-<span id="cb155-39"><a href="#cb155-39" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Precision: </span><span class="sc">{</span>precision<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
-<span id="cb155-40"><a href="#cb155-40" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Recall: </span><span class="sc">{</span>recall<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
-<span id="cb155-41"><a href="#cb155-41" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"F1 Score: </span><span class="sc">{</span>f1<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
-<span id="cb155-42"><a href="#cb155-42" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Cohen Kappa: </span><span class="sc">{</span>kappa<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
-<span id="cb155-43"><a href="#cb155-43" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Matthews Correlation Coefficient: </span><span class="sc">{</span>mcc<span class="sc">:.2f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+    <div class="sourceCode cell-code" id="cb163"><pre class="sourceCode python code-with-copy"><code
+            class="sourceCode python"><span id="cb163-1"><a href="#cb163-1" aria-hidden="true" tabindex="-1"></a><span
+            class="co"># Evaluate the best model with the test set</span></span>
+<span id="cb163-2"><a href="#cb163-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span
+        class="im">import</span> accuracy_score, precision_score, recall_score, f1_score, cohen_kappa_score, matthews_corrcoef</span>
+<span id="cb163-3"><a href="#cb163-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb163-4"><a href="#cb163-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb163-5"><a href="#cb163-5" aria-hidden="true" tabindex="-1"></a>best_model <span class="op">=</span> evaluator_models.fitted_models[best_model_name]</span>
+<span id="cb163-6"><a href="#cb163-6" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> best_model.predict(X_test_features)</span>
+<span id="cb163-7"><a href="#cb163-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb163-8"><a href="#cb163-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span
+        class="ss">f"Evaluation of the best model (</span><span class="sc">{</span>best_model_name<span
+        class="sc">}</span><span class="ss">) using X_test:"</span>)</span>
+<span id="cb163-9"><a href="#cb163-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb163-10"><a href="#cb163-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Confusion Matrix</span></span>
+<span id="cb163-11"><a href="#cb163-11" aria-hidden="true" tabindex="-1"></a>cm <span class="op">=</span> confusion_matrix(y_test, y_pred)</span>
+<span id="cb163-12"><a href="#cb163-12" aria-hidden="true" tabindex="-1"></a>disp <span class="op">=</span> ConfusionMatrixDisplay(confusion_matrix<span
+        class="op">=</span>cm)</span>
+<span id="cb163-13"><a href="#cb163-13" aria-hidden="true" tabindex="-1"></a>disp.plot(cmap<span class="op">=</span>plt.cm.Blues)</span>
+<span id="cb163-14"><a href="#cb163-14" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="ss">f"Confusion Matrix for </span><span
+        class="sc">{</span>best_model_name<span class="sc">}</span><span class="ss"> on X_test"</span>)</span>
+<span id="cb163-15"><a href="#cb163-15" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb163-16"><a href="#cb163-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb163-17"><a href="#cb163-17" aria-hidden="true" tabindex="-1"></a><span class="co"># ROC Curve</span></span>
+<span id="cb163-18"><a href="#cb163-18" aria-hidden="true" tabindex="-1"></a>y_scores <span class="op">=</span> best_model.predict_proba(X_test_features)[:, <span
+        class="dv">1</span>]</span>
+<span id="cb163-19"><a href="#cb163-19" aria-hidden="true" tabindex="-1"></a>fpr, tpr, _ <span class="op">=</span> roc_curve(y_test, y_scores)</span>
+<span id="cb163-20"><a href="#cb163-20" aria-hidden="true" tabindex="-1"></a>roc_auc <span class="op">=</span> auc(fpr, tpr)</span>
+<span id="cb163-21"><a href="#cb163-21" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span
+        class="dv">10</span>, <span class="dv">8</span>))</span>
+<span id="cb163-22"><a href="#cb163-22" aria-hidden="true" tabindex="-1"></a>plt.plot(fpr, tpr, label<span
+        class="op">=</span><span class="ss">f"</span><span class="sc">{</span>best_model_name<span
+        class="sc">}</span><span class="ss"> (area = </span><span class="sc">{</span>roc_auc<span
+        class="sc">:.2f}</span><span class="ss">)"</span>)</span>
+<span id="cb163-23"><a href="#cb163-23" aria-hidden="true" tabindex="-1"></a>plt.plot([<span class="dv">0</span>, <span
+        class="dv">1</span>], [<span class="dv">0</span>, <span class="dv">1</span>], <span
+        class="st">"k--"</span>)</span>
+<span id="cb163-24"><a href="#cb163-24" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"False Positive Rate"</span>)</span>
+<span id="cb163-25"><a href="#cb163-25" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"True Positive Rate"</span>)</span>
+<span id="cb163-26"><a href="#cb163-26" aria-hidden="true" tabindex="-1"></a>plt.title(<span
+        class="ss">f"ROC Curve for </span><span class="sc">{</span>best_model_name<span class="sc">}</span><span
+        class="ss"> on X_test"</span>)</span>
+<span id="cb163-27"><a href="#cb163-27" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span
+        class="op">=</span><span class="st">"lower right"</span>)</span>
+<span id="cb163-28"><a href="#cb163-28" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb163-29"><a href="#cb163-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb163-30"><a href="#cb163-30" aria-hidden="true" tabindex="-1"></a><span
+        class="co"># Other Metrics</span></span>
+<span id="cb163-31"><a href="#cb163-31" aria-hidden="true" tabindex="-1"></a>accuracy <span class="op">=</span> accuracy_score(y_test_features, y_pred)</span>
+<span id="cb163-32"><a href="#cb163-32" aria-hidden="true" tabindex="-1"></a>precision <span class="op">=</span> precision_score(y_test_features, y_pred)</span>
+<span id="cb163-33"><a href="#cb163-33" aria-hidden="true" tabindex="-1"></a>recall <span class="op">=</span> recall_score(y_test_features, y_pred)</span>
+<span id="cb163-34"><a href="#cb163-34" aria-hidden="true" tabindex="-1"></a>f1 <span class="op">=</span> f1_score(y_test_features, y_pred)</span>
+<span id="cb163-35"><a href="#cb163-35" aria-hidden="true" tabindex="-1"></a>kappa <span class="op">=</span> cohen_kappa_score(y_test_features, y_pred)</span>
+<span id="cb163-36"><a href="#cb163-36" aria-hidden="true" tabindex="-1"></a>mcc <span class="op">=</span> matthews_corrcoef(y_test_features, y_pred)</span>
+<span id="cb163-37"><a href="#cb163-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb163-38"><a href="#cb163-38" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span
+        class="ss">f"Accuracy: </span><span class="sc">{</span>accuracy<span class="sc">:.2f}</span><span
+        class="ss">"</span>)</span>
+<span id="cb163-39"><a href="#cb163-39" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span
+        class="ss">f"Precision: </span><span class="sc">{</span>precision<span class="sc">:.2f}</span><span
+        class="ss">"</span>)</span>
+<span id="cb163-40"><a href="#cb163-40" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span
+        class="ss">f"Recall: </span><span class="sc">{</span>recall<span class="sc">:.2f}</span><span
+        class="ss">"</span>)</span>
+<span id="cb163-41"><a href="#cb163-41" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span
+        class="ss">f"F1 Score: </span><span class="sc">{</span>f1<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb163-42"><a href="#cb163-42" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span
+        class="ss">f"Cohen Kappa: </span><span class="sc">{</span>kappa<span class="sc">:.2f}</span><span
+        class="ss">"</span>)</span>
+<span id="cb163-43"><a href="#cb163-43" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span
+        class="ss">f"Matthews Correlation Coefficient: </span><span class="sc">{</span>mcc<span
+        class="sc">:.2f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard"
+                                                                               class="code-copy-button"><i
+            class="bi"></i></button></pre>
+    </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Evaluation of the best model (Gradient Boosting) using X_test:
-Accuracy: 0.88
-Precision: 0.82
-Recall: 0.96
-F1 Score: 0.89
-Cohen Kappa: 0.75
-Matthews Correlation Coefficient: 0.77</code></pre>
+    <pre><code>Evaluation of the best model (Gradient Boosting) using X_test:</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <div>
@@ -5552,6 +5808,14 @@ Matthews Correlation Coefficient: 0.77</code></pre>
 </figure>
 </div>
 </div>
+    <div class="cell-output cell-output-stdout">
+<pre><code>Accuracy: 0.88
+Precision: 0.82
+Recall: 0.96
+F1 Score: 0.89
+Cohen Kappa: 0.75
+Matthews Correlation Coefficient: 0.77</code></pre>
+</div>
 </div>
 </section>
 <section id="erklärbare-modelle" class="level1">
@@ -5559,17 +5823,25 @@ Matthews Correlation Coefficient: 0.77</code></pre>
 <section id="reduziere-modell-für-erklärbarkeit" class="level2">
 <h2 class="anchored" data-anchor-id="reduziere-modell-für-erklärbarkeit">Reduziere Modell für Erklärbarkeit</h2>
 <div id="a00394e6" class="cell">
-<div class="sourceCode cell-code" id="cb157"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb157-1"><a href="#cb157-1" aria-hidden="true" tabindex="-1"></a><span class="co"># todo reduce model and do training</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+    <div class="sourceCode cell-code" id="cb166">
+        <pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb166-1"><a
+                href="#cb166-1" aria-hidden="true" tabindex="-1"></a><span class="co"># todo reduce model and do training</span></span></code><button
+                title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre>
+    </div>
 </div>
 <div id="bf90f725" class="cell">
-<div class="sourceCode cell-code" id="cb158"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb158-1"><a href="#cb158-1" aria-hidden="true" tabindex="-1"></a><span class="co"># todo fix the error of lime and shap and add the explanation to the reduced model</span></span>
-<span id="cb158-2"><a href="#cb158-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb158-3"><a href="#cb158-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Explain the best model with LIME</span></span>
-<span id="cb158-4"><a href="#cb158-4" aria-hidden="true" tabindex="-1"></a><span class="co"># evaluator_models.explain_with_lime("Random Forest")</span></span>
-<span id="cb158-5"><a href="#cb158-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb158-6"><a href="#cb158-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Explain the best model with SHAP</span></span>
-<span id="cb158-7"><a href="#cb158-7" aria-hidden="true" tabindex="-1"></a><span class="co"># evaluator_models.explain_with_shap("Random Forest")</span></span>
-<span id="cb158-8"><a href="#cb158-8" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+    <div class="sourceCode cell-code" id="cb167"><pre class="sourceCode python code-with-copy"><code
+            class="sourceCode python"><span id="cb167-1"><a href="#cb167-1" aria-hidden="true" tabindex="-1"></a><span
+            class="co"># todo fix the error of lime and shap and add the explanation to the reduced model</span></span>
+<span id="cb167-2"><a href="#cb167-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb167-3"><a href="#cb167-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Explain the best model with LIME</span></span>
+<span id="cb167-4"><a href="#cb167-4" aria-hidden="true" tabindex="-1"></a><span class="co"># evaluator_models.explain_with_lime("Random Forest")</span></span>
+<span id="cb167-5"><a href="#cb167-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb167-6"><a href="#cb167-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Explain the best model with SHAP</span></span>
+<span id="cb167-7"><a href="#cb167-7" aria-hidden="true" tabindex="-1"></a><span class="co"># evaluator_models.explain_with_shap("Random Forest")</span></span>
+<span id="cb167-8"><a href="#cb167-8" aria-hidden="true" tabindex="-1"></a></span></code><button
+            title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre>
+    </div>
 </div>
 <section id="stepwise-regression" class="level3">
 <h3 class="anchored" data-anchor-id="stepwise-regression">Stepwise Regression</h3>
@@ -5577,25 +5849,33 @@ Matthews Correlation Coefficient: 0.77</code></pre>
 <section id="logistic-regression-reduziert" class="level3">
 <h3 class="anchored" data-anchor-id="logistic-regression-reduziert">Logistic Regression Reduziert</h3>
 <div id="d99aacb3" class="cell">
-<div class="sourceCode cell-code" id="cb159"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb159-1"><a href="#cb159-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Example usage</span></span>
-<span id="cb159-2"><a href="#cb159-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Define models and their parameter grids</span></span>
-<span id="cb159-3"><a href="#cb159-3" aria-hidden="true" tabindex="-1"></a>models <span class="op">=</span> {</span>
-<span id="cb159-4"><a href="#cb159-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Logistic Regression Reduced"</span>: LogisticRegression(solver<span class="op">=</span><span class="st">"liblinear"</span>),</span>
-<span id="cb159-5"><a href="#cb159-5" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb159-6"><a href="#cb159-6" aria-hidden="true" tabindex="-1"></a>param_grid <span class="op">=</span> {</span>
-<span id="cb159-7"><a href="#cb159-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Logistic Regression Reduced"</span>: {<span class="st">"model__C"</span>: [<span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="dv">1</span>, <span class="dv">10</span>]},</span>
-<span id="cb159-8"><a href="#cb159-8" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb159-9"><a href="#cb159-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb159-10"><a href="#cb159-10" aria-hidden="true" tabindex="-1"></a><span class="co"># todo fields of stepwise regression selection</span></span>
-<span id="cb159-11"><a href="#cb159-11" aria-hidden="true" tabindex="-1"></a>selected_fields <span class="op">=</span> []</span>
-<span id="cb159-12"><a href="#cb159-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb159-13"><a href="#cb159-13" aria-hidden="true" tabindex="-1"></a>evaluator_reduced <span class="op">=</span> ModelEvaluator(</span>
-<span id="cb159-14"><a href="#cb159-14" aria-hidden="true" tabindex="-1"></a>    models, param_grid, X, y, X_test, y_test, selected_fields<span class="op">=</span>selected_fields</span>
-<span id="cb159-15"><a href="#cb159-15" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb159-16"><a href="#cb159-16" aria-hidden="true" tabindex="-1"></a><span class="co"># evaluator_reduced.evaluate_models()</span></span>
-<span id="cb159-17"><a href="#cb159-17" aria-hidden="true" tabindex="-1"></a><span class="co"># evaluator_reduced.plot_roc_curves()</span></span>
-<span id="cb159-18"><a href="#cb159-18" aria-hidden="true" tabindex="-1"></a><span class="co"># evaluator_reduced.plot_confusion_matrices()</span></span>
-<span id="cb159-19"><a href="#cb159-19" aria-hidden="true" tabindex="-1"></a><span class="co"># evaluator_reduced.compare_top_n_customers("Baseline Logistic Regression", n=100)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+    <div class="sourceCode cell-code" id="cb168"><pre class="sourceCode python code-with-copy"><code
+            class="sourceCode python"><span id="cb168-1"><a href="#cb168-1" aria-hidden="true" tabindex="-1"></a><span
+            class="co"># Example usage</span></span>
+<span id="cb168-2"><a href="#cb168-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Define models and their parameter grids</span></span>
+<span id="cb168-3"><a href="#cb168-3" aria-hidden="true" tabindex="-1"></a>models <span class="op">=</span> {</span>
+<span id="cb168-4"><a href="#cb168-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Logistic Regression Reduced"</span>: LogisticRegression(solver<span
+        class="op">=</span><span class="st">"liblinear"</span>),</span>
+<span id="cb168-5"><a href="#cb168-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb168-6"><a href="#cb168-6" aria-hidden="true" tabindex="-1"></a>param_grid <span class="op">=</span> {</span>
+<span id="cb168-7"><a href="#cb168-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Logistic Regression Reduced"</span>: {<span
+        class="st">"model__C"</span>: [<span class="fl">0.01</span>, <span class="fl">0.1</span>, <span
+        class="dv">1</span>, <span class="dv">10</span>]},</span>
+<span id="cb168-8"><a href="#cb168-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb168-9"><a href="#cb168-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb168-10"><a href="#cb168-10" aria-hidden="true" tabindex="-1"></a><span class="co"># todo fields of stepwise regression selection</span></span>
+<span id="cb168-11"><a href="#cb168-11" aria-hidden="true" tabindex="-1"></a>selected_fields <span class="op">=</span> []</span>
+<span id="cb168-12"><a href="#cb168-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb168-13"><a href="#cb168-13" aria-hidden="true" tabindex="-1"></a>evaluator_reduced <span class="op">=</span> ModelEvaluator(</span>
+<span id="cb168-14"><a href="#cb168-14" aria-hidden="true" tabindex="-1"></a>    models, param_grid, X, y, X_test, y_test, selected_fields<span
+        class="op">=</span>selected_fields</span>
+<span id="cb168-15"><a href="#cb168-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb168-16"><a href="#cb168-16" aria-hidden="true" tabindex="-1"></a><span class="co"># evaluator_reduced.evaluate_models()</span></span>
+<span id="cb168-17"><a href="#cb168-17" aria-hidden="true" tabindex="-1"></a><span class="co"># evaluator_reduced.plot_roc_curves()</span></span>
+<span id="cb168-18"><a href="#cb168-18" aria-hidden="true" tabindex="-1"></a><span class="co"># evaluator_reduced.plot_confusion_matrices()</span></span>
+<span id="cb168-19"><a href="#cb168-19" aria-hidden="true" tabindex="-1"></a><span class="co"># evaluator_reduced.compare_top_n_customers("Baseline Logistic Regression", n=100)</span></span></code><button
+            title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre>
+    </div>
 </div>
 </section>
 <section id="todo-explain-model" class="level3">
@@ -5612,71 +5892,115 @@ Matthews Correlation Coefficient: 0.77</code></pre>
 <section id="convert-notebook" class="level1">
 <h1>Convert Notebook</h1>
 <div id="561272d7" class="cell" data-execution_count="128">
-<div class="sourceCode cell-code" id="cb160"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb160-1"><a href="#cb160-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>capture</span>
-<span id="cb160-2"><a href="#cb160-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> subprocess</span>
-<span id="cb160-3"><a href="#cb160-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pathlib</span>
-<span id="cb160-4"><a href="#cb160-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
-<span id="cb160-5"><a href="#cb160-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb160-6"><a href="#cb160-6" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
-<span id="cb160-7"><a href="#cb160-7" aria-hidden="true" tabindex="-1"></a>    file_path <span class="op">=</span> pathlib.Path(os.path.basename(<span class="va">__file__</span>))</span>
-<span id="cb160-8"><a href="#cb160-8" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span>:</span>
-<span id="cb160-9"><a href="#cb160-9" aria-hidden="true" tabindex="-1"></a>    file_path <span class="op">=</span> pathlib.Path(<span class="st">"AML_MC.ipynb"</span>)</span>
-<span id="cb160-10"><a href="#cb160-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb160-11"><a href="#cb160-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Check the file extension</span></span>
-<span id="cb160-12"><a href="#cb160-12" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> file_path.suffix <span class="op">==</span> <span class="st">".py"</span>:</span>
-<span id="cb160-13"><a href="#cb160-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># If it's a Python script, convert it to a notebook</span></span>
-<span id="cb160-14"><a href="#cb160-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
-<span id="cb160-15"><a href="#cb160-15" aria-hidden="true" tabindex="-1"></a>        subprocess.check_output([<span class="st">"jupytext"</span>, <span class="st">"--to"</span>, <span class="st">"notebook"</span>, <span class="bu">str</span>(file_path)])</span>
-<span id="cb160-16"><a href="#cb160-16" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"Converted to notebook."</span>)</span>
-<span id="cb160-17"><a href="#cb160-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> subprocess.CalledProcessError <span class="im">as</span> e:</span>
-<span id="cb160-18"><a href="#cb160-18" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"Conversion failed. Error message:"</span>, e.output)</span>
-<span id="cb160-19"><a href="#cb160-19" aria-hidden="true" tabindex="-1"></a><span class="cf">elif</span> file_path.suffix <span class="op">==</span> <span class="st">".ipynb"</span>:</span>
-<span id="cb160-20"><a href="#cb160-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># If it's a notebook, convert it to a Python script with cell markers</span></span>
-<span id="cb160-21"><a href="#cb160-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
-<span id="cb160-22"><a href="#cb160-22" aria-hidden="true" tabindex="-1"></a>        subprocess.check_output([<span class="st">"jupytext"</span>, <span class="st">"--to"</span>, <span class="st">"py:percent"</span>, <span class="bu">str</span>(file_path)])</span>
-<span id="cb160-23"><a href="#cb160-23" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"Converted to Python script."</span>)</span>
-<span id="cb160-24"><a href="#cb160-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> subprocess.CalledProcessError <span class="im">as</span> e:</span>
-<span id="cb160-25"><a href="#cb160-25" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"Conversion failed. Error message:"</span>, e.output)</span>
-<span id="cb160-26"><a href="#cb160-26" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
-<span id="cb160-27"><a href="#cb160-27" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Unsupported file type."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+    <div class="sourceCode cell-code" id="cb169"><pre class="sourceCode python code-with-copy"><code
+            class="sourceCode python"><span id="cb169-1"><a href="#cb169-1" aria-hidden="true" tabindex="-1"></a><span
+            class="op">%%</span>capture</span>
+<span id="cb169-2"><a href="#cb169-2" aria-hidden="true" tabindex="-1"></a><span
+        class="im">import</span> subprocess</span>
+<span id="cb169-3"><a href="#cb169-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pathlib</span>
+<span id="cb169-4"><a href="#cb169-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb169-5"><a href="#cb169-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb169-6"><a href="#cb169-6" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
+<span id="cb169-7"><a href="#cb169-7" aria-hidden="true" tabindex="-1"></a>    file_path <span class="op">=</span> pathlib.Path(os.path.basename(<span
+        class="va">__file__</span>))</span>
+<span id="cb169-8"><a href="#cb169-8" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span>:</span>
+<span id="cb169-9"><a href="#cb169-9" aria-hidden="true" tabindex="-1"></a>    file_path <span class="op">=</span> pathlib.Path(<span
+        class="st">"AML_MC.ipynb"</span>)</span>
+<span id="cb169-10"><a href="#cb169-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb169-11"><a href="#cb169-11" aria-hidden="true" tabindex="-1"></a><span
+        class="co"># Check the file extension</span></span>
+<span id="cb169-12"><a href="#cb169-12" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> file_path.suffix <span
+        class="op">==</span> <span class="st">".py"</span>:</span>
+<span id="cb169-13"><a href="#cb169-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># If it's a Python script, convert it to a notebook</span></span>
+<span id="cb169-14"><a href="#cb169-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb169-15"><a href="#cb169-15" aria-hidden="true" tabindex="-1"></a>        subprocess.check_output([<span
+        class="st">"jupytext"</span>, <span class="st">"--to"</span>, <span class="st">"notebook"</span>, <span
+        class="bu">str</span>(file_path)])</span>
+<span id="cb169-16"><a href="#cb169-16" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span
+        class="st">"Converted to notebook."</span>)</span>
+<span id="cb169-17"><a href="#cb169-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> subprocess.CalledProcessError <span
+        class="im">as</span> e:</span>
+<span id="cb169-18"><a href="#cb169-18" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span
+        class="st">"Conversion failed. Error message:"</span>, e.output)</span>
+<span id="cb169-19"><a href="#cb169-19" aria-hidden="true" tabindex="-1"></a><span class="cf">elif</span> file_path.suffix <span
+        class="op">==</span> <span class="st">".ipynb"</span>:</span>
+<span id="cb169-20"><a href="#cb169-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># If it's a notebook, convert it to a Python script with cell markers</span></span>
+<span id="cb169-21"><a href="#cb169-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb169-22"><a href="#cb169-22" aria-hidden="true" tabindex="-1"></a>        subprocess.check_output([<span
+        class="st">"jupytext"</span>, <span class="st">"--to"</span>, <span class="st">"py:percent"</span>, <span
+        class="bu">str</span>(file_path)])</span>
+<span id="cb169-23"><a href="#cb169-23" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span
+        class="st">"Converted to Python script."</span>)</span>
+<span id="cb169-24"><a href="#cb169-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> subprocess.CalledProcessError <span
+        class="im">as</span> e:</span>
+<span id="cb169-25"><a href="#cb169-25" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span
+        class="st">"Conversion failed. Error message:"</span>, e.output)</span>
+<span id="cb169-26"><a href="#cb169-26" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb169-27"><a href="#cb169-27" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span
+        class="st">"Unsupported file type."</span>)</span></code><button title="Copy to Clipboard"
+                                                                         class="code-copy-button"><i
+            class="bi"></i></button></pre>
+    </div>
 </div>
 <div id="7af820bc" class="cell" data-execution_count="129">
-<div class="sourceCode cell-code" id="cb161"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb161-1"><a href="#cb161-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> subprocess</span>
-<span id="cb161-2"><a href="#cb161-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pathlib</span>
-<span id="cb161-3"><a href="#cb161-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
-<span id="cb161-4"><a href="#cb161-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb161-5"><a href="#cb161-5" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
-<span id="cb161-6"><a href="#cb161-6" aria-hidden="true" tabindex="-1"></a>    file_path <span class="op">=</span> pathlib.Path(os.path.basename(<span class="va">__file__</span>))</span>
-<span id="cb161-7"><a href="#cb161-7" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span>:</span>
-<span id="cb161-8"><a href="#cb161-8" aria-hidden="true" tabindex="-1"></a>    file_path <span class="op">=</span> pathlib.Path(<span class="st">"AML_MC.ipynb"</span>)</span>
-<span id="cb161-9"><a href="#cb161-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb161-10"><a href="#cb161-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Check the file extension</span></span>
-<span id="cb161-11"><a href="#cb161-11" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> file_path.suffix <span class="op">==</span> <span class="st">".qmd"</span>:</span>
-<span id="cb161-12"><a href="#cb161-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># If it's a Python script, convert it to a notebook</span></span>
-<span id="cb161-13"><a href="#cb161-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
-<span id="cb161-14"><a href="#cb161-14" aria-hidden="true" tabindex="-1"></a>        os.system(<span class="st">"quarto convert AML_MC.qmd"</span>)</span>
-<span id="cb161-15"><a href="#cb161-15" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"Converted to notebook."</span>)</span>
-<span id="cb161-16"><a href="#cb161-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> subprocess.CalledProcessError <span class="im">as</span> e:</span>
-<span id="cb161-17"><a href="#cb161-17" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"Conversion failed. Error message:"</span>, e.output)</span>
-<span id="cb161-18"><a href="#cb161-18" aria-hidden="true" tabindex="-1"></a><span class="cf">elif</span> file_path.suffix <span class="op">==</span> <span class="st">".ipynb"</span>:</span>
-<span id="cb161-19"><a href="#cb161-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># If it's a notebook, convert it to a Python script with cell markers</span></span>
-<span id="cb161-20"><a href="#cb161-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
-<span id="cb161-21"><a href="#cb161-21" aria-hidden="true" tabindex="-1"></a>        <span class="co"># quatro convert ipynb to qmd</span></span>
-<span id="cb161-22"><a href="#cb161-22" aria-hidden="true" tabindex="-1"></a>        os.system(<span class="st">"quarto convert AML_MC.ipynb"</span>)</span>
-<span id="cb161-23"><a href="#cb161-23" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"Converted to qmd."</span>)</span>
-<span id="cb161-24"><a href="#cb161-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> subprocess.CalledProcessError <span class="im">as</span> e:</span>
-<span id="cb161-25"><a href="#cb161-25" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"Conversion failed. Error message:"</span>, e.output)</span>
-<span id="cb161-26"><a href="#cb161-26" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
-<span id="cb161-27"><a href="#cb161-27" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Unsupported file type."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+    <div class="sourceCode cell-code" id="cb170"><pre class="sourceCode python code-with-copy"><code
+            class="sourceCode python"><span id="cb170-1"><a href="#cb170-1" aria-hidden="true" tabindex="-1"></a><span
+            class="im">import</span> subprocess</span>
+<span id="cb170-2"><a href="#cb170-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pathlib</span>
+<span id="cb170-3"><a href="#cb170-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb170-4"><a href="#cb170-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb170-5"><a href="#cb170-5" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
+<span id="cb170-6"><a href="#cb170-6" aria-hidden="true" tabindex="-1"></a>    file_path <span class="op">=</span> pathlib.Path(os.path.basename(<span
+        class="va">__file__</span>))</span>
+<span id="cb170-7"><a href="#cb170-7" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span>:</span>
+<span id="cb170-8"><a href="#cb170-8" aria-hidden="true" tabindex="-1"></a>    file_path <span class="op">=</span> pathlib.Path(<span
+        class="st">"AML_MC.ipynb"</span>)</span>
+<span id="cb170-9"><a href="#cb170-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb170-10"><a href="#cb170-10" aria-hidden="true" tabindex="-1"></a><span
+        class="co"># Check the file extension</span></span>
+<span id="cb170-11"><a href="#cb170-11" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> file_path.suffix <span
+        class="op">==</span> <span class="st">".qmd"</span>:</span>
+<span id="cb170-12"><a href="#cb170-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># If it's a Python script, convert it to a notebook</span></span>
+<span id="cb170-13"><a href="#cb170-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb170-14"><a href="#cb170-14" aria-hidden="true" tabindex="-1"></a>        os.system(<span class="st">"quarto convert AML_MC.qmd"</span>)</span>
+<span id="cb170-15"><a href="#cb170-15" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span
+        class="st">"Converted to notebook."</span>)</span>
+<span id="cb170-16"><a href="#cb170-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> subprocess.CalledProcessError <span
+        class="im">as</span> e:</span>
+<span id="cb170-17"><a href="#cb170-17" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span
+        class="st">"Conversion failed. Error message:"</span>, e.output)</span>
+<span id="cb170-18"><a href="#cb170-18" aria-hidden="true" tabindex="-1"></a><span class="cf">elif</span> file_path.suffix <span
+        class="op">==</span> <span class="st">".ipynb"</span>:</span>
+<span id="cb170-19"><a href="#cb170-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># If it's a notebook, convert it to a Python script with cell markers</span></span>
+<span id="cb170-20"><a href="#cb170-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb170-21"><a href="#cb170-21" aria-hidden="true" tabindex="-1"></a>        <span class="co"># quatro convert ipynb to qmd</span></span>
+<span id="cb170-22"><a href="#cb170-22" aria-hidden="true" tabindex="-1"></a>        os.system(<span class="st">"quarto convert AML_MC.ipynb"</span>)</span>
+<span id="cb170-23"><a href="#cb170-23" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span
+        class="st">"Converted to qmd."</span>)</span>
+<span id="cb170-24"><a href="#cb170-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> subprocess.CalledProcessError <span
+        class="im">as</span> e:</span>
+<span id="cb170-25"><a href="#cb170-25" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span
+        class="st">"Conversion failed. Error message:"</span>, e.output)</span>
+<span id="cb170-26"><a href="#cb170-26" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb170-27"><a href="#cb170-27" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span
+        class="st">"Unsupported file type."</span>)</span></code><button title="Copy to Clipboard"
+                                                                         class="code-copy-button"><i
+            class="bi"></i></button></pre>
+    </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Converted to qmd.</code></pre>
 </div>
 </div>
-<div id="2a3b0229" class="cell">
-<div class="sourceCode cell-code" id="cb163"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb163-1"><a href="#cb163-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
-<span id="cb163-2"><a href="#cb163-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb163-3"><a href="#cb163-3" aria-hidden="true" tabindex="-1"></a>os.system(<span class="st">"quarto render AML_MC.ipynb --to html"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="143">
+    <div id="2a3b0229" class="cell" data-execution_count="130">
+        <div class="sourceCode cell-code" id="cb172"><pre class="sourceCode python code-with-copy"><code
+                class="sourceCode python"><span id="cb172-1"><a href="#cb172-1" aria-hidden="true"
+                                                                tabindex="-1"></a><span
+                class="im">import</span> os</span>
+<span id="cb172-2"><a href="#cb172-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb172-3"><a href="#cb172-3" aria-hidden="true" tabindex="-1"></a>os.system(<span class="st">"quarto render AML_MC.ipynb --to html"</span>)</span></code><button
+                title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre>
+        </div>
+        <div class="cell-output cell-output-display" data-execution_count="130">
 <pre><code>0</code></pre>
 </div>
 </div>
@@ -5725,18 +6049,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-  });
-  clipboard.on('success', function(e) {
+  const onCopySuccess = function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -5768,7 +6081,29 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
   });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
     var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
     var mailtoRegex = new RegExp(/^mailto:/);
       var filterRegex = new RegExp('/' + window.location.host + '/');
@@ -5776,7 +6111,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
     }
     // Inspect non-navigation links and adorn them if external
- 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
     for (var i=0; i<links.length; i++) {
       const link = links[i];
       if (!isInternal(link.href)) {
