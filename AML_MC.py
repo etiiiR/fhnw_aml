@@ -38,7 +38,7 @@
 # %%
 from itables import init_notebook_mode
 
-init_notebook_mode(all_interactive=True)
+init_notebook_mode()
 
 # %%
 # Laden der eingesetzten Libraries
@@ -49,7 +49,6 @@ import numpy as np
 import sklearn.metrics as metrics
 from IPython.display import display
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics.pairwise import cosine_similarity
 
 import pandas as pd
 from sklearn.model_selection import train_test_split, cross_validate
@@ -1064,31 +1063,12 @@ static_data.info()
 # %%
 print("Anzahl duplizierter Einträge:", static_data.duplicated().sum())
 
-# %%
-## Junior Cards removal
-# In the advertising campaign, we do not want to promote children's/junior cards (for whatever reasons). First, I looked at the distribution of age at issuance. Here I see that there are not many junior cards, nor are the cards issued at a late age.
-# # Filter rows where 'card_type' contains 'junior' (case insensitive)
-# junior_cards = static_data[
-#     static_data["type_card"].str.contains("junior", case=False, na=False)
-# ]
-#
-# display(junior_cards)
-#
-# # Calculate age at issue
-# junior_cards["age_at_issue"] = (
-#                                        junior_cards["issued_card"] - junior_cards["birth_day_client"]
-#                                ).dt.days // 365
-#
-# # Plot histogram
-# plt.figure(figsize=(10, 6))
-# sns.histplot(data=junior_cards, x="age_at_issue", bins=20)
-# plt.title("Age distribution at issue date of junior cards")
-# plt.xlabel("Age at issue date")
-# plt.ylabel("Number of cards")
-# plt.show()
+# %% [markdown]
+# Damit wird ein Datensatz mit 4500 individuellen Kunden und 56 Spalten erzeugt. 892 dieser Kunden besitzen eine Kreditkarte und 682 haben einen Kredit aufgenommen. 
 
 # %% [markdown]
-# ## Junior Cards Removal
+# ## Entfernen der Junior Karteninhaber
+# Kunden im jugendlichen Alter sind speziell interessante Kunden für eine Bank, da diese grundsätzlich noch keine bis wenige Bankdienstleistungen beziehen und somit flexibel sind. Es ist deshalb sehr vorteilhaft für ein Unternehmen diese für sich zu gewinnen, weshalb viele Banken für solche Kunden ganz spezifische Prozesse definieren. Das in dieser Aufgabenstellung gewünschte Modell würde in so einem Prozess nicht eingesetzt werden, weshalb die jugendlichen Kunden nachfolgend aus dem Datensatz entfernt werden.    
 
 # %%
 num_accounts_before = len(static_data)
@@ -1101,13 +1081,23 @@ num_junior_cards = num_accounts_before - num_accounts_after
 print(f"Number of junior cards removed: {num_junior_cards}")
 
 # %% [markdown]
+# Durch diese Entfernung wurden 145 Kunden entfernt. 
+
+# %% [markdown]
 # ## Bewegungsdaten
+# Um einen Datensatz zu erhalten, bei welchem jede Zeile eine Observation repräsentiert müssen die Transaktionen pro Kunde entsprechend aufgerollt werden. Das bedeutet, ein vordefiniertes Zeitfenster vor dem zu modellierenden Event zu definieren und die darin enthaltenen Daten in einer Zeile zu aggregieren. Das gesuchte Zeitfenster beinhaltet bestenfalls saisonale Gegebenheiten und stets einen Lag-Zeitraum, der die Verzögerung der Kaufentscheidung und Ausführung des Auftrags aufzeichnen soll. 
+# Hier wird ein Rollup-Fenster inklusive Lag von 13 Monaten eingesetzt. 
+#
 # ### Käufer
+# Für Kunden, die bereits eine Kreditkarte besitzen, ist es unkompliziert, das Rollup-Fenster zu identifizieren. 
 #
 
 # %%
 # select all transactions from trans from date 1995-03-16 and account_id 150
 trans[(trans["date"] == "1995-03-16") & (trans["account_id"] == 150)]
+
+# %% [markdown]
+# Aus dieser Tabelle ersichtlich ist, dass für den Kunden 150 zum Datum der Eröffnung des Kontos mehrere Transaktionen vorhanden sind und dass wenn die Beträge von dem Tag aufsummiert werden, der korrekte Kontostand resultiert (1900 + 900 = 2800). Deshalb wird nachfolgend davon ausgegangen, dass die Aufsummierung der Transaktionsbeträge zum korrekten Kontostand führt. 
 
 # %%
 # sort dataframe trans by account_id and date
@@ -1124,6 +1114,17 @@ first_row_per_account["account_id"].nunique() == trans["account_id"].nunique()
 
 # %%
 first_row_per_account.query("amount != balance")
+
+# %% [markdown]
+# Mit dem obigen Code wird zudem sichergestellt, dass diese Gegebenheit für alle Kunden gilt. Nachfolgend werden die Transaktionen aggregiert, sodass die Spalten  
+#
+# - `volume`: das Volumen, also die Summe der Ein- und Ausgaben auf dem Konto,  
+# - `credit`: die Summe der Einnahmen,  
+# - `withdrawal`: die Summe der Ausgaben,  
+# - `n_transactions`: die Anzahl der getätigten Transaktionen und  
+# - `balance`: der Kontostand
+#
+# pro Monat entstehen. Dieser Datensatz wird dann mithilfe der nachfolgend definierten Funktion `rollup_credit_card` aufgerollt. 
 
 # %%
 # Extract year and month from date to a new column 'year_month'
@@ -1150,6 +1151,10 @@ transactions_monthly["balance"] = transactions_monthly.groupby("account_id")[
     "volume"
 ].cumsum()
 
+# %%
+# count unique account_ids in transactions_monthly
+transactions_monthly["account_id"].nunique()
+
 
 # %%
 def rollup_credit_card(trans_monthly, account_card_issue_dates):
@@ -1163,7 +1168,7 @@ def rollup_credit_card(trans_monthly, account_card_issue_dates):
         )
     ]
 
-    # select only where  months_before_card_issue >0 and <= 13
+    # select only where months_before_card_issue > 0 and <= 13
     trans_monthly = trans_monthly[
         (trans_monthly["months_before_card_issue"] > 0)
         & (trans_monthly["months_before_card_issue"] <= 13)
@@ -1194,120 +1199,184 @@ transactions_rolled_up_buyers = rollup_credit_card(
     transactions_monthly, buyers.loc[:, ["account_id", "issued"]]
 )
 
+transactions_rolled_up_buyers.info()
+
+# %% [markdown]
+# Und so entsteht ein Datensatz, welcher für 568 Kreditkartenkäufer die Merkmale `balance`, `credit`, `n_transactions`, `volume` und `withdrawal` für alle 13 Monate des Rollup-Fensters inklusive Lag beinhaltet. 
 
 # %% [markdown]
 # ### Nicht-Käufer
-#
+# Um die Transaktionen der Nicht-Käufer analog zu verarbeiten, wird ein fiktives Kaufdatum benötigt, welches als Ausgangslage für die Aufrollung dient.
 
 # %%
-# model top-n similarity of districts
-def calculate_district_similarity():
-    data = data_frames["district.csv"]
-    data = data.drop(columns=["region", "district_name"])
+# plot the issue date distribution of the buyers that where rolled up (586)
+merged_data = transactions_rolled_up_buyers.merge(buyers, how='left', left_on='account_id', right_on="account_id")
+plt.figure(figsize=(10, 6))
+merged_data["issued"].value_counts().sort_index().plot(kind="bar")
+plt.title("Verteilung der Ausstellungsdaten")
+plt.xlabel("Datum")
+plt.ylabel("Anzahl")
+plt.show()
 
-    # Calculate the similarity matrix
-    similarity_matrix = cosine_similarity(data)
 
-    # Create a DataFrame from the similarity matrix
-    similarity_df = pd.DataFrame(
-        similarity_matrix, index=data.index, columns=data.index
+# %%
+# from transactions_monthly plot the number of distinct account ids per month
+plt.figure(figsize=(10, 6))
+transactions_monthly["year_month"].value_counts().sort_index().plot(kind="bar")
+plt.title("Anzahl der Konten pro Monat")
+plt.xlabel("Monat")
+plt.ylabel("Anzahl")
+plt.show()
+
+
+# %%
+def rollup_non_credit(trans_monthly, non_buyers, range):
+    # set seed 
+    np.random.seed(42)
+    # for each non buyer, find the date of the first transaction
+    first_transaction_dates = trans_monthly.groupby('account_id')['year_month'].min().reset_index()
+    first_transaction_dates.columns = ['account_id', 'first_transaction_date']
+
+    # merge the first transaction dates with the non_buyers DataFrame
+    non_buyers = non_buyers.merge(first_transaction_dates, on='account_id', how='left')
+
+    # randomly sample a date from the range as issue date for each non buyer making sure that the random date is after the first transaction of the non buyer
+    non_buyers["issued"] = non_buyers["first_transaction_date"].apply(
+        lambda x: np.random.choice(range, 1)[0]
     )
 
-    # Create a mask to exclude the diagonal
-    mask = np.eye(len(similarity_df), dtype=bool)
-
-    # Apply the mask to the DataFrame
-    similarity_df = similarity_df.mask(mask)
-
-    return similarity_df
+    non_buyers_rolled_up = rollup_credit_card(trans_monthly, non_buyers.loc[:, ["account_id", "issued"]])
+    return non_buyers_rolled_up, non_buyers
 
 
 # %%
-def top_n_similarity(district_id, n, similarity_df):
-    # Get the row of the similarity matrix corresponding to the district_id
-    similarity_row = similarity_df.loc[district_id - 1]
-
-    # Sort the values in the row in descending order and get the top n indices
-    top_n_indices = similarity_row.sort_values(ascending=False).head(n).index
-
-    # append district id to top_n_indices
-    top_n_indices = top_n_indices.append(pd.Index([district_id]))
-
-    return top_n_indices
-
+# get the list of issue dates of buyers
+issue_dates_buyers = buyers["issued"].unique()
+transactions_rolled_up_non_buyers, non_buyers = rollup_non_credit(transactions_monthly,
+                                                                  static_data[~static_data["has_card"]],
+                                                                  issue_dates_buyers)
+transactions_rolled_up_non_buyers.info()
 
 # %%
-# find similar non-buyers
-def find_similar_non_buyers(buyers, non_buyers):
-    similar_non_buyers = pd.DataFrame(
-        columns=["account_id", "issued"]
-    )  # TODO better way? right now warning?!
-    no_similar_found = []
-    district_similarities = calculate_district_similarity()
+# # model top-n similarity of districts
+# def calculate_district_similarity():
+#     data = data_frames["district.csv"]
+#     data = data.drop(columns=["region", "district_name"])
 
-    for _, buyer in buyers.iterrows():
-        # exclude already found similar_non_buyers from non_buyer's list
-        non_buyers = non_buyers[
-            ~non_buyers["account_id"].isin(similar_non_buyers["account_id"])
-        ]
-        # find top n similar districts
-        top_n_similar = top_n_similarity(
-            buyer["district_id_client"], 2, district_similarities
-        )
+#     # Calculate the similarity matrix
+#     similarity_matrix = cosine_similarity(data)
 
-        # Find non-buyers with similar age, sex, and district
-        similar = non_buyers[
-            (non_buyers["age"] >= buyer["age"] - 3)
-            & (non_buyers["age"] <= buyer["age"] + 3)
-            & (non_buyers["gender"] == buyer["gender"])
-            & (non_buyers["district_id_account"].isin(top_n_similar))
-        ]
+#     # Create a DataFrame from the similarity matrix
+#     similarity_df = pd.DataFrame(
+#         similarity_matrix, index=data.index, columns=data.index
+#     )
 
-        # join transaction data to similar
-        similar = pd.merge(similar, transactions_monthly, on="account_id")
+#     # Create a mask to exclude the diagonal
+#     mask = np.eye(len(similarity_df), dtype=bool)
 
-        similar["issued"] = buyer["issued"]
-        similar["months_before_card_issue"] = [
-            (issued - year_month).n
-            for issued, year_month in zip(similar["issued"], similar["year_month"])
-        ]
+#     # Apply the mask to the DataFrame
+#     similarity_df = similarity_df.mask(mask)
 
-        # select only where months_before_card_issue > 0 and <= 13
-        similar = similar[
-            (similar["months_before_card_issue"] > 0)
-            & (similar["months_before_card_issue"] <= 13)
-        ]
-
-        # make sure there's 13 rows per account_id and drop account_ids for which that's not true
-        similar = similar.groupby("account_id").filter(lambda x: len(x) == 13)
-
-        # next if similar is empty
-        if similar.empty:
-            no_similar_found.append(buyer["account_id"])
-            continue
-
-        # drop duplicates
-        similar = similar.drop_duplicates(subset=["account_id"])
-
-        # Append similar similar['account_id'] and similar['nb_issued'] to similar_non_buyers
-        similar_non_buyers = pd.concat(
-            [similar_non_buyers, similar[["account_id", "issued"]]]
-        )
-
-    return similar_non_buyers, no_similar_found
-
+#     return similarity_df
 
 # %%
-non_buyers = static_data[~static_data["has_card"]]
-similar_non_buyers, none_found = find_similar_non_buyers(buyers, non_buyers)
+# def top_n_similarity(district_id, n, similarity_df):
+#     # Get the row of the similarity matrix corresponding to the district_id
+#     similarity_row = similarity_df.loc[district_id - 1]
+
+#     # Sort the values in the row in descending order and get the top n indices
+#     top_n_indices = similarity_row.sort_values(ascending=False).head(n).index
+
+#     # append district id to top_n_indices
+#     top_n_indices = top_n_indices.append(pd.Index([district_id]))
+
+#     return top_n_indices
 
 # %%
-len(non_buyers[~non_buyers["account_id"].isin(similar_non_buyers["account_id"])])
+# # find similar non-buyers
+# def find_similar_non_buyers(buyers, non_buyers):
+#     similar_non_buyers = pd.DataFrame(
+#         columns=["account_id", "issued"]
+#     )  # TODO better way? right now warning?!
+#     no_similar_found = []
+#     district_similarities = calculate_district_similarity()
+
+#     for _, buyer in buyers.iterrows():
+#         # exclude already found similar_non_buyers from non_buyer's list
+#         non_buyers = non_buyers[
+#             ~non_buyers["account_id"].isin(similar_non_buyers["account_id"])
+#         ]
+#         # find top n similar districts
+#         top_n_similar = top_n_similarity(
+#             buyer["district_id_client"], 2, district_similarities
+#         )
+
+#         # Find non-buyers with similar age, sex, and district
+#         similar = non_buyers[
+#             (non_buyers["age"] >= buyer["age"] - 3)
+#             & (non_buyers["age"] <= buyer["age"] + 3)
+#             & (non_buyers["gender"] == buyer["gender"])
+#             & (non_buyers["district_id_account"].isin(top_n_similar))
+#         ]
+
+#         # join transaction data to similar
+#         similar = pd.merge(similar, transactions_monthly, on="account_id")
+
+#         similar["issued"] = buyer["issued"]
+#         similar["months_before_card_issue"] = [
+#             (issued - year_month).n
+#             for issued, year_month in zip(similar["issued"], similar["year_month"])
+#         ]
+
+#         # select only where months_before_card_issue > 0 and <= 13
+#         similar = similar[
+#             (similar["months_before_card_issue"] > 0)
+#             & (similar["months_before_card_issue"] <= 13)
+#         ]
+
+#         # make sure there's 13 rows per account_id and drop account_ids for which that's not true
+#         similar = similar.groupby("account_id").filter(lambda x: len(x) == 13)
+
+#         # next if similar is empty
+#         if similar.empty:
+#             no_similar_found.append(buyer["account_id"])
+#             continue
+
+#         # drop duplicates
+#         similar = similar.drop_duplicates(subset=["account_id"])
+
+#         # Append similar similar['account_id'] and similar['nb_issued'] to similar_non_buyers
+#         similar_non_buyers = pd.concat(
+#             [similar_non_buyers, similar[["account_id", "issued"]]]
+#         )
+
+#     return similar_non_buyers, no_similar_found
 
 # %%
-transactions_rolled_up_non_buyers = rollup_credit_card(
-    transactions_monthly, similar_non_buyers
-)
+# non_buyers = static_data[~static_data["has_card"]]
+# similar_non_buyers, none_found = find_similar_non_buyers(buyers, non_buyers)
+
+# %%
+# len(none_found)
+
+# %%
+# len(non_buyers[~non_buyers["account_id"].isin(similar_non_buyers["account_id"])])
+
+# %%
+# transactions_rolled_up_non_buyers = rollup_credit_card(
+#     transactions_monthly, similar_non_buyers
+# )
+
+# %%
+# plot the issue date distribution of the non-buyers that where rolled up
+plt.figure(figsize=(10, 6))
+non_buyers["issued"].value_counts().sort_index().plot(kind="bar")
+plt.title("Verteilung der Ausstellungsdaten")
+plt.xlabel("Datum")
+plt.ylabel("Anzahl")
+plt.show()
+
+
 
 # %% [markdown]
 # ## Zusammenfügen der Daten
