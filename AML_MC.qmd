@@ -1,6 +1,6 @@
 ---
 title: AML Challenge 2024
-date: '`r Sys.Date()`'
+date: today
 author: 'Etienne Roulet, Alexander Shanmugam'
 format:
   html:
@@ -9,47 +9,44 @@ format:
     page-layout: full
 editor_options:
   chunk_output_type: console
+bibliography: references.bib
 jupyter:
   jupytext:
     cell_metadata_filter: '-all'
     main_language: python
     notebook_metadata_filter: '-all'
   kernelspec:
-    display_name: Python 3
+    display_name: Python 3 (ipykernel)
     language: python
     name: python3
 ---
 
 ### Todos
-
-- Big todo: Data # print y.value_counts() there are 2000 none has_card == no is that really sooo???
-
-- Big todo: inballanced Data and very bad metrics see precision idk where that comes from
 - Big todo: Fix plotting Confusion Matrix and ROC, see metrics are different from plotting
-- Big todo: - Reduce Model, Explainable AI 
-- Big todo: no complex logic in preprocessing (What Danni said implementing) 
+- Big todo: - Reduce Model, Explainable AI  
 
-
-- Markdown writing and explaine what we have done
+- Markdown writing and explain what we have done
 - Clean up code: (Imports in central place, Comments, Code Refactor)
-
 
 # Setup
 Die folgenden Code-Blöcke können genutzt werden, um die benötigten Abhängigkeiten zu installieren und zu importieren.
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:36.194435Z', start_time: '2024-06-05T13:21:35.676924Z'}
 %%capture
 %pip install -r ../requirements.txt
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:37.652875Z', start_time: '2024-06-05T13:21:36.196324Z'}
 from itables import show
 from itables import init_notebook_mode
 
-init_notebook_mode(all_interactive=True)
+init_notebook_mode()
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:39.850424Z', start_time: '2024-06-05T13:21:37.654519Z'}
 # Laden der eingesetzten Libraries
 from datetime import datetime
 
@@ -99,6 +96,7 @@ from sklearn.feature_selection import SelectFromModel
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:39.860045Z', start_time: '2024-06-05T13:21:39.856230Z'}
 %%capture
 # set theme ggplot for plots
 plt.style.use("ggplot")
@@ -108,6 +106,7 @@ pd.set_option("display.max_rows", None)
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:39.874326Z', start_time: '2024-06-05T13:21:39.863633Z'}
 # Funktion zur Bestimmung des Geschlechts und Berechnung des Geburtstags
 def parse_details(birth_number):
     birth_number_str = str(
@@ -158,6 +157,7 @@ Inhalt der hier bearbeiteten und dokumentierten Mini-Challenge für das Modul «
 Zur Verfügung gestellt wurden 8 csv-Dateien von welchen die Beschreibung der erfassten Variablen unter dem folgenden Link eingesehen werden können: [PKDD'99 Discovery Challenge - Guide to the Financial Data Set](https://sorry.vse.cz/~berka/challenge/PAST/index.html). Nachfolgend werden diese csv-Dateien eingelesen.
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:40.771057Z', start_time: '2024-06-05T13:21:39.876207Z'}
 account = pd.read_csv("./data/account.csv", sep=";", dtype={"date": "str"})
 card = pd.read_csv("./data/card.csv", sep=";", dtype={"issued": "str"})
 client = pd.read_csv("./data/client.csv", sep=";")
@@ -172,22 +172,26 @@ trans = pd.read_csv("./data/trans.csv", sep=";", dtype={"date": "str", "bank": "
 Im folgenden Abschnitt werden die geladenen Daten separat so transformiert, dass jede Zeile einer Observation und jede Spalte einer Variable im entsprechenden Datenformat entspricht, also ins Tidy-Format gebracht.
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:40.775694Z', start_time: '2024-06-05T13:21:40.772349Z'}
 data_frames = {}
 ```
 
 ## Account
 [//]: # (-.- .tabset)
-Der Datensatz `accounts.csv` beinhaltet 4500 Observationen mit den folgenden Informationen über die Kontos der Bank:  
-- `account_id`: die Kontonummer, 
-- `district_id`: den Standort der entsprechenden Bankfiliale,
-- `frequency`: die Frequenz der Ausstellung von Kontoauszügen (monatlich, wöchentlich, pro Transaktion) und 
+Der Datensatz `accounts.csv` beinhaltet 4500 Observationen mit den folgenden Informationen über die Kontos der Bank: 
+   
+- `account_id`: die Kontonummer,  
+- `district_id`: den Standort der entsprechenden Bankfiliale,  
+- `frequency`: die Frequenz der Ausstellung von Kontoauszügen (monatlich, wöchentlich, pro Transaktion) und  
 - `date`: das Erstellungsdatum
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:40.788192Z', start_time: '2024-06-05T13:21:40.776619Z'}
 account.info()
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:40.794045Z', start_time: '2024-06-05T13:21:40.788818Z'}
 print("Anzahl fehlender Werte:", sum(account.isnull().sum()))
 print("Anzahl duplizierter Einträge:", account.duplicated().sum())
 ```
@@ -196,6 +200,7 @@ print("Anzahl duplizierter Einträge:", account.duplicated().sum())
 Nachfolgend wird die `date` Spalte des `account.csv`-Datensatzes in das entsprechende Datenformat geparsed und die Werte von `frequency` übersetzt und als Levels einer Kategorie definiert.
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:40.811910Z', start_time: '2024-06-05T13:21:40.797161Z'}
 # parse date
 account["date"] = pd.to_datetime(account["date"], format="%y%m%d")
 # translate categories
@@ -218,6 +223,7 @@ account.sample(n=5)
 Hier zu sehen ist die Verteilung der Distrikte pro Bankkonto. Ersichtlich ist, dass im Distrikt 1 mit Abstand am meisten Bankkontos geführt werden. Die darauf folgenden Distrikte bewegen sich alle im Bereich zwischen ~250 - 50 Bankkonten.  
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:41.196817Z', start_time: '2024-06-05T13:21:40.812493Z'}
 # plot the distribution of the district_ids and replace the id with it's name
 plt.figure(figsize=(15, 6))
 account["district_id"].value_counts().plot(kind="bar")
@@ -231,6 +237,7 @@ plt.show()
 Auf dieser Visualisierung zu sehen ist die Klassenverteilung der Frequenz der Ausstellung der Kontoauszüge. Die allermeisten Bankkonten besitzen eine monatliche Ausstellung.
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:41.280193Z', start_time: '2024-06-05T13:21:41.197786Z'}
 # Verteilung der Frequenz visualisieren
 plt.figure(figsize=(10, 6))
 account["frequency"].value_counts().plot(kind="bar")
@@ -244,6 +251,7 @@ plt.show()
 Der hier dargestellte Plot zeigt die Verteilung der Kontoerstellungsdaten. Das erste Konto wurde im Jahr 1993 und das neuste im 1998 erstellt.  
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:41.443215Z', start_time: '2024-06-05T13:21:41.281646Z'}
 # plot date distribution
 plt.figure(figsize=(10, 6))
 plt.hist(account["date"], bins=20)
@@ -257,11 +265,13 @@ plt.show()
 Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/accounts.html) entnommen werden. 
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:41.457895Z', start_time: '2024-06-05T13:21:41.455133Z'}
 # append account data to dataframe collection
 data_frames["account.csv"] = account
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:41.462876Z', start_time: '2024-06-05T13:21:41.459275Z'}
 # %%capture
 # # generate sweetviz report
 # svReport_account = sv.analyze(account)
@@ -272,16 +282,19 @@ data_frames["account.csv"] = account
 [//]: # (-.- .tabset)
 
 Der Datensatz `card.csv` beinhaltet 892 Observationen mit den folgenden Informationen über die von der Bank herausgegebenen Kreditkarten:  
-- `card_id`: die Kartennummer, 
-- `disp_id`: die Zuordnung zum entsprechenden Bankkonto und -inhaber (Disposition),
-- `type`: die Art der Kreditkarte (junior, classic, gold) und 
+
+- `card_id`: die Kartennummer,  
+- `disp_id`: die Zuordnung zum entsprechenden Bankkonto und -inhaber (Disposition),  
+- `type`: die Art der Kreditkarte (junior, classic, gold) und  
 - `issued`: das Ausstellungsdatum
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:41.475572Z', start_time: '2024-06-05T13:21:41.467514Z'}
 card.info()
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:41.481800Z', start_time: '2024-06-05T13:21:41.476855Z'}
 print("Anzahl fehlender Werte:", sum(card.isnull().sum()))
 print("Anzahl duplizierter Einträge:", card.duplicated().sum())
 ```
@@ -290,6 +303,7 @@ print("Anzahl duplizierter Einträge:", card.duplicated().sum())
 Auch bei diesem Datensatz (`card.csv`) werden zunächst die Datentypen korrigiert um anschliessend die Inhalte entsprechend beschreiben zu können
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:41.499263Z', start_time: '2024-06-05T13:21:41.487247Z'}
 # parse date
 card["issued"] = pd.to_datetime(card["issued"].str[:6], format="%y%m%d")
 card["issued"] = card["issued"].dt.to_period("M")
@@ -303,6 +317,7 @@ card.sample(n=5)
 Hier dargestellt ist die Klassenverteilung der Kartentypen. Die meisten Karteninhaber besitzen eine klassische Kreditkarte, gefolgt von ~180 junior- und ~100 gold Karten.  
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:41.578542Z', start_time: '2024-06-05T13:21:41.500963Z'}
 # plot distribution of type
 plt.figure(figsize=(10, 6))
 card["type"].value_counts().plot(kind="bar")
@@ -316,6 +331,7 @@ plt.show()
 Hier dargestellt ist die Häufigkeit von Kreditkartenausstellungen pro Monat. Erkennbar ist eine steigende Tendenz mit einem Rückgang in den Monaten Februar - April 1997.  
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:41.756597Z', start_time: '2024-06-05T13:21:41.579879Z'}
 # plot issued date per month and year
 plt.figure(figsize=(15, 6))
 card["issued"].value_counts().sort_index().plot(kind="bar")
@@ -329,11 +345,13 @@ plt.show()
 Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/card.html) entnommen werden.
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:41.760316Z', start_time: '2024-06-05T13:21:41.758255Z'}
 # append to dataframes collection
 data_frames["card.csv"] = card
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:41.764495Z', start_time: '2024-06-05T13:21:41.761996Z'}
 # %%capture
 # # generate sweetviz report
 # svReport_card = sv.analyze(card)
@@ -344,15 +362,18 @@ data_frames["card.csv"] = card
 [//]: # (-.- .tabset)
 
 Der Datensatz `client.csv` beinhaltet 5369 Observationen mit den folgenden Informationen über die Kunden der Bank:  
-- `client_id`: die Kundennummer, 
-- `birth_number`: eine Kombination aus Geburtsdatum und Geschlecht sowie
-- `district_id`: die Adresse  
+
+- `client_id`: die Kundennummer,  
+- `birth_number`: eine Kombination aus Geburtsdatum und Geschlecht sowie  
+- `district_id`: die Adresse   
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:41.772187Z', start_time: '2024-06-05T13:21:41.765843Z'}
 client.info()
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:41.780146Z', start_time: '2024-06-05T13:21:41.773837Z'}
 print("Anzahl fehlender Werte:", sum(client.isnull().sum()))
 print("Anzahl duplizierter Einträge:", client.duplicated().sum())
 ```
@@ -361,6 +382,7 @@ print("Anzahl duplizierter Einträge:", client.duplicated().sum())
 Die Spalte `birth_number` des `client.csv`-Datensatzes codiert 3 Features der Bankkunden: Geschlecht, Geburtsdatum und damit auch das Alter. Diese Informationen werden mithilfe der zuvor definierten Funktionen `parse_details()` und `calculate_age` extrahiert.
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:41.804883Z', start_time: '2024-06-05T13:21:41.781836Z'}
 # Geburtstag & Geschlecht aus birth_number extrahieren
 client["gender"], client["birth_day"] = zip(
     *client["birth_number"].apply(parse_details)
@@ -380,6 +402,7 @@ client.sample(n=5)
 Hier dargestellt ist die Verteilung des Geschlechts der Bankkunden. Das Geschlecht der erfassten Bankkunden ist fast gleichverteilt mit einem etwas kleineren Frauenanteil.  
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:41.892043Z', start_time: '2024-06-05T13:21:41.806399Z'}
 # plot distribution of gender
 plt.figure(figsize=(10, 6))
 gender_distribution = client["gender"].value_counts().plot(kind="bar")
@@ -393,6 +416,7 @@ plt.show()
 Nachfolgend abgebildet ist die Verteilung des Alters der Bankkunden. Die jüngste erfasste Person ist 12 Jahre alt und die älteste 88. 
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:41.984747Z', start_time: '2024-06-05T13:21:41.895159Z'}
 # plot distribution of age
 plt.figure(figsize=(10, 6))
 client["age"].plot(kind="hist", bins=20)
@@ -406,10 +430,12 @@ plt.show()
 Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/client.html) entnommen werden.
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:41.988784Z', start_time: '2024-06-05T13:21:41.986070Z'}
 data_frames["client.csv"] = client
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:41.991580Z', start_time: '2024-06-05T13:21:41.989528Z'}
 # %%capture
 # svReport_client = sv.analyze(client)
 # svReport_client.show_html(filepath="./reports/client.html", open_browser=False)
@@ -418,17 +444,20 @@ data_frames["client.csv"] = client
 ## Disp
 [//]: # (-.- .tabset)
 
-Der Datensatz `disp.csv` beinhaltet 5369 Observationen mit den folgenden Informationen über die Dispositionen der Bank:  
-- `disp_id`: der Identifikationsschlüssel der Disposition,
-- `client_id`: die Kundennummer,
-- `account_id`: die Kontonummer,
+Der Datensatz `disp.csv` beinhaltet 5369 Observationen mit den folgenden Informationen über die Dispositionen der Bank:   
+
+- `disp_id`: der Identifikationsschlüssel der Disposition,  
+- `client_id`: die Kundennummer,  
+- `account_id`: die Kontonummer,  
 - `type`: die Art der Disposition (Inhaber, Benutzer)
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:42.000423Z', start_time: '2024-06-05T13:21:41.992871Z'}
 disp.info()
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:42.006008Z', start_time: '2024-06-05T13:21:42.001464Z'}
 print("Anzahl fehlender Werte:", sum(disp.isnull().sum()))
 print("Anzahl duplizierter Einträge:", disp.duplicated().sum())
 ```
@@ -437,6 +466,7 @@ print("Anzahl duplizierter Einträge:", disp.duplicated().sum())
 Auch die Variablen des Datensatzes `disp.csv` werden in die korrekten Datentypen übertragen. 
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:42.012090Z', start_time: '2024-06-05T13:21:42.007020Z'}
 # Spalte type als Kategorie speichern
 disp["type"] = disp["type"].astype("category")
 
@@ -448,6 +478,7 @@ disp.sample(n=5)
 Hier dargestellt ist die Verteilung der Art der Dispositionen. 4500 Kunden sind Inhaber eines Kontos und 896 sind Disponenten. 
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:42.081753Z', start_time: '2024-06-05T13:21:42.013079Z'}
 # plot distribution of kind
 plt.figure(figsize=(10, 6))
 disp["type"].value_counts().plot(kind="bar")
@@ -458,6 +489,7 @@ plt.show()
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:42.087469Z', start_time: '2024-06-05T13:21:42.083040Z'}
 # remove disponents
 disp = disp[disp["type"] == "OWNER"]
 ```
@@ -466,10 +498,12 @@ disp = disp[disp["type"] == "OWNER"]
 Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/disp.html) entnommen werden.
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:42.092328Z', start_time: '2024-06-05T13:21:42.088710Z'}
 data_frames["disp.csv"] = disp
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:42.097295Z', start_time: '2024-06-05T13:21:42.094063Z'}
 # %%capture
 # svReport_disp = sv.analyze(disp)
 # svReport_disp.show_html(filepath="./reports/disp.html", open_browser=False)
@@ -478,29 +512,32 @@ data_frames["disp.csv"] = disp
 ## District
 [//]: # (-.- .tabset)
 
-Der Datensatz `district.csv` beinhaltet 77 Observationen mit den folgenden demografischen Informationen:  
-- `A1`: die ID des Distrikts, 
-- `A2`: der Name des Distrikts,
-- `A3`: die Region,
-- `A4`: die Anzahl der Einwohner,
-- `A5`: die Anzahl der Gemeinden mit < 499 Einwohner,
-- `A6`: die Anzahl der Gemeinden mit 500 - 1999 Einwohner,
-- `A7`: die Anzahl der Gemeinden mit 2000 - 9999 Einwohner,
-- `A8`: die Anzahl der Gemeinden mit >10000 Einwohner,
-- `A9`: die Anzahl Städte,
-- `A10`: das Verhältnis von städtischen Einwohnern,
-- `A11`: das durchschnittliche Einkommen,
-- `A12`: die Arbeitslosenrate vom Jahr 95,
-- `A13`: die Arbeitslosenrate vom Jahr 96,
-- `A14`: die Anzahl von Unternehmer pro 1000 Einwohner,
-- `A15`: die Anzahl von begangenen Verbrechen im Jahr 95,
-- `A16`: die Anzahl von begangenen Verbrechen im Jahr 96, 
+Der Datensatz `district.csv` beinhaltet 77 Observationen mit den folgenden demografischen Informationen:   
+
+- `A1`: die ID des Distrikts,  
+- `A2`: der Name des Distrikts,  
+- `A3`: die Region,  
+- `A4`: die Anzahl der Einwohner,  
+- `A5`: die Anzahl der Gemeinden mit < 499 Einwohner,  
+- `A6`: die Anzahl der Gemeinden mit 500 - 1999 Einwohner,  
+- `A7`: die Anzahl der Gemeinden mit 2000 - 9999 Einwohner,  
+- `A8`: die Anzahl der Gemeinden mit >10000 Einwohner,  
+- `A9`: die Anzahl Städte,  
+- `A10`: das Verhältnis von städtischen Einwohnern,  
+- `A11`: das durchschnittliche Einkommen,  
+- `A12`: die Arbeitslosenrate vom Jahr 95,  
+- `A13`: die Arbeitslosenrate vom Jahr 96,  
+- `A14`: die Anzahl von Unternehmer pro 1000 Einwohner,  
+- `A15`: die Anzahl von begangenen Verbrechen im Jahr 95,  
+- `A16`: die Anzahl von begangenen Verbrechen im Jahr 96,   
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:42.105877Z', start_time: '2024-06-05T13:21:42.099429Z'}
 district.info()
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:42.113574Z', start_time: '2024-06-05T13:21:42.107245Z'}
 print("Anzahl fehlender Werte:", sum(district.isnull().sum()))
 print("Anzahl duplizierter Einträge:", district.duplicated().sum())
 ```
@@ -509,6 +546,7 @@ print("Anzahl duplizierter Einträge:", district.duplicated().sum())
 Zunächst werden die Spaltennamen in sprechendere übersetzt.
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:42.122410Z', start_time: '2024-06-05T13:21:42.114861Z'}
 # Spalten umbenennen
 district = district.rename(
     columns={
@@ -557,16 +595,18 @@ district["district_name"] = district["district_name"].astype("category")
 Auffällig ist, dass nebst den Spalten `A2` (dem Namen) und `A3` (der Region) die Spalten `A12` und `A15` den Datentyp `object` erhalten. Das ist, weil jeweils ein fehlender Wert vorhanden ist, welcher mit einem `?` gekennzeichnet ist. 
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:42.138843Z', start_time: '2024-06-05T13:21:42.124003Z'}
 # die fehlenden Werte anzeigen
 district[district.isin(["?"]).any(axis=1)]
 ```
 
-Wir gehen davon aus, dass es sich hier um effektiv fehlende Werte handelt und nicht um zensierte Daten, also Werte, für welche der exakte Wert fehlt, aber trotzdem Informationen vorhanden sind. In diesem Fall, wenn die Variable mit den fehlenden Werten eine hohe Korrelation mit anderen Prediktoren aufweist, bietet es sich an, KNN oder eine einfache lineare Regression für die Imputation anzuwenden. [1] 
+Wir gehen davon aus, dass es sich hier um effektiv fehlende Werte handelt und nicht um zensierte Daten, also Werte, für welche der exakte Wert fehlt, aber trotzdem Informationen vorhanden sind. In diesem Fall, wenn die Variable mit den fehlenden Werten eine hohe Korrelation mit anderen Prediktoren aufweist, bietet es sich an, KNN oder eine einfache lineare Regression für die Imputation anzuwenden. [@brancoSurveyPredictiveModeling2017] 
 
 Die Korrelationsmatrix des [SweetViz Reports](./reports/district.html) zeigt, dass `unemploy_rate95` stark mit `unemploy_rate96` und `no_of_crimes95` mit `no_of_crimes96` korreliert. 
 
 ```{python}
-# die ? ersetzen mit NaN
+#| ExecuteTime: {end_time: '2024-06-05T13:21:42.156333Z', start_time: '2024-06-05T13:21:42.149709Z'}
+    # die ? ersetzen mit NaN
 district = district.replace("?", np.nan)
 
 # Datentyp korrigieren
@@ -575,11 +615,13 @@ district["unemploy_rate95"] = district["unemploy_rate95"].astype(float)
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:42.164979Z', start_time: '2024-06-05T13:21:42.158895Z'}
 # Korrelation zwischen Arbeitslosenquote 95 und 96
 district[["unemploy_rate95", "unemploy_rate96"]].corr()
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:42.172928Z', start_time: '2024-06-05T13:21:42.166748Z'}
 # Korrelation zwischen Anzahl Verbrechen 95 und 96
 district[["no_of_crimes95", "no_of_crimes96"]].corr()
 ```
@@ -587,6 +629,7 @@ district[["no_of_crimes95", "no_of_crimes96"]].corr()
 Demnach werden nachfolgend zwei lineare Regressions-Modelle trainiert, um die fehlenden Werte zu imputieren.
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:42.187169Z', start_time: '2024-06-05T13:21:42.174656Z'}
 # Zeilen filtern, sodass keine fehlenden Werte vorhanden sind
 district_no_na = district[district["unemploy_rate95"].notnull()]
 
@@ -609,6 +652,7 @@ regression_results(
 Der $R^2$ Wert von $0.9634$ versichert, damit ein stabiles Modell für die Imputation erreicht zu haben. 
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:42.194314Z', start_time: '2024-06-05T13:21:42.189244Z'}
 # Lineares regressions Modell erstellen
 lin_reg_crime = LinearRegression()
 
@@ -628,6 +672,7 @@ regression_results(
 Auch hier mit einem $R^2$ Wert von $0.9969$ gehen wir davon aus, damit ein stabiles Modell für die Imputation erreicht zu haben. Somit werden nachfolgend die beiden Modelle genutzt, um die fehlenden Werte einzufüllen.
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:42.200145Z', start_time: '2024-06-05T13:21:42.195892Z'}
 # Vorhersage der fehlenden Werte
 district.loc[district["no_of_crimes95"].isnull(), "no_of_crimes95"] = (
     lin_reg_crime.predict(
@@ -647,10 +692,12 @@ district.loc[district["unemploy_rate95"].isnull(), "unemploy_rate95"] = (
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:42.211282Z', start_time: '2024-06-05T13:21:42.201901Z'}
 district.sample(n=5)
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:42.217312Z', start_time: '2024-06-05T13:21:42.212516Z'}
 district.isnull().sum()
 ```
 
@@ -658,10 +705,12 @@ district.isnull().sum()
 Es gibt keine Duplikate und somit 77 unterschiedliche Namen der Distrikte. Diese sind auf 8 Regionen verteilt, wobei die meisten in south Moravia und die wenigsten in Prague liegen. Der Distrikt mit den wenigsten Einwohnern zählt 42821, im Vergleich zu demjenigen mit den meisten: 1204953, wobei die nächst kleinere Ortschaft 102609 Einwohner zählt. Weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/district.html) entnommen werden. 
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:42.221202Z', start_time: '2024-06-05T13:21:42.218431Z'}
 data_frames["district.csv"] = district
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:42.224614Z', start_time: '2024-06-05T13:21:42.222374Z'}
 # %%capture
 # svReport_district = sv.analyze(district)
 # svReport_district.show_html(filepath="./reports/district.html", open_browser=False)
@@ -671,19 +720,22 @@ data_frames["district.csv"] = district
 [//]: # (-.- .tabset)
 
 Der Datensatz `loan.csv` beinhaltet 682 Observationen mit den folgenden Informationen über die vergebenen Darlehen der Bank:  
-- `loan_id`: ID des Darlehens,
-- `account_id`: die Kontonummer,
-- `date`: das Datum, wann das Darlehen gewährt wurde,
-- `amount`: der Betrag,
-- `duration`: die Dauer des Darlehens,
-- `payments`: die höhe der monatlichen Zahlungen und
+
+- `loan_id`: ID des Darlehens,  
+- `account_id`: die Kontonummer,  
+- `date`: das Datum, wann das Darlehen gewährt wurde,  
+- `amount`: der Betrag,  
+- `duration`: die Dauer des Darlehens,  
+- `payments`: die höhe der monatlichen Zahlungen und  
 - `status`: der Rückzahlungsstatus (A: ausgeglichen, B: Vertrag abgelaufen aber nicht fertig bezahlt, C: laufender Vertrag und alles in Ordnung, D: laufender Vertrag und Kunde verschuldet)
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:42.232215Z', start_time: '2024-06-05T13:21:42.225981Z'}
 loan.info()
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:42.237030Z', start_time: '2024-06-05T13:21:42.233098Z'}
 print("Anzahl fehlender Werte:", sum(loan.isnull().sum()))
 print("Anzahl duplizierter Einträge:", loan.duplicated().sum())
 ```
@@ -692,6 +744,7 @@ print("Anzahl duplizierter Einträge:", loan.duplicated().sum())
 Auch für den `loan.csv` Datensatz werden zunächst Datenformate korrigiert und Kategorien übersetzt. Anschliessend wird überprüft, ob ein Bankkonto mehrere Darlehen besitzt.  
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:42.241789Z', start_time: '2024-06-05T13:21:42.237856Z'}
 # Datum parsen
 loan["date"] = pd.to_datetime(loan["date"], format="%y%m%d")
 
@@ -709,6 +762,7 @@ loan["status"] = loan["status"].astype("category")
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:42.709741Z', start_time: '2024-06-05T13:21:42.706100Z'}
 # Anzahl der Darlehen pro Kontonummer berechnen
 num_of_loan_df = (
     loan.groupby("account_id")
@@ -719,6 +773,7 @@ num_of_loan_df = (
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:44.973312Z', start_time: '2024-06-05T13:21:44.967237Z'}
 # Überprüfen, ob jedes Konto nur ein Darlehen hat
 num_of_loan_df["num_of_loan"].value_counts()
 ```
@@ -726,6 +781,7 @@ num_of_loan_df["num_of_loan"].value_counts()
 Von allen Bankkontos, die ein Darlehen aufgenommen haben, hat jedes Konto genau ein Darlehen zugewiesen.
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:45.082283Z', start_time: '2024-06-05T13:21:45.077298Z'}
 # Sample 5 random rows from the joined DataFrame
 display(loan.sample(n=5))
 ```
@@ -734,6 +790,7 @@ display(loan.sample(n=5))
 Nachfolgend dargestellt ist die Verteilung der Darlehensausstellungsdaten. das erste Darlehen wurde im Juli 1993 ausgestellt und das neuste im Dezember 1998. 
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:45.368225Z', start_time: '2024-06-05T13:21:45.185086Z'}
 # plot distribution of date
 plt.figure(figsize=(15, 6))
 loan["date"].dt.to_period("M").value_counts().sort_index().plot(kind="bar")
@@ -747,6 +804,7 @@ plt.show()
 Hier ersichtlich ist die Verteilung der Dauer der Darlehen. Sie ist fast gleichverteilt über die 5 möglichen Optionen. 
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:45.464569Z', start_time: '2024-06-05T13:21:45.369830Z'}
 # plot duration distribution
 plt.figure(figsize=(10, 6))
 loan["duration"].value_counts().plot(kind="bar")
@@ -760,6 +818,7 @@ plt.show()
 Hier dargestellt ist die Verteilung der Darlehensbeträge. Nur wenige Darlehensbeträge sind höher als 400000 wobei die meisten um die 100000 betragen. 
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:45.859438Z', start_time: '2024-06-05T13:21:45.645026Z'}
 # plot amount
 plt.figure(figsize=(10, 6))
 loan["amount"].plot(kind="hist", bins=20)
@@ -773,6 +832,7 @@ plt.show()
 Der nachfolgende Plot zeigt die Klassenverteilung vom Darlehensstatus. Die meisten (~400) sind laufend und ok, rund 200 sind abgeschlossen, die Kunden von ~50 Darlehen sind verschuldet und etwas weniger wurden abgeschlossen, ohne fertig abbezahlt worden zu sein.  
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:46.102915Z', start_time: '2024-06-05T13:21:45.992882Z'}
 # plot status distribution
 plt.figure(figsize=(10, 6))
 loan["status"].value_counts().plot(kind="bar")
@@ -786,6 +846,7 @@ plt.show()
 Hier ersichtlich ist die Verteilung der monatlichen Zahlungen der Darlehen. Die kleinste monatliche Zahlung beträgt 304 und die höchste 9910.
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:46.306547Z', start_time: '2024-06-05T13:21:46.217971Z'}
 # plot payments
 plt.figure(figsize=(10, 6))
 loan["payments"].plot(kind="hist", bins=20)
@@ -799,11 +860,13 @@ plt.show()
 Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/loan.html) entnommen werden.
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:46.613869Z', start_time: '2024-06-05T13:21:46.610888Z'}
 # Assign the resulting DataFrame to a dictionary for storage
 data_frames["loan.csv"] = loan
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:46.892601Z', start_time: '2024-06-05T13:21:46.890590Z'}
 # %%capture
 # svReport_loan = sv.analyze(loan)
 # svReport_loan.show_html(filepath="./reports/loan.html", open_browser=False)
@@ -813,18 +876,21 @@ data_frames["loan.csv"] = loan
 [//]: # (-.- .tabset)
 
 Der Datensatz `order.csv` beinhaltet 6471 Observationen mit den folgenden Informationen über die Daueraufträge eines Kontos:  
-- `order_id`: die Nummer des Dauerauftrags,
-- `account_id`: die Kontonummer von welchem der Auftrag stammt,
-- `bank_to`: die empfangende Bank,
-- `account_to`: das empfangende Konto, 
-- `amount`: der Betrag,
+
+- `order_id`: die Nummer des Dauerauftrags,  
+- `account_id`: die Kontonummer von welchem der Auftrag stammt,  
+- `bank_to`: die empfangende Bank,  
+- `account_to`: das empfangende Konto,  
+- `amount`: der Betrag,  
 - `k_symbol`: die Art des Auftrags (Versicherungszahlung, Haushalt, Leasing, Darlehen)
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:47.044506Z', start_time: '2024-06-05T13:21:47.040052Z'}
 order.info()
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:47.191337Z', start_time: '2024-06-05T13:21:47.185183Z'}
 print("Anzahl fehlender Werte:", sum(order.isnull().sum()))
 print("Anzahl duplizierter Einträge:", order.duplicated().sum())
 ```
@@ -833,6 +899,7 @@ print("Anzahl duplizierter Einträge:", order.duplicated().sum())
 Auch für `order.csv` werden die Kategorien zunächst übersetzt und fehlende Werte mit der Kategorie `unknown` ersetzt. Es bestehen deutlich mehr Daueraufträge als Bankkontos, was darauf hindeutet, dass ein Bankkonto mehrere Daueraufträge eingerichtet haben kann. Zur weiteren Verarbeitung der Daten wird das Format so geändert, dass pro Konto ein `order`-Eintrag existiert.  
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:47.337712Z', start_time: '2024-06-05T13:21:47.334209Z'}
 # Kategorien übersetzen und fehlende Werte mit "unknown" füllen
 order["k_symbol"] = (
     order["k_symbol"]
@@ -851,6 +918,7 @@ order["k_symbol"] = order["k_symbol"].astype("category")
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:47.493825Z', start_time: '2024-06-05T13:21:47.474341Z'}
 # Merge with 'account_id_df' to ensure all accounts are represented
 order = pd.merge(account[["account_id"]], order, on="account_id", how="left")
 
@@ -894,11 +962,13 @@ Die meisten Daueraufträge sind betreffend dem Haushalt eingerichtet worden (350
 Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/order.html) entnommen werden.
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:47.621117Z', start_time: '2024-06-05T13:21:47.618247Z'}
 # Assuming data_frames is a dictionary for storing DataFrames
 data_frames["order.csv"] = orders_pivot
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:47.826512Z', start_time: '2024-06-05T13:21:47.823562Z'}
 # %%capture
 # svReport_order = sv.analyze(order)
 # svReport_order.show_html(filepath="./reports/order.html", open_browser=False)
@@ -908,22 +978,25 @@ data_frames["order.csv"] = orders_pivot
 [//]: # (-.- .tabset)
 
 Der Datensatz `trans.csv` beinhaltet 1056320 Observationen mit den folgenden Informationen über die Transaktionen eines Kontos:  
-- `trans_id`: die ID der Transaktion,
-- `account_id`: die Kontonummer des ausführenden Kontos,
-- `date`: das Datum,
-- `type`: der Typ (Einzahlung, Bezug)
-- `operation`: die Art der Transaktion (Bezug Kreditkarte, Bareinzahlung, Bezug über eine andere Bank, Bezug Bar, Überweisung)
-- `amount`: der Betrag der Transaktion,
-- `balance`: der Kontostand nach ausführung der Transaktion,
-- `k_symbol`: die Klassifikation der Transaktion (Versicherungszahlung, Kontoauszug, Zinsauszahlung, Zinszahlung bei negativem Kontostand, Haushalt, Pension, Darlehensauszahlung),
-- `bank`: die empfangende Bank und 
+
+- `trans_id`: die ID der Transaktion,  
+- `account_id`: die Kontonummer des ausführenden Kontos,  
+- `date`: das Datum,  
+- `type`: der Typ (Einzahlung, Bezug),  
+- `operation`: die Art der Transaktion (Bezug Kreditkarte, Bareinzahlung, Bezug über eine andere Bank, Bezug Bar, Überweisung)  
+- `amount`: der Betrag der Transaktion,  
+- `balance`: der Kontostand nach ausführung der Transaktion,  
+- `k_symbol`: die Klassifikation der Transaktion (Versicherungszahlung, Kontoauszug, Zinsauszahlung, Zinszahlung bei negativem Kontostand, Haushalt, Pension, Darlehensauszahlung),  
+- `bank`: die empfangende Bank und   
 - `account`: das empfangende Bankkonto
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:48.133619Z', start_time: '2024-06-05T13:21:48.003371Z'}
 trans.info()
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:48.640014Z', start_time: '2024-06-05T13:21:48.151794Z'}
 print("Anzahl fehlender Werte:", sum(trans.isnull().sum()))
 print("Anzahl duplizierter Einträge:", trans.duplicated().sum())
 ```
@@ -932,6 +1005,7 @@ print("Anzahl duplizierter Einträge:", trans.duplicated().sum())
 Die Kategorien für `type`, `operation` und `k_symbol` wurden übersetzt und die Datentypen korrigiert.  
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:49.426944Z', start_time: '2024-06-05T13:21:48.641005Z'}
 trans["date"] = pd.to_datetime(trans["date"], format="%y%m%d")
 
 # Update 'type' column
@@ -973,6 +1047,7 @@ trans.loc[trans["type"] == "withdrawal", "amount"] = trans.loc[
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:49.459311Z', start_time: '2024-06-05T13:21:49.428662Z'}
 # Sample 5 random rows from the DataFrame
 trans.sample(n=5)
 ```
@@ -980,6 +1055,7 @@ trans.sample(n=5)
 ### Zeitliche Entwicklung eines Kontos
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:49.673641Z', start_time: '2024-06-05T13:21:49.459975Z'}
 # Plot Zeitliche Entwicklung des Konto-Saldos für die Konto nummer 19
 account_19 = trans[trans["account_id"] == 19].copy()  # Create a copy of the DataFrame
 # Ensure the date column is in datetime format
@@ -997,6 +1073,7 @@ plt.show()
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:49.942136Z', start_time: '2024-06-05T13:21:49.679543Z'}
 # zoom the year 1995 of the plot
 account_19_1995 = account_19[account_19["date"].dt.year == 1995]
 # plot it
@@ -1014,11 +1091,13 @@ plt.show()
 Die Korrelation sowie weitere Informationen zu den vorhandenen Daten können aus dem [SweetViz Report](./reports/trans.html) entnommen werden.
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:49.962398Z', start_time: '2024-06-05T13:21:49.943612Z'}
 # Assign to a dictionary if needed (similar to list assignment in R)
 data_frames["trans.csv"] = trans
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:49.971765Z', start_time: '2024-06-05T13:21:49.963881Z'}
 # %%capture
 # svReport_trans = sv.analyze(trans)
 # svReport_trans.show_html(filepath="./reports/trans.html", open_browser=False)
@@ -1029,17 +1108,19 @@ Im nachfolgenden Abschnitt werden die Daten zu statischen (Kunden-) Daten und tr
  
 ## Stammdaten
 Die aufbereiteten Stammdaten aus den Dateien 
-- `disp.csv`
-- `account.csv`
-- `client.csv`
-- `card.csv`
-- `loan.csv` 
-- `order.csv`
-- `districts.csv`
+
+- `disp.csv`  
+- `account.csv`  
+- `client.csv`  
+- `card.csv`  
+- `loan.csv`  
+- `order.csv`  
+- `districts.csv`  
 
 werden nachfolgend zu einem Datensatz kombiniert. 
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:49.992628Z', start_time: '2024-06-05T13:21:49.973253Z'}
 # merge dataframes
 static_data = (
     data_frames["disp.csv"]
@@ -1084,44 +1165,45 @@ static_data = (
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:49.996143Z', start_time: '2024-06-05T13:21:49.993495Z'}
 static_data["has_card"] = ~static_data["card_id"].isna()
 ```
 
 ```{python}
+static_data['type_card'] = static_data['type_card'].cat.add_categories(['none'])
+static_data.loc[static_data["card_id"].isna(), "type_card"] = "none"
+```
+
+```{python}
+# get static_data status categories
+static_data["status"] = static_data["status"].cat.add_categories(["none"])
+static_data.loc[static_data["status"].isna(), "status"] = "none"
+```
+
+```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:50.009650Z', start_time: '2024-06-05T13:21:50.002124Z'}
 static_data.info()
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:50.259882Z', start_time: '2024-06-05T13:21:50.251757Z'}
 print("Anzahl duplizierter Einträge:", static_data.duplicated().sum())
 ```
 
 ```{python}
-## Junior Cards removal
-# In the advertising campaign, we do not want to promote children's/junior cards (for whatever reasons). First, I looked at the distribution of age at issuance. Here I see that there are not many junior cards, nor are the cards issued at a late age.
-# # Filter rows where 'card_type' contains 'junior' (case insensitive)
-# junior_cards = static_data[
-#     static_data["type_card"].str.contains("junior", case=False, na=False)
-# ]
-#
-# display(junior_cards)
-#
-# # Calculate age at issue
-# junior_cards["age_at_issue"] = (
-#                                        junior_cards["issued_card"] - junior_cards["birth_day_client"]
-#                                ).dt.days // 365
-#
-# # Plot histogram
-# plt.figure(figsize=(10, 6))
-# sns.histplot(data=junior_cards, x="age_at_issue", bins=20)
-# plt.title("Age distribution at issue date of junior cards")
-# plt.xlabel("Age at issue date")
-# plt.ylabel("Number of cards")
-# plt.show()
+# fillna for payments, duration, amount
+static_data["payments"] = static_data["payments"].fillna(0)
+static_data["duration"] = static_data["duration"].fillna(0)
+static_data["amount"] = static_data["amount"].fillna(0)
 ```
 
-## Junior Cards Removal
+Damit wird ein Datensatz mit 4500 individuellen Kunden und 56 Spalten erzeugt. 892 dieser Kunden besitzen eine Kreditkarte und 682 haben einen Kredit aufgenommen. 
+
+## Entfernen der Junior Karteninhaber
+Kunden im jugendlichen Alter sind speziell interessante Kunden für eine Bank, da diese grundsätzlich noch keine bis wenige Bankdienstleistungen beziehen und somit flexibel sind. Es ist deshalb sehr vorteilhaft für ein Unternehmen diese für sich zu gewinnen, weshalb viele Banken für solche Kunden ganz spezifische Prozesse definieren. Das in dieser Aufgabenstellung gewünschte Modell würde in so einem Prozess nicht eingesetzt werden, weshalb die jugendlichen Kunden nachfolgend aus dem Datensatz entfernt werden.    
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:50.696829Z', start_time: '2024-06-05T13:21:50.687804Z'}
 num_accounts_before = len(static_data)
 # # Filter rows where 'card_type' does not contain 'junior' (case insensitive)
 static_data = static_data[
@@ -1132,15 +1214,25 @@ num_junior_cards = num_accounts_before - num_accounts_after
 print(f"Number of junior cards removed: {num_junior_cards}")
 ```
 
+Durch diese Entfernung wurden 145 Kunden entfernt. 
+
 ## Bewegungsdaten
+Um einen Datensatz zu erhalten, bei welchem jede Zeile eine Observation repräsentiert müssen die Transaktionen pro Kunde entsprechend aufgerollt werden. Das bedeutet, ein vordefiniertes Zeitfenster vor dem zu modellierenden Event zu definieren und die darin enthaltenen Daten in einer Zeile zu aggregieren. Das gesuchte Zeitfenster beinhaltet bestenfalls saisonale Gegebenheiten und stets einen Lag-Zeitraum, der die Verzögerung der Kaufentscheidung und Ausführung des Auftrags aufzeichnen soll. 
+Hier wird ein Rollup-Fenster inklusive Lag von 13 Monaten eingesetzt. 
+
 ### Käufer
+Für Kunden, die bereits eine Kreditkarte besitzen, ist es unkompliziert, das Rollup-Fenster zu identifizieren. 
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:50.924224Z', start_time: '2024-06-05T13:21:50.910019Z'}
 # select all transactions from trans from date 1995-03-16 and account_id 150
 trans[(trans["date"] == "1995-03-16") & (trans["account_id"] == 150)]
 ```
 
+Aus dieser Tabelle ersichtlich ist, dass für den Kunden 150 zum Datum der Eröffnung des Kontos mehrere Transaktionen vorhanden sind und dass wenn die Beträge von dem Tag aufsummiert werden, der korrekte Kontostand resultiert (1900 + 900 = 2800). Deshalb wird nachfolgend davon ausgegangen, dass die Aufsummierung der Transaktionsbeträge zum korrekten Kontostand führt. 
+
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:52.450983Z', start_time: '2024-06-05T13:21:51.093741Z'}
 # sort dataframe trans by account_id and date
 first_row_per_account = trans.groupby("account_id")
 
@@ -1151,15 +1243,28 @@ first_row_per_account = first_row_per_account.apply(
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:52.495520Z', start_time: '2024-06-05T13:21:52.451932Z'}
 # show that there's one row per unique account_id in trans
 first_row_per_account["account_id"].nunique() == trans["account_id"].nunique()
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:21:52.502324Z', start_time: '2024-06-05T13:21:52.496263Z'}
 first_row_per_account.query("amount != balance")
 ```
 
+Mit dem obigen Code wird zudem sichergestellt, dass diese Gegebenheit für alle Kunden gilt. Nachfolgend werden die Transaktionen aggregiert, sodass die Spalten  
+
+- `volume`: das Volumen, also die Summe der Ein- und Ausgaben auf dem Konto,  
+- `credit`: die Summe der Einnahmen,  
+- `withdrawal`: die Summe der Ausgaben,  
+- `n_transactions`: die Anzahl der getätigten Transaktionen und  
+- `balance`: der Kontostand
+
+pro Monat entstehen. Dieser Datensatz wird dann mithilfe der nachfolgend definierten Funktion `rollup_credit_card` aufgerollt. 
+
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:22:10.765128Z', start_time: '2024-06-05T13:21:52.503740Z'}
 # Extract year and month from date to a new column 'year_month'
 trans["year_month"] = trans["date"].dt.to_period("M")
 
@@ -1186,6 +1291,13 @@ transactions_monthly["balance"] = transactions_monthly.groupby("account_id")[
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:22:10.770667Z', start_time: '2024-06-05T13:22:10.765939Z'}
+# count unique account_ids in transactions_monthly
+transactions_monthly["account_id"].nunique()
+```
+
+```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:22:10.774448Z', start_time: '2024-06-05T13:22:10.771323Z'}
 def rollup_credit_card(trans_monthly, account_card_issue_dates):
     # Add issue date and calculate months since card issue
     trans_monthly = pd.merge(trans_monthly, account_card_issue_dates, on="account_id")
@@ -1197,7 +1309,7 @@ def rollup_credit_card(trans_monthly, account_card_issue_dates):
         )
     ]
 
-    # select only where  months_before_card_issue >0 and <= 13
+    # select only where months_before_card_issue > 0 and <= 13
     trans_monthly = trans_monthly[
         (trans_monthly["months_before_card_issue"] > 0)
         & (trans_monthly["months_before_card_issue"] <= 13)
@@ -1222,153 +1334,251 @@ def rollup_credit_card(trans_monthly, account_card_issue_dates):
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:22:10.845310Z', start_time: '2024-06-05T13:22:10.775196Z'}
 buyers = static_data[static_data["has_card"]]
 
 transactions_rolled_up_buyers = rollup_credit_card(
     transactions_monthly, buyers.loc[:, ["account_id", "issued"]]
 )
+
+transactions_rolled_up_buyers.info()
 ```
+
+Und so entsteht ein Datensatz, welcher für 568 Kreditkartenkäufer die Merkmale `balance`, `credit`, `n_transactions`, `volume` und `withdrawal` für alle 13 Monate des Rollup-Fensters inklusive Lag beinhaltet. 
 
 ### Nicht-Käufer
+Um die Transaktionen der Nicht-Käufer analog zu verarbeiten, wird ein fiktives Kaufdatum benötigt, welches als Ausgangslage für die Aufrollung dient.
 
 ```{python}
-# model top-n similarity of districts
-def calculate_district_similarity():
-    data = data_frames["district.csv"]
-    data = data.drop(columns=["region", "district_name"])
+#| ExecuteTime: {end_time: '2024-06-05T13:22:10.990028Z', start_time: '2024-06-05T13:22:10.846017Z'}
+# plot the issue date distribution of the buyers that where rolled up (586)
+merged_data = transactions_rolled_up_buyers.merge(buyers, how='left', left_on='account_id', right_on="account_id")
+plt.figure(figsize=(10, 6))
+merged_data["issued"].value_counts().sort_index().plot(kind="bar")
+plt.title("Verteilung der Ausstellungsdaten")
+plt.xlabel("Datum")
+plt.ylabel("Anzahl")
+plt.show()
+```
 
-    # Calculate the similarity matrix
-    similarity_matrix = cosine_similarity(data)
+```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:22:11.172469Z', start_time: '2024-06-05T13:22:10.991623Z'}
+# from transactions_monthly plot the number of distinct account ids per month
+plt.figure(figsize=(10, 6))
+transactions_monthly["year_month"].value_counts().sort_index().plot(kind="bar")
+plt.title("Anzahl der Konten pro Monat")
+plt.xlabel("Monat")
+plt.ylabel("Anzahl")
+plt.show()
+```
 
-    # Create a DataFrame from the similarity matrix
-    similarity_df = pd.DataFrame(
-        similarity_matrix, index=data.index, columns=data.index
+```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:22:11.179138Z', start_time: '2024-06-05T13:22:11.176237Z'}
+def rollup_non_credit(trans_monthly, non_buyers, range):
+    # set seed 
+    np.random.seed(43)
+    #for each non buyer, find the date of the first transaction
+    first_transaction_dates = trans_monthly.groupby('account_id')['year_month'].min().reset_index()
+    first_transaction_dates.columns = ['account_id', 'first_transaction_date']
+
+    # merge the first transaction dates with the non_buyers DataFrame
+    non_buyers = non_buyers.merge(first_transaction_dates, on='account_id', how='left')
+
+    # randomly sample a date from the range as issue date for each non buyer making sure that the random date is after the first transaction of the non buyer
+    non_buyers["issued"] = non_buyers["first_transaction_date"].apply(
+        lambda x: np.random.choice(range, 1)[0]
     )
 
-    # Create a mask to exclude the diagonal
-    mask = np.eye(len(similarity_df), dtype=bool)
-
-    # Apply the mask to the DataFrame
-    similarity_df = similarity_df.mask(mask)
-
-    return similarity_df
+    non_buyers_rolled_up = rollup_credit_card(trans_monthly, non_buyers.loc[:, ["account_id", "issued"]])
+    return non_buyers_rolled_up, non_buyers
 ```
 
 ```{python}
-def top_n_similarity(district_id, n, similarity_df):
-    # Get the row of the similarity matrix corresponding to the district_id
-    similarity_row = similarity_df.loc[district_id - 1]
-
-    # Sort the values in the row in descending order and get the top n indices
-    top_n_indices = similarity_row.sort_values(ascending=False).head(n).index
-
-    # append district id to top_n_indices
-    top_n_indices = top_n_indices.append(pd.Index([district_id]))
-
-    return top_n_indices
+#| ExecuteTime: {end_time: '2024-06-05T13:22:11.711739Z', start_time: '2024-06-05T13:22:11.180604Z'}
+# get the list of issue dates of buyers
+issue_dates_buyers = buyers["issued"].unique()
+transactions_rolled_up_non_buyers, non_buyers = rollup_non_credit(transactions_monthly, static_data[~static_data["has_card"]], issue_dates_buyers)
+transactions_rolled_up_non_buyers.info()
 ```
 
 ```{python}
-# find similar non-buyers
-def find_similar_non_buyers(buyers, non_buyers):
-    similar_non_buyers = pd.DataFrame(
-        columns=["account_id", "issued"]
-    )  # TODO better way? right now warning?!
-    no_similar_found = []
-    district_similarities = calculate_district_similarity()
+#| ExecuteTime: {end_time: '2024-06-05T13:22:11.714781Z', start_time: '2024-06-05T13:22:11.712395Z'}
+# # model top-n similarity of districts
+# def calculate_district_similarity():
+#     data = data_frames["district.csv"]
+#     data = data.drop(columns=["region", "district_name"])
 
-    for _, buyer in buyers.iterrows():
-        # exclude already found similar_non_buyers from non_buyer's list
-        non_buyers = non_buyers[
-            ~non_buyers["account_id"].isin(similar_non_buyers["account_id"])
-        ]
-        # find top n similar districts
-        top_n_similar = top_n_similarity(
-            buyer["district_id_client"], 2, district_similarities
-        )
+#     # Calculate the similarity matrix
+#     similarity_matrix = cosine_similarity(data)
 
-        # Find non-buyers with similar age, sex, and district
-        similar = non_buyers[
-            (non_buyers["age"] >= buyer["age"] - 3)
-            & (non_buyers["age"] <= buyer["age"] + 3)
-            & (non_buyers["gender"] == buyer["gender"])
-            & (non_buyers["district_id_account"].isin(top_n_similar))
-        ]
+#     # Create a DataFrame from the similarity matrix
+#     similarity_df = pd.DataFrame(
+#         similarity_matrix, index=data.index, columns=data.index
+#     )
 
-        # join transaction data to similar
-        similar = pd.merge(similar, transactions_monthly, on="account_id")
+#     # Create a mask to exclude the diagonal
+#     mask = np.eye(len(similarity_df), dtype=bool)
 
-        similar["issued"] = buyer["issued"]
-        similar["months_before_card_issue"] = [
-            (issued - year_month).n
-            for issued, year_month in zip(similar["issued"], similar["year_month"])
-        ]
+#     # Apply the mask to the DataFrame
+#     similarity_df = similarity_df.mask(mask)
 
-        # select only where months_before_card_issue > 0 and <= 13
-        similar = similar[
-            (similar["months_before_card_issue"] > 0)
-            & (similar["months_before_card_issue"] <= 13)
-        ]
-
-        # make sure there's 13 rows per account_id and drop account_ids for which that's not true
-        similar = similar.groupby("account_id").filter(lambda x: len(x) == 13)
-
-        # next if similar is empty
-        if similar.empty:
-            no_similar_found.append(buyer["account_id"])
-            continue
-
-        # drop duplicates
-        similar = similar.drop_duplicates(subset=["account_id"])
-
-        # Append similar similar['account_id'] and similar['nb_issued'] to similar_non_buyers
-        similar_non_buyers = pd.concat(
-            [similar_non_buyers, similar[["account_id", "issued"]]]
-        )
-
-    return similar_non_buyers, no_similar_found
+#     return similarity_df
 ```
 
 ```{python}
-non_buyers = static_data[~static_data["has_card"]]
-similar_non_buyers, none_found = find_similar_non_buyers(buyers, non_buyers)
+#| ExecuteTime: {end_time: '2024-06-05T13:22:11.717932Z', start_time: '2024-06-05T13:22:11.715461Z'}
+# def top_n_similarity(district_id, n, similarity_df):
+#     # Get the row of the similarity matrix corresponding to the district_id
+#     similarity_row = similarity_df.loc[district_id - 1]
+
+#     # Sort the values in the row in descending order and get the top n indices
+#     top_n_indices = similarity_row.sort_values(ascending=False).head(n).index
+
+#     # append district id to top_n_indices
+#     top_n_indices = top_n_indices.append(pd.Index([district_id]))
+
+#     return top_n_indices
 ```
 
 ```{python}
-len(non_buyers[~non_buyers["account_id"].isin(similar_non_buyers["account_id"])])
+#| ExecuteTime: {end_time: '2024-06-05T13:22:11.721282Z', start_time: '2024-06-05T13:22:11.719039Z'}
+# # find similar non-buyers
+# def find_similar_non_buyers(buyers, non_buyers):
+#     similar_non_buyers = pd.DataFrame(
+#         columns=["account_id", "issued"]
+#     )  
+#     no_similar_found = []
+#     district_similarities = calculate_district_similarity()
+
+#     for _, buyer in buyers.iterrows():
+#         # exclude already found similar_non_buyers from non_buyer's list
+#         non_buyers = non_buyers[
+#             ~non_buyers["account_id"].isin(similar_non_buyers["account_id"])
+#         ]
+#         # find top n similar districts
+#         top_n_similar = top_n_similarity(
+#             buyer["district_id_client"], 2, district_similarities
+#         )
+
+#         # Find non-buyers with similar age, sex, and district
+#         similar = non_buyers[
+#             (non_buyers["age"] >= buyer["age"] - 3)
+#             & (non_buyers["age"] <= buyer["age"] + 3)
+#             & (non_buyers["gender"] == buyer["gender"])
+#             & (non_buyers["district_id_account"].isin(top_n_similar))
+#         ]
+
+#         # join transaction data to similar
+#         similar = pd.merge(similar, transactions_monthly, on="account_id")
+
+#         similar["issued"] = buyer["issued"]
+#         similar["months_before_card_issue"] = [
+#             (issued - year_month).n
+#             for issued, year_month in zip(similar["issued"], similar["year_month"])
+#         ]
+
+#         # select only where months_before_card_issue > 0 and <= 13
+#         similar = similar[
+#             (similar["months_before_card_issue"] > 0)
+#             & (similar["months_before_card_issue"] <= 13)
+#         ]
+
+#         # make sure there's 13 rows per account_id and drop account_ids for which that's not true
+#         similar = similar.groupby("account_id").filter(lambda x: len(x) == 13)
+
+#         # next if similar is empty
+#         if similar.empty:
+#             no_similar_found.append(buyer["account_id"])
+#             continue
+
+#         # drop duplicates
+#         similar = similar.drop_duplicates(subset=["account_id"])
+
+#         # Append similar similar['account_id'] and similar['nb_issued'] to similar_non_buyers
+#         similar_non_buyers = pd.concat(
+#             [similar_non_buyers, similar[["account_id", "issued"]]]
+#         )
+
+#     return similar_non_buyers, no_similar_found
 ```
 
 ```{python}
-transactions_rolled_up_non_buyers = rollup_credit_card(
-    transactions_monthly, similar_non_buyers
-)
+#| ExecuteTime: {end_time: '2024-06-05T13:22:11.724001Z', start_time: '2024-06-05T13:22:11.721960Z'}
+# non_buyers = static_data[~static_data["has_card"]]
+# similar_non_buyers, none_found = find_similar_non_buyers(buyers, non_buyers)
+```
+
+```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:22:11.726224Z', start_time: '2024-06-05T13:22:11.724663Z'}
+# len(none_found)
+```
+
+```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:22:11.728774Z', start_time: '2024-06-05T13:22:11.727159Z'}
+# len(non_buyers[~non_buyers["account_id"].isin(similar_non_buyers["account_id"])])
+```
+
+```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:22:11.730738Z', start_time: '2024-06-05T13:22:11.729245Z'}
+# transactions_rolled_up_non_buyers = rollup_credit_card(
+#     transactions_monthly, similar_non_buyers
+# )
+```
+
+```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:22:11.960337Z', start_time: '2024-06-05T13:22:11.731384Z'}
+# plot the issue date distribution of the non-buyers that where rolled up
+plt.figure(figsize=(10, 6))
+non_buyers["issued"].value_counts().sort_index().plot(kind="bar")
+plt.title("Verteilung der Ausstellungsdaten")
+plt.xlabel("Datum")
+plt.ylabel("Anzahl")
+plt.show()
+
 ```
 
 ## Zusammenfügen der Daten
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:22:11.964754Z', start_time: '2024-06-05T13:22:11.961480Z'}
 transactions_rolled_up = pd.concat(
     [transactions_rolled_up_buyers, transactions_rolled_up_non_buyers]
 )
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:23:15.485180Z', start_time: '2024-06-05T13:23:15.458584Z'}
 # merge transactions_rolled_up and static data
 X = pd.merge(static_data, transactions_rolled_up, on="account_id")
+y = X["has_card"]
+X = X.drop(columns=["has_card", "card_id", "issued", "type_card", "loan_id", "date_loan", "disp_id", "client_id", "district_id_account", "birth_day"])
+# convert "date_account" to "days active"
+X["date_account"] = (X["date_account"] - X["date_account"].min()).dt.days
+```
+
+```{python}
+# show NaNs in X
+X.isnull().sum()
+```
+
+```{python}
+X.info()
 ```
 
 ## Remove Data
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T10:36:28.605229Z', start_time: '2024-06-05T10:36:28.602261Z'}
 # print underage accounts
 ```
 
 ## Visualize
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:24:18.127835Z', start_time: '2024-06-05T13:24:18.067523Z'}
 # plot distribution of has_card
 plt.figure(figsize=(10, 6))
-X["has_card"].value_counts().plot(kind="bar")
+y.value_counts().plot(kind="bar")
 plt.title("Verteilung der Kartenbesitzer")
 plt.xlabel("Kartenbesitzer")
 plt.ylabel("Anzahl")
@@ -1376,16 +1586,18 @@ plt.show()
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T10:36:28.775641Z', start_time: '2024-06-05T10:36:28.688195Z'}
 ## plot distribution of card_type
-plt.figure(figsize=(10, 6))
-X["type_card"].value_counts(dropna=False).plot(kind="bar")
-plt.title("Verteilung der Kartentypen")
-plt.xlabel("Kartentyp")
-plt.ylabel("Anzahl")
-plt.show()
+#plt.figure(figsize=(10, 6))
+#X["type_card"].value_counts(dropna=False).plot(kind="bar")
+#plt.title("Verteilung der Kartentypen")
+#plt.xlabel("Kartentyp")
+#plt.ylabel("Anzahl")
+#plt.show()
 ```
 
 ```{python}
+#| ExecuteTime: {end_time: '2024-06-05T13:32:44.268996Z', start_time: '2024-06-05T13:32:44.037598Z'}
 # Filter the data for accounts 14 and 18
 account_data = X[X["account_id"].isin([14, 18])]
 # Reshape the DataFrame for easier plotting
@@ -1402,8 +1614,8 @@ volume_data = account_data.melt(
 )
 
 # Convert 'Month' from string to integer for proper sorting
-balance_data["Month"] = balance_data["Month"].str.extract("(\d+)").astype(int)
-volume_data["Month"] = volume_data["Month"].str.extract("(\d+)").astype(int)
+balance_data["Month"] = balance_data["Month"].str.extract(r"(\d+)").astype(int)
+volume_data["Month"] = volume_data["Month"].str.extract(r"(\d+)").astype(int)
 
 # Sort data by account and month
 balance_data = balance_data.sort_values(by=["account_id", "Month"])
@@ -1430,38 +1642,38 @@ plt.show()
 ```
 
 ```{python}
-print(X.dtypes)
+from imblearn.over_sampling import SMOTE
+
+# x get dummy variables for category
+X = pd.get_dummies(X, drop_first=True)
+
+sm = SMOTE(random_state=43)
+X_res, y_res = sm.fit_resample(X, y)
 ```
 
 ```{python}
-X.columns
-```
-
-```{python}
-# todo think about a better approach
-
 # Sample from both groups to create a balanced dataset
-counts = X["has_card"].value_counts()
+#counts = X["has_card"].value_counts()
 
 # Determine the minimum count between True and False
-min_count = counts.min()
+#min_count = counts.min()
 
-true_sample = X[X["has_card"] == True].sample(n=min_count, random_state=42)
-false_sample = X[X["has_card"] == False].sample(n=min_count, random_state=42)
+#true_sample = X[X["has_card"] == True].sample(n=min_count, random_state=42)
+#false_sample = X[X["has_card"] == False].sample(n=min_count, random_state=42)
 
 # Combine the sampled data
-X = pd.concat([true_sample, false_sample])
+#X = pd.concat([true_sample, false_sample])
 
 # Verify the counts
-balanced_counts = X["has_card"].value_counts()
+#balanced_counts = X["has_card"].value_counts()
 
-print(balanced_counts)
+#print(balanced_counts)
 ```
 
 ```{python}
 # plot distribution of has_card
 plt.figure(figsize=(10, 6))
-X["has_card"].value_counts().plot(kind="bar")
+y_res.value_counts().plot(kind="bar")
 plt.title("Verteilung der Kartenbesitzer")
 plt.xlabel("Kartenbesitzer")
 plt.ylabel("Anzahl")
@@ -1513,7 +1725,7 @@ df_features = pd.DataFrame(all_features)
 
 
 display(df_features.head(5))
-X_feature_engineered = pd.concat([X, df_features], axis=1)
+X_feature_engineered = pd.concat([X_res, df_features], axis=1)
 display(X_feature_engineered.head(5))
 ```
 
@@ -1536,7 +1748,7 @@ def clean_data(df):
     return df_cleaned
 
 
-X = clean_data(X)
+X_res = clean_data(X_res)
 X_feature_engineered = clean_data(X_feature_engineered)
 ```
 
@@ -1544,18 +1756,16 @@ X_feature_engineered = clean_data(X_feature_engineered)
 
 ```{python}
 # Assuming 'X' is your DataFrame and 'has_card' is the target variable
-y = X["has_card"]
-y_features = X_feature_engineered["has_card"]
+#y_features = X_feature_engineered["has_card"]
 
-X.drop("has_card", axis=1, inplace=True)
-X_feature_engineered.drop("has_card", axis=1, inplace=True)
+#X_feature_engineered.drop("has_card", axis=1, inplace=True)
 # we use kfold for cross validation and then the X_test and y_test are used for evaluation on never seen data
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.1, random_state=42, stratify=y
+    X_res, y_res, test_size=0.1, random_state=42, stratify=y_res
 )
 
 X_train_features, X_test_features, y_train_features, y_test_features = train_test_split(
-    X_feature_engineered, y, test_size=0.1, random_state=42, stratify=y
+    X_feature_engineered, y_res, test_size=0.1, random_state=42, stratify=y_res
 )
 ```
 
@@ -1563,12 +1773,6 @@ X_train_features, X_test_features, y_train_features, y_test_features = train_tes
 
 ```{python}
 print(X_train.columns)
-```
-
-```{python}
-# print length of X_train
-display(X_train)
-display(X_train_features)
 ```
 
 # Modeling und Model Selection
@@ -1846,6 +2050,10 @@ class MetricsBenchmarker:
 ```
 
 ```{python}
+X_train.columns
+```
+
+```{python}
 # Example usage
 from sklearn.linear_model import LogisticRegression
 
@@ -1858,7 +2066,9 @@ param_grid = {
 }
 
 selected_fields = (
-    ["age", "gender", "region_client"]
+    ["age"]
+    + [col for col in X_train.columns if "gender" in col]
+    + [col for col in X_train.columns if "region_client" in col]
     + [f"volume_{i}" for i in range(1, 14)]
     + [f"balance_{i}" for i in range(1, 14)]
 )
@@ -2233,6 +2443,4 @@ import os
 os.system("quarto render AML_MC.ipynb --to html")
 ```
 
-# Referenzen
-- [1] [Applied Predictive Modelling](http://link.springer.com/10.1007/978-1-4614-6849-3)
 

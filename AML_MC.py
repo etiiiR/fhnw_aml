@@ -1,6 +1,6 @@
 # ---
 # title: "AML Challenge 2024"
-# date: "`r Sys.Date()`"
+# date: today
 # author: "Etienne Roulet, Alexander Shanmugam"
 # format: 
 #     html:
@@ -9,22 +9,16 @@
 #         page-layout: full
 # editor_options: 
 #     chunk_output_type: console
+# bibliography: references.bib
 # ---
 
 # %% [markdown]
 # ### Todos
-#
-# - Big todo: Data # print y.value_counts() there are 2000 none has_card == no is that really sooo???
-#
-# - Big todo: inballanced Data and very bad metrics see precision idk where that comes from
 # - Big todo: Fix plotting Confusion Matrix and ROC, see metrics are different from plotting
-# - Big todo: - Reduce Model, Explainable AI 
-# - Big todo: no complex logic in preprocessing (What Danni said implementing) 
+# - Big todo: - Reduce Model, Explainable AI  
 #
-#
-# - Markdown writing and explaine what we have done
+# - Markdown writing and explain what we have done
 # - Clean up code: (Imports in central place, Comments, Code Refactor)
-#
 #
 
 # %% [markdown]
@@ -36,6 +30,7 @@
 # %pip install -r ../requirements.txt
 
 # %%
+from itables import show
 from itables import init_notebook_mode
 
 init_notebook_mode()
@@ -46,9 +41,12 @@ from datetime import datetime
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import sklearn.metrics as metrics
 from IPython.display import display
+from itables import init_notebook_mode
 from sklearn.linear_model import LinearRegression
+from sklearn.metrics.pairwise import cosine_similarity
 
 import pandas as pd
 from sklearn.model_selection import train_test_split, cross_validate
@@ -56,6 +54,8 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.impute import SimpleImputer
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LogisticRegression
+
 
 from sklearn.model_selection import (
     GridSearchCV,
@@ -68,6 +68,8 @@ from sklearn.metrics import (
     confusion_matrix,
     ConfusionMatrixDisplay,
     fbeta_score,
+    cohen_kappa_score,
+    matthews_corrcoef,
 )
 import lime.lime_tabular
 import shap
@@ -77,6 +79,9 @@ from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import AdaBoostClassifier
+from tqdm import tqdm
+from sklearn.linear_model import LassoCV
+from sklearn.feature_selection import SelectFromModel
 
 # %%
 # %%capture
@@ -538,12 +543,12 @@ district["district_name"] = district["district_name"].astype("category")
 district[district.isin(["?"]).any(axis=1)]
 
 # %% [markdown]
-# Wir gehen davon aus, dass es sich hier um effektiv fehlende Werte handelt und nicht um zensierte Daten, also Werte, für welche der exakte Wert fehlt, aber trotzdem Informationen vorhanden sind. In diesem Fall, wenn die Variable mit den fehlenden Werten eine hohe Korrelation mit anderen Prediktoren aufweist, bietet es sich an, KNN oder eine einfache lineare Regression für die Imputation anzuwenden. [1] 
+# Wir gehen davon aus, dass es sich hier um effektiv fehlende Werte handelt und nicht um zensierte Daten, also Werte, für welche der exakte Wert fehlt, aber trotzdem Informationen vorhanden sind. In diesem Fall, wenn die Variable mit den fehlenden Werten eine hohe Korrelation mit anderen Prediktoren aufweist, bietet es sich an, KNN oder eine einfache lineare Regression für die Imputation anzuwenden. [@brancoSurveyPredictiveModeling2017] 
 #
 # Die Korrelationsmatrix des [SweetViz Reports](./reports/district.html) zeigt, dass `unemploy_rate95` stark mit `unemploy_rate96` und `no_of_crimes95` mit `no_of_crimes96` korreliert. 
 
-# %%
-# die ? ersetzen mit NaN
+    # %%
+    # die ? ersetzen mit NaN
 district = district.replace("?", np.nan)
 
 # Datentyp korrigieren
@@ -1058,10 +1063,25 @@ static_data = (
 static_data["has_card"] = ~static_data["card_id"].isna()
 
 # %%
+static_data['type_card'] = static_data['type_card'].cat.add_categories(['none'])
+static_data.loc[static_data["card_id"].isna(), "type_card"] = "none"
+
+# %%
+# get static_data status categories
+static_data["status"] = static_data["status"].cat.add_categories(["none"])
+static_data.loc[static_data["status"].isna(), "status"] = "none"
+
+# %%
 static_data.info()
 
 # %%
 print("Anzahl duplizierter Einträge:", static_data.duplicated().sum())
+
+# %%
+# fillna for payments, duration, amount
+static_data["payments"] = static_data["payments"].fillna(0)
+static_data["duration"] = static_data["duration"].fillna(0)
+static_data["amount"] = static_data["amount"].fillna(0)
 
 # %% [markdown]
 # Damit wird ein Datensatz mit 4500 individuellen Kunden und 56 Spalten erzeugt. 892 dieser Kunden besitzen eine Kreditkarte und 682 haben einen Kredit aufgenommen. 
@@ -1232,8 +1252,8 @@ plt.show()
 # %%
 def rollup_non_credit(trans_monthly, non_buyers, range):
     # set seed 
-    np.random.seed(42)
-    # for each non buyer, find the date of the first transaction
+    np.random.seed(43)
+    #for each non buyer, find the date of the first transaction
     first_transaction_dates = trans_monthly.groupby('account_id')['year_month'].min().reset_index()
     first_transaction_dates.columns = ['account_id', 'first_transaction_date']
 
@@ -1252,9 +1272,7 @@ def rollup_non_credit(trans_monthly, non_buyers, range):
 # %%
 # get the list of issue dates of buyers
 issue_dates_buyers = buyers["issued"].unique()
-transactions_rolled_up_non_buyers, non_buyers = rollup_non_credit(transactions_monthly,
-                                                                  static_data[~static_data["has_card"]],
-                                                                  issue_dates_buyers)
+transactions_rolled_up_non_buyers, non_buyers = rollup_non_credit(transactions_monthly, static_data[~static_data["has_card"]], issue_dates_buyers)
 transactions_rolled_up_non_buyers.info()
 
 # %%
@@ -1297,7 +1315,7 @@ transactions_rolled_up_non_buyers.info()
 # def find_similar_non_buyers(buyers, non_buyers):
 #     similar_non_buyers = pd.DataFrame(
 #         columns=["account_id", "issued"]
-#     )  # TODO better way? right now warning?!
+#     )  
 #     no_similar_found = []
 #     district_similarities = calculate_district_similarity()
 
@@ -1389,6 +1407,17 @@ transactions_rolled_up = pd.concat(
 # %%
 # merge transactions_rolled_up and static data
 X = pd.merge(static_data, transactions_rolled_up, on="account_id")
+y = X["has_card"]
+X = X.drop(columns=["has_card", "card_id", "issued", "type_card", "loan_id", "date_loan", "disp_id", "client_id", "district_id_account", "birth_day"])
+# convert "date_account" to "days active"
+X["date_account"] = (X["date_account"] - X["date_account"].min()).dt.days
+
+# %%
+# show NaNs in X
+X.isnull().sum()
+
+# %%
+X.info()
 
 # %% [markdown]
 # ## Remove Data
@@ -1402,7 +1431,7 @@ X = pd.merge(static_data, transactions_rolled_up, on="account_id")
 # %%
 # plot distribution of has_card
 plt.figure(figsize=(10, 6))
-X["has_card"].value_counts().plot(kind="bar")
+y.value_counts().plot(kind="bar")
 plt.title("Verteilung der Kartenbesitzer")
 plt.xlabel("Kartenbesitzer")
 plt.ylabel("Anzahl")
@@ -1410,12 +1439,12 @@ plt.show()
 
 # %%
 ## plot distribution of card_type
-plt.figure(figsize=(10, 6))
-X["type_card"].value_counts(dropna=False).plot(kind="bar")
-plt.title("Verteilung der Kartentypen")
-plt.xlabel("Kartentyp")
-plt.ylabel("Anzahl")
-plt.show()
+#plt.figure(figsize=(10, 6))
+#X["type_card"].value_counts(dropna=False).plot(kind="bar")
+#plt.title("Verteilung der Kartentypen")
+#plt.xlabel("Kartentyp")
+#plt.ylabel("Anzahl")
+#plt.show()
 
 # %%
 # Filter the data for accounts 14 and 18
@@ -1434,8 +1463,8 @@ volume_data = account_data.melt(
 )
 
 # Convert 'Month' from string to integer for proper sorting
-balance_data["Month"] = balance_data["Month"].str.extract("(\d+)").astype(int)
-volume_data["Month"] = volume_data["Month"].str.extract("(\d+)").astype(int)
+balance_data["Month"] = balance_data["Month"].str.extract(r"(\d+)").astype(int)
+volume_data["Month"] = volume_data["Month"].str.extract(r"(\d+)").astype(int)
 
 # Sort data by account and month
 balance_data = balance_data.sort_values(by=["account_id", "Month"])
@@ -1461,36 +1490,37 @@ plt.legend()
 plt.show()
 
 # %%
-print(X.dtypes)
+from imblearn.over_sampling import SMOTE
+
+# x get dummy variables for category
+X = pd.get_dummies(X, drop_first=True)
+
+sm = SMOTE(random_state=43)
+X_res, y_res = sm.fit_resample(X, y)
 
 # %%
-X.columns
-
-# %%
-# todo think about a better approach
-
 # Sample from both groups to create a balanced dataset
-counts = X["has_card"].value_counts()
+#counts = X["has_card"].value_counts()
 
 # Determine the minimum count between True and False
-min_count = counts.min()
+#min_count = counts.min()
 
-true_sample = X[X["has_card"] == True].sample(n=min_count, random_state=42)
-false_sample = X[X["has_card"] == False].sample(n=min_count, random_state=42)
+#true_sample = X[X["has_card"] == True].sample(n=min_count, random_state=42)
+#false_sample = X[X["has_card"] == False].sample(n=min_count, random_state=42)
 
 # Combine the sampled data
-X = pd.concat([true_sample, false_sample])
+#X = pd.concat([true_sample, false_sample])
 
 # Verify the counts
-balanced_counts = X["has_card"].value_counts()
+#balanced_counts = X["has_card"].value_counts()
 
-print(balanced_counts)
+#print(balanced_counts)
 
 
 # %%
 # plot distribution of has_card
 plt.figure(figsize=(10, 6))
-X["has_card"].value_counts().plot(kind="bar")
+y_res.value_counts().plot(kind="bar")
 plt.title("Verteilung der Kartenbesitzer")
 plt.xlabel("Kartenbesitzer")
 plt.ylabel("Anzahl")
@@ -1543,7 +1573,7 @@ df_features = pd.DataFrame(all_features)
 
 
 display(df_features.head(5))
-X_feature_engineered = pd.concat([X, df_features], axis=1)
+X_feature_engineered = pd.concat([X_res, df_features], axis=1)
 display(X_feature_engineered.head(5))
 
 
@@ -1566,7 +1596,7 @@ def clean_data(df):
     return df_cleaned
 
 
-X = clean_data(X)
+X_res = clean_data(X_res)
 X_feature_engineered = clean_data(X_feature_engineered)
 
 # %% [markdown]
@@ -1574,18 +1604,16 @@ X_feature_engineered = clean_data(X_feature_engineered)
 
 # %%
 # Assuming 'X' is your DataFrame and 'has_card' is the target variable
-y = X["has_card"]
-y_features = X_feature_engineered["has_card"]
+#y_features = X_feature_engineered["has_card"]
 
-X.drop("has_card", axis=1, inplace=True)
-X_feature_engineered.drop("has_card", axis=1, inplace=True)
+#X_feature_engineered.drop("has_card", axis=1, inplace=True)
 # we use kfold for cross validation and then the X_test and y_test are used for evaluation on never seen data
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.1, random_state=42, stratify=y
+    X_res, y_res, test_size=0.1, random_state=42, stratify=y_res
 )
 
 X_train_features, X_test_features, y_train_features, y_test_features = train_test_split(
-    X_feature_engineered, y, test_size=0.1, random_state=42, stratify=y
+    X_feature_engineered, y_res, test_size=0.1, random_state=42, stratify=y_res
 )
 
 
@@ -1594,11 +1622,6 @@ X_train_features, X_test_features, y_train_features, y_test_features = train_tes
 
 # %%
 print(X_train.columns)
-
-# %%
-# print length of X_train
-display(X_train)
-display(X_train_features)
 
 
 # %% [markdown]
@@ -1877,6 +1900,9 @@ class MetricsBenchmarker:
 
 
 # %%
+X_train.columns
+
+# %%
 # Example usage
 from sklearn.linear_model import LogisticRegression
 
@@ -1889,7 +1915,9 @@ param_grid = {
 }
 
 selected_fields = (
-    ["age", "gender", "region_client"]
+    ["age"]
+    + [col for col in X_train.columns if "gender" in col]
+    + [col for col in X_train.columns if "region_client" in col]
     + [f"volume_{i}" for i in range(1, 14)]
     + [f"balance_{i}" for i in range(1, 14)]
 )
@@ -2264,6 +2292,4 @@ import os
 
 os.system("quarto render AML_MC.ipynb --to html")
 
-# %% [markdown]
-# # Referenzen
-# - [1] [Applied Predictive Modelling](http://link.springer.com/10.1007/978-1-4614-6849-3)
+# %%
