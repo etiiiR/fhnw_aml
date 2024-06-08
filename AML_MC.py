@@ -1648,7 +1648,7 @@ X_feature_engineered.isnull().sum()[X_feature_engineered.isnull().sum() > 0]
 
 
 # %%
-# Nomalize the data and standardize the data  
+# Nomalize the data and standardize the data
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 scaler = StandardScaler()
@@ -1656,7 +1656,6 @@ X_res = pd.DataFrame(scaler.fit_transform(X_res), columns=X_res.columns)
 X_feature_engineered = pd.DataFrame(
     scaler.fit_transform(X_feature_engineered), columns=X_feature_engineered.columns
 )
-
 
 
 # %% [markdown]
@@ -2158,11 +2157,6 @@ print(f"Matthews Correlation Coefficient: {mcc:.2f}")
 # %% [markdown]
 # ## Reduziere Modell für Erklärbarkeit
 
-# %% [markdown]
-# ### Stepwise Regression 
-
-# %%
-
 # %%
 import numpy as np
 import pandas as pd
@@ -2395,6 +2389,7 @@ else:
 # %%
 import os
 
-os.system("quarto render AML_MC.ipynb --to html")
+
+os.system("quarto render AML_MC.ipynb --to html --embed-resources")
 
 # %%
