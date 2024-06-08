@@ -14,9 +14,11 @@
 
 # %% [markdown]
 # ### Todos
-# - Big todo: Fix plotting Confusion Matrix and ROC, see metrics are different from plotting
-# - Big todo: - Reduce Model, Explainable AI  
 #
+# - 14. Quantitatives Untersuchen der Unterschiede von Top-N Kunden-Listen verschiedener Modelle.
+# - 17. Beschreiben des Mehrwerts des “finalen” Modelles in der Praxis.
+#
+# - remove underaged accounts not only junior cards
 # - Markdown writing and explain what we have done
 # - Clean up code: (Imports in central place, Comments, Code Refactor)
 #
@@ -547,8 +549,8 @@ district[district.isin(["?"]).any(axis=1)]
 #
 # Die Korrelationsmatrix des [SweetViz Reports](./reports/district.html) zeigt, dass `unemploy_rate95` stark mit `unemploy_rate96` und `no_of_crimes95` mit `no_of_crimes96` korreliert. 
 
-    # %%
-    # die ? ersetzen mit NaN
+# %%
+# die ? ersetzen mit NaN
 district = district.replace("?", np.nan)
 
 # Datentyp korrigieren
@@ -1063,7 +1065,7 @@ static_data = (
 static_data["has_card"] = ~static_data["card_id"].isna()
 
 # %%
-static_data['type_card'] = static_data['type_card'].cat.add_categories(['none'])
+static_data["type_card"] = static_data["type_card"].cat.add_categories(["none"])
 static_data.loc[static_data["card_id"].isna(), "type_card"] = "none"
 
 # %%
@@ -1230,14 +1232,15 @@ transactions_rolled_up_buyers.info()
 
 # %%
 # plot the issue date distribution of the buyers that where rolled up (586)
-merged_data = transactions_rolled_up_buyers.merge(buyers, how='left', left_on='account_id', right_on="account_id")
+merged_data = transactions_rolled_up_buyers.merge(
+    buyers, how="left", left_on="account_id", right_on="account_id"
+)
 plt.figure(figsize=(10, 6))
 merged_data["issued"].value_counts().sort_index().plot(kind="bar")
 plt.title("Verteilung der Ausstellungsdaten")
 plt.xlabel("Datum")
 plt.ylabel("Anzahl")
 plt.show()
-
 
 # %%
 # from transactions_monthly plot the number of distinct account ids per month
@@ -1251,28 +1254,34 @@ plt.show()
 
 # %%
 def rollup_non_credit(trans_monthly, non_buyers, range):
-    # set seed 
+    # set seed
     np.random.seed(43)
-    #for each non buyer, find the date of the first transaction
-    first_transaction_dates = trans_monthly.groupby('account_id')['year_month'].min().reset_index()
-    first_transaction_dates.columns = ['account_id', 'first_transaction_date']
+    # for each non buyer, find the date of the first transaction
+    first_transaction_dates = (
+        trans_monthly.groupby("account_id")["year_month"].min().reset_index()
+    )
+    first_transaction_dates.columns = ["account_id", "first_transaction_date"]
 
     # merge the first transaction dates with the non_buyers DataFrame
-    non_buyers = non_buyers.merge(first_transaction_dates, on='account_id', how='left')
+    non_buyers = non_buyers.merge(first_transaction_dates, on="account_id", how="left")
 
     # randomly sample a date from the range as issue date for each non buyer making sure that the random date is after the first transaction of the non buyer
     non_buyers["issued"] = non_buyers["first_transaction_date"].apply(
         lambda x: np.random.choice(range, 1)[0]
     )
 
-    non_buyers_rolled_up = rollup_credit_card(trans_monthly, non_buyers.loc[:, ["account_id", "issued"]])
+    non_buyers_rolled_up = rollup_credit_card(
+        trans_monthly, non_buyers.loc[:, ["account_id", "issued"]]
+    )
     return non_buyers_rolled_up, non_buyers
 
 
 # %%
 # get the list of issue dates of buyers
 issue_dates_buyers = buyers["issued"].unique()
-transactions_rolled_up_non_buyers, non_buyers = rollup_non_credit(transactions_monthly, static_data[~static_data["has_card"]], issue_dates_buyers)
+transactions_rolled_up_non_buyers, non_buyers = rollup_non_credit(
+    transactions_monthly, static_data[~static_data["has_card"]], issue_dates_buyers
+)
 transactions_rolled_up_non_buyers.info()
 
 # %%
@@ -1315,7 +1324,7 @@ transactions_rolled_up_non_buyers.info()
 # def find_similar_non_buyers(buyers, non_buyers):
 #     similar_non_buyers = pd.DataFrame(
 #         columns=["account_id", "issued"]
-#     )  
+#     )
 #     no_similar_found = []
 #     district_similarities = calculate_district_similarity()
 
@@ -1394,8 +1403,6 @@ plt.xlabel("Datum")
 plt.ylabel("Anzahl")
 plt.show()
 
-
-
 # %% [markdown]
 # ## Zusammenfügen der Daten
 
@@ -1408,7 +1415,20 @@ transactions_rolled_up = pd.concat(
 # merge transactions_rolled_up and static data
 X = pd.merge(static_data, transactions_rolled_up, on="account_id")
 y = X["has_card"]
-X = X.drop(columns=["has_card", "card_id", "issued", "type_card", "loan_id", "date_loan", "disp_id", "client_id", "district_id_account", "birth_day"])
+X = X.drop(
+    columns=[
+        "has_card",
+        "card_id",
+        "issued",
+        "type_card",
+        "loan_id",
+        "date_loan",
+        "disp_id",
+        "client_id",
+        "district_id_account",
+        "birth_day",
+    ]
+)
 # convert "date_account" to "days active"
 X["date_account"] = (X["date_account"] - X["date_account"].min()).dt.days
 
@@ -1439,12 +1459,12 @@ plt.show()
 
 # %%
 ## plot distribution of card_type
-#plt.figure(figsize=(10, 6))
-#X["type_card"].value_counts(dropna=False).plot(kind="bar")
-#plt.title("Verteilung der Kartentypen")
-#plt.xlabel("Kartentyp")
-#plt.ylabel("Anzahl")
-#plt.show()
+# plt.figure(figsize=(10, 6))
+# X["type_card"].value_counts(dropna=False).plot(kind="bar")
+# plt.title("Verteilung der Kartentypen")
+# plt.xlabel("Kartentyp")
+# plt.ylabel("Anzahl")
+# plt.show()
 
 # %%
 # Filter the data for accounts 14 and 18
@@ -1500,21 +1520,21 @@ X_res, y_res = sm.fit_resample(X, y)
 
 # %%
 # Sample from both groups to create a balanced dataset
-#counts = X["has_card"].value_counts()
+# counts = X["has_card"].value_counts()
 
 # Determine the minimum count between True and False
-#min_count = counts.min()
+# min_count = counts.min()
 
-#true_sample = X[X["has_card"] == True].sample(n=min_count, random_state=42)
-#false_sample = X[X["has_card"] == False].sample(n=min_count, random_state=42)
+# true_sample = X[X["has_card"] == True].sample(n=min_count, random_state=42)
+# false_sample = X[X["has_card"] == False].sample(n=min_count, random_state=42)
 
 # Combine the sampled data
-#X = pd.concat([true_sample, false_sample])
+# X = pd.concat([true_sample, false_sample])
 
 # Verify the counts
-#balanced_counts = X["has_card"].value_counts()
+# balanced_counts = X["has_card"].value_counts()
 
-#print(balanced_counts)
+# print(balanced_counts)
 
 
 # %%
@@ -1572,7 +1592,6 @@ for prefix in columns_to_process:
 df_features = pd.DataFrame(all_features)
 
 
-display(df_features.head(5))
 X_feature_engineered = pd.concat([X_res, df_features], axis=1)
 display(X_feature_engineered.head(5))
 
@@ -1599,14 +1618,55 @@ def clean_data(df):
 X_res = clean_data(X_res)
 X_feature_engineered = clean_data(X_feature_engineered)
 
+# %%
+display(X_feature_engineered.head(5))
+display(X_res.head(5))
+
+
+# %%
+# only print the columns with missing values
+X_res.isnull().sum()[X_res.isnull().sum() > 0]
+X_feature_engineered.isnull().sum()[X_feature_engineered.isnull().sum() > 0]
+
+
+# %%
+# impute missing values with knn imputation but in dataframe
+# import KNNImputer
+from sklearn.impute import KNNImputer
+
+imputer = KNNImputer(n_neighbors=5)
+X_res = pd.DataFrame(imputer.fit_transform(X_res), columns=X_res.columns)
+X_feature_engineered = pd.DataFrame(
+    imputer.fit_transform(X_feature_engineered), columns=X_feature_engineered.columns
+)
+
+
+# %%
+# only print the columns with missing values
+X_res.isnull().sum()[X_res.isnull().sum() > 0]
+X_feature_engineered.isnull().sum()[X_feature_engineered.isnull().sum() > 0]
+
+
+# %%
+# Nomalize the data and standardize the data  
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+
+scaler = StandardScaler()
+X_res = pd.DataFrame(scaler.fit_transform(X_res), columns=X_res.columns)
+X_feature_engineered = pd.DataFrame(
+    scaler.fit_transform(X_feature_engineered), columns=X_feature_engineered.columns
+)
+
+
+
 # %% [markdown]
 # # Evaluations Daten
 
 # %%
 # Assuming 'X' is your DataFrame and 'has_card' is the target variable
-#y_features = X_feature_engineered["has_card"]
+# y_features = X_feature_engineered["has_card"]
 
-#X_feature_engineered.drop("has_card", axis=1, inplace=True)
+# X_feature_engineered.drop("has_card", axis=1, inplace=True)
 # we use kfold for cross validation and then the X_test and y_test are used for evaluation on never seen data
 X_train, X_test, y_train, y_test = train_test_split(
     X_res, y_res, test_size=0.1, random_state=42, stratify=y_res
@@ -1616,19 +1676,20 @@ X_train_features, X_test_features, y_train_features, y_test_features = train_tes
     X_feature_engineered, y_res, test_size=0.1, random_state=42, stratify=y_res
 )
 
-
 # %% [markdown]
 # ## Drop Featrues
 
 # %%
-print(X_train.columns)
-
+X_train.dtypes
 
 # %% [markdown]
 # # Modeling und Model Selection
 # Für die Model Selection benutzen wir einen StratifiedKFold mit 10 Folds in dem wir nur den Train split Folden, denn später brauchen wir die Test Daten für den Error Assesment.
 
 # %%
+from lime.lime_tabular import LimeTabularExplainer
+
+
 class ModelEvaluator:
     def __init__(self, models, param_grid, X, y, X_test, y_test, selected_fields=None):
         """
@@ -1720,7 +1781,7 @@ class ModelEvaluator:
 
             self.cv_predictions[name] = all_cv_preds
             self.fitted_models[name] = best_pipeline.fit(self.X, self.y)
-    
+
     def evaluate_models(self):
         if not self.fitted_models:
             self.fit_models()
@@ -1784,68 +1845,6 @@ class ModelEvaluator:
         plt.ylabel("Frequency")
         plt.show()
 
-    def explain_with_lime(self, model_name, num_features=10):
-        if model_name in self.best_models:
-            model = self.best_models[model_name]
-        else:
-            model = self.optimize_model(model_name)
-
-        cv = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
-        for train_idx, test_idx in cv.split(self.X, self.y):
-            X_train, X_test = self.X.iloc[train_idx], self.X.iloc[test_idx]
-            y_train, y_test = self.y.iloc[train_idx], self.y.iloc[test_idx]
-            break  # Use the first fold
-
-        # Ensure only numeric features are passed to LIME
-        X_train_numeric = X_train.select_dtypes(include=[np.number])
-        X_test_numeric = X_test.select_dtypes(include=[np.number])
-
-        # Remove columns with zero variance
-        X_train_numeric = X_train_numeric.loc[
-            :, (X_train_numeric != X_train_numeric.iloc[0]).any()
-        ]
-        X_test_numeric = X_test_numeric.loc[:, X_train_numeric.columns]
-
-        explainer = lime.lime_tabular.LimeTabularExplainer(
-            X_train_numeric.values,
-            feature_names=X_train_numeric.columns,
-            class_names=["No Card", "Has Card"],
-            discretize_continuous=True,
-        )
-
-        # Explain a prediction for a single instance
-        idx = 0  # Index of the instance to explain
-        exp = explainer.explain_instance(
-            X_test_numeric.values[idx], model.predict_proba, num_features=num_features
-        )
-        exp.show_in_notebook(show_table=True, show_all=False)
-
-    def explain_with_shap(self, model_name):
-        if model_name in self.best_models:
-            model = self.best_models[model_name]
-        else:
-            model = self.optimize_model(model_name)
-
-        cv = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
-        for train_idx, test_idx in cv.split(self.X, self.y):
-            X_train, X_test = self.X.iloc[train_idx], self.X.iloc[test_idx]
-            y_train, y_test = self.y.iloc[train_idx], self.y.iloc[test_idx]
-            break  # Use the first fold
-
-        # Ensure only numeric features are passed to SHAP
-        X_train_numeric = X_train.select_dtypes(include=[np.number])
-        X_test_numeric = X_test.select_dtypes(include=[np.number])
-
-        explainer = shap.Explainer(model, X_train_numeric)
-        shap_values = explainer(X_test_numeric)
-
-        # Plot SHAP summary plot
-        shap.summary_plot(shap_values, X_test_numeric)
-
-        # Plot SHAP dependence plot for a single feature
-        feature = "balance_mean"  # Feature to explain
-        shap.dependence_plot(feature, shap_values, X_test_numeric)
-
     def plot_confusion_matrices(self):
         if not self.fitted_models:
             self.fit_models()
@@ -1899,8 +1898,6 @@ class MetricsBenchmarker:
         plt.show()
 
 
-# %%
-X_train.columns
 
 # %%
 # Example usage
@@ -2011,24 +2008,6 @@ evaluator.compare_top_n_customers("Logistic Regression Features added", n=100)
 
 # Assuming X and y are defined
 
-
-# %%
-# check if there are any missing values
-# print the missing values of withdrawal mean ration last3 first3
-print(X_feature_engineered["withdrawal_mean_ratio_last3_first3"].isnull().sum())
-
-# get the index of the missing values
-missing_values = X_feature_engineered["withdrawal_mean_ratio_last3_first3"].isnull()
-missing_values_index = X_feature_engineered[missing_values].index
-print(missing_values_index)
-X_feature_engineered.loc[missing_values_index]
-# Transform the missing values to the mean of the column
-X_feature_engineered["withdrawal_mean_ratio_last3_first3"] = X_feature_engineered[
-    "withdrawal_mean_ratio_last3_first3"
-].fillna(X_feature_engineered["withdrawal_mean_ratio_last3_first3"].mean())
-
-display(X_feature_engineered.head(5))
-
 # %%
 # Usage example:
 # Define models and their parameter grids
@@ -2123,7 +2102,14 @@ best_model_score = weighted_scores[best_model_name]
 
 # %%
 # Evaluate the best model with the test set
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, cohen_kappa_score, matthews_corrcoef
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    cohen_kappa_score,
+    matthews_corrcoef,
+)
 
 
 best_model = evaluator_models.fitted_models[best_model_name]
@@ -2172,53 +2158,172 @@ print(f"Matthews Correlation Coefficient: {mcc:.2f}")
 # %% [markdown]
 # ## Reduziere Modell für Erklärbarkeit
 
-# %%
-# todo reduce model and do training
-
-# %%
-# todo fix the error of lime and shap and add the explanation to the reduced model
-
-# Explain the best model with LIME
-# evaluator_models.explain_with_lime("Random Forest")
-
-# Explain the best model with SHAP
-# evaluator_models.explain_with_shap("Random Forest")
-
-
-
 # %% [markdown]
 # ### Stepwise Regression 
 
 # %%
 
+# %%
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import LogisticRegressionCV
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, roc_curve, auc
+import matplotlib.pyplot as plt
+import lime.lime_tabular
+import shap
+import statsmodels.api as sm
+
+# Ensure all data in X_train_features are numeric
+X_train_features = X_train_features.apply(pd.to_numeric, errors="coerce")
+
+# Drop rows with any NaN values in X_train_features and align y_res
+X_train_features = X_train_features.dropna()
+y_res_aligned = y_res.loc[X_train_features.index]
+
+X_train_reduced = X_train_features.copy()
+X_test_reduced = X_test_features.copy()
+y_test_reduced = y_test_features.copy()
+y_train_reduced = y_train_features.copy()
+
+# Convert to DataFrame with feature names for consistency
+X_train_reduced = pd.DataFrame(X_train_reduced, columns=X_train_features.columns)
+X_test_reduced = pd.DataFrame(X_test_reduced, columns=X_train_features.columns)
+
+# Add a constant column for the intercept
+X_train_reduced = sm.add_constant(X_train_reduced)
+X_test_reduced = sm.add_constant(X_test_reduced)
+
+# Convert to numeric to avoid dtype issues
+X_train_reduced = X_train_reduced.apply(pd.to_numeric)
+X_test_reduced = X_test_reduced.apply(pd.to_numeric)
+
+# Apply Lasso (L1) regularization for feature selection
+lasso_model = LogisticRegressionCV(
+    cv=5, penalty="l1", solver="liblinear", random_state=42, Cs=np.logspace(-4, 0, 50)
+)
+lasso_model.fit(X_train_reduced, y_train_reduced)
+
+# Get the features with non-zero coefficients
+coef = pd.Series(lasso_model.coef_[0], index=X_train_reduced.columns)
+selected_features = coef[coef != 0].index.tolist()
+print("Selected features after Lasso:", selected_features)
+
+lasso_selected_fields = selected_features
+
+
 # %% [markdown]
 # ### Logistic Regression Reduziert
 
-# %%
-# Example usage
-# Define models and their parameter grids
-models = {
-    "Logistic Regression Reduced": LogisticRegression(solver="liblinear"),
-}
-param_grid = {
-    "Logistic Regression Reduced": {"model__C": [0.01, 0.1, 1, 10]},
-}
-
-# todo fields of stepwise regression selection
-selected_fields = []
-
-evaluator_reduced = ModelEvaluator(
-    models, param_grid, X, y, X_test, y_test, selected_fields=selected_fields
-)
-# evaluator_reduced.evaluate_models()
-# evaluator_reduced.plot_roc_curves()
-# evaluator_reduced.plot_confusion_matrices()
-# evaluator_reduced.compare_top_n_customers("Baseline Logistic Regression", n=100)
-
 # %% [markdown]
-# ### todo Explain model
+# #### Wir machen kein Model Selection mehr sondern nur ein Model Assesment für Explainable AI
 
 # %%
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, roc_curve, auc
+import matplotlib.pyplot as plt
+import lime.lime_tabular
+import shap
+
+# Step 1: Create and Train a Reduced Model
+selected_fields_reduced = lasso_selected_fields
+
+# Ensure all data in selected fields are numeric
+X_feature_engineered[selected_fields_reduced] = X_feature_engineered[
+    selected_fields_reduced
+].apply(pd.to_numeric)
+
+X_train_reduced, X_test_reduced, y_train_reduced, y_test_reduced = train_test_split(
+    X_feature_engineered[selected_fields_reduced],
+    y_res,
+    test_size=0.1,
+    random_state=42,
+    stratify=y_res,
+)
+
+# Convert to DataFrame with feature names for consistency
+X_train_reduced = pd.DataFrame(X_train_reduced, columns=selected_fields_reduced)
+X_test_reduced = pd.DataFrame(X_test_reduced, columns=selected_fields_reduced)
+
+reduced_model = LogisticRegression(solver="liblinear")
+reduced_model.fit(X_train_reduced, y_train_reduced)
+
+y_pred_reduced = reduced_model.predict(X_test_reduced)
+cm = confusion_matrix(y_test_reduced, y_pred_reduced)
+disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+disp.plot(cmap=plt.cm.Blues)
+plt.title("Confusion Matrix for Reduced Model")
+plt.show()
+
+y_scores_reduced = reduced_model.predict_proba(X_test_reduced)[:, 1]
+fpr, tpr, _ = roc_curve(y_test_reduced, y_scores_reduced)
+roc_auc = auc(fpr, tpr)
+plt.figure(figsize=(10, 8))
+plt.plot(fpr, tpr, label=f"Reduced Model (area = {roc_auc:.2f})")
+plt.plot([0, 1], [0, 1], "k--")
+plt.xlabel("False Positive Rate")
+plt.ylabel("True Positive Rate")
+plt.title("ROC Curve for Reduced Model")
+plt.legend(loc="lower right")
+plt.show()
+
+
+# Step 2: Create a Wrapper Function for LIME
+def predict_proba_with_feature_names(X):
+    X_df = pd.DataFrame(X, columns=selected_fields_reduced)
+    return reduced_model.predict_proba(X_df)
+
+
+# Explain the Model with LIME
+explainer = lime.lime_tabular.LimeTabularExplainer(
+    training_data=X_train_reduced.values,
+    feature_names=selected_fields_reduced,
+    class_names=["No Card", "Card"],
+    mode="classification",
+)
+
+for i in range(15):
+    exp = explainer.explain_instance(
+        data_row=X_test_reduced.iloc[i].values,
+        predict_fn=predict_proba_with_feature_names,
+    )
+    exp.show_in_notebook(show_table=True)
+
+# Step 3: Explain the Model with SHAP
+# Summarize the background data using shap.sample
+background_data = shap.sample(X_train_reduced, 100)
+
+explainer_shap = shap.KernelExplainer(reduced_model.predict_proba, background_data)
+shap_values = explainer_shap.shap_values(X_test_reduced)
+
+shap.initjs()
+
+# Print shapes to debug
+print("SHAP values shape:", np.array(shap_values).shape)
+print("X_test_reduced shape:", X_test_reduced.shape)
+
+# Verify dimensions (consider removing the extra dimension if it exists)
+instance_index = 0  # Change the instance index if needed
+positive_class_index = 1
+
+if len(shap_values.shape) > 2:  # Check for extra dimension
+    shap_values = shap_values[
+        :, :, positive_class_index
+    ]  # Select positive class values
+
+assert len(shap_values[instance_index]) == X_test_reduced.shape[1], "Dimension mismatch"
+
+# Use only the SHAP values for the positive class (index 1)
+shap.force_plot(
+    explainer_shap.expected_value[positive_class_index],
+    shap_values[instance_index],
+    X_test_reduced.iloc[instance_index],
+)
+shap.summary_plot(shap_values, X_test_reduced, feature_names=selected_fields_reduced)
+
 
 # %% [markdown]
 # ## Interpretation von den Resultaten
