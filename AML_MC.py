@@ -18,7 +18,6 @@
 # - 14. Quantitatives Untersuchen der Unterschiede von Top-N Kunden-Listen verschiedener Modelle.
 # - 17. Beschreiben des Mehrwerts des “finalen” Modelles in der Praxis.
 #
-# - remove underaged accounts not only junior cards
 # - Markdown writing and explain what we have done
 # - Clean up code: (Imports in central place, Comments, Code Refactor)
 #
@@ -1314,22 +1313,35 @@ plt.show()
 transactions_rolled_up = pd.concat(
     [transactions_rolled_up_buyers, transactions_rolled_up_non_buyers]
 )
-
-# %%
 # merge transactions_rolled_up and static data
 X = pd.merge(static_data, transactions_rolled_up, on="account_id")
-y = X["has_card"]
 
+# %% [markdown]
+# ### Entfernen von minderjährigen Kunden
+# Kunden die zum Zeitpunkt des Erwerbs der Kreditkarte minderjährig waren, müssen entfernt werden, da diese Zielgruppe, wie bereits beschrieben, nicht modelliert werden soll.
+
+# %%
+num_before_underage_removal = X["account_id"].nunique()
+X['issued'] = X['issued'].fillna(non_buyers["issued"])
 X['issued'] = X['issued'].dt.to_timestamp()
 
+time_to_compare = pd.Timedelta(days=6970)
+
 # Filter underage accounts
-# X = X[(X['issued'] - X['birth_day']) >= offset_timedelta]
+X = X[(X['issued'] - X['birth_day']) >= time_to_compare]
 
 # Calculate the number of accounts after filtering
-# num_accounts_after = X['account_id'].nunique()
+num_accounts_after = X['account_id'].nunique()
 
 # Calculate the number of underage accounts
-# num_underage_accounts = num_accounts_before - num_accounts_after
+num_underage_accounts = num_before_underage_removal - num_accounts_after
+num_underage_accounts
+
+# %% [markdown]
+# 120 Kunden werden durch diesen Schritt entfernt.
+
+# %%
+y = X["has_card"]
 
 X = X.drop(columns=["has_card", "card_id", "issued", "type_card", "loan_id", "date_loan", "disp_id", "client_id",
                     "district_id_account", "birth_day", "type_disp"])
@@ -1350,9 +1362,12 @@ X.isnull().sum()
 # In der Vorverarbeitung werden diverse Kundenkonten aus dem Datensatz entfernt. Die folgende Darstellung zeigt auf, wie viele in welchem Schritt entfernt werden.
 
 # %%
+num_junior_cards, lost_buyers, non_buyers_lost, num_underage_accounts, X.shape[0]
+
+# %%
 waterfall_data = {
-    "step": ["Initial", "Junior Card Holders", "Lost Buyers", "Non-Buyers", "Final"],
-    "count": [num_accounts_before, -num_junior_cards, -lost_buyers, -non_buyers_lost, X.shape[0]],
+    "step": ["Initial", "Junior Card Holders", "Lost Buyers", "Non-Buyers", "Underage Clients", "Final"],
+    "count": [4500, -num_junior_cards, -lost_buyers, -non_buyers_lost, -num_underage_accounts, X.shape[0]],
 }
 
 waterfall_df = pd.DataFrame(waterfall_data)
@@ -1360,7 +1375,7 @@ waterfall_df = pd.DataFrame(waterfall_data)
 blank = waterfall_df["count"].cumsum().shift(1).fillna(0)
 step = blank.reset_index(drop=True).repeat(3).shift(-1)
 step[1::3] = np.nan
-blank[4] = 0
+blank[5] = 0
 
 # %%
 my_plot = waterfall_df.plot(kind='bar', stacked=True, bottom=blank, legend=False,
@@ -1371,7 +1386,7 @@ my_plot.plot(step.index, step.values, 'k')
 display(waterfall_df)
 
 # %% [markdown]
-# Insgesamt werden also 2248 Konten in der Vorberarbeitung entfernt. 
+# Insgesamt werden also 2368 Konten in der Vorberarbeitung entfernt. 
 # ### Verteilung Kartenbesitzer
 # Nachfolgend wird die Verteilung der Kartenbesitzer aufgezeigt.
 
