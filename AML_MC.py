@@ -15,7 +15,6 @@
 # %% [markdown]
 # ### Todos
 #
-# - 14. Quantitatives Untersuchen der Unterschiede von Top-N Kunden-Listen verschiedener Modelle.
 # - 17. Beschreiben des Mehrwerts des “finalen” Modelles in der Praxis.
 #
 # - Markdown writing and explain what we have done
@@ -1337,6 +1336,7 @@ num_accounts_after = X['account_id'].nunique()
 num_underage_accounts = num_before_underage_removal - num_accounts_after
 num_underage_accounts
 
+
 # %% [markdown]
 # 120 Kunden werden durch diesen Schritt entfernt.
 
@@ -1755,7 +1755,8 @@ class ModelEvaluator:
     def compare_top_n_customers(self, model_name, n=100):
         print(f"Comparing top {n} customers for {model_name}")
         model = self.fitted_models[model_name]
-        probabilities = model.predict_proba(self.X)[:, 1]
+        probabilities = model.predict_proba(self.eval_data)[:, 1]
+        predictions = model.predict(self.eval_data)
         top_n_indices = np.argsort(probabilities)[::-1][:n]
 
         plt.figure()
@@ -1764,6 +1765,10 @@ class ModelEvaluator:
         plt.xlabel("Probability")
         plt.ylabel("Frequency")
         plt.show()
+
+        dict = {'predictions': predictions, 'probabilities': probabilities}
+
+        return pd.DataFrame(dict)
 
     def plot_confusion_matrices(self):
         if not self.fitted_models:
@@ -1820,6 +1825,7 @@ class MetricsBenchmarker:
 
 
 # %%
+model_predictions = {}
 # Example usage
 from sklearn.linear_model import LogisticRegression
 
@@ -1852,7 +1858,10 @@ evaluator_baseline = ModelEvaluator(
 evaluator_baseline.evaluate_models()
 evaluator_baseline.plot_roc_curves()
 evaluator_baseline.plot_confusion_matrices()
-evaluator_baseline.compare_top_n_customers("Baseline Logistic Regression", n=100)
+predictions = evaluator_baseline.compare_top_n_customers("Baseline Logistic Regression", n=100)
+predictions["account_id"] = X_test.index.values
+
+model_predictions["Baseline Logistic Regression"] = predictions
 
 # %%
 # Define models and their parameter grids
@@ -1868,19 +1877,17 @@ selected_fields = X_train_features.columns
 evaluator = ModelEvaluator(
     models,
     param_grid,
-    X_test_features,
-    y_test_features,
     X_train_features,
     y_train_features,
+    X_test_features,
+    y_test_features,
     selected_fields=selected_fields,
 )
 evaluator.evaluate_models()
 evaluator.plot_roc_curves()
-evaluator.compare_top_n_customers("Logistic Regression Features", n=100)
-
-
-# Assuming X and y are defined
-#
+predictions = evaluator.compare_top_n_customers("Logistic Regression Features", n=100)
+predictions["account_id"] = X_test.index.values
+model_predictions["Logistic Regression Features"] = predictions
 
 # %% [markdown]
 # ## Overfitting because of jagged ROC curve needs Regularization
@@ -1913,20 +1920,19 @@ selected_fields = X_train_features.columns
 evaluator = ModelEvaluator(
     models,
     param_grid,
-    X_test_features,
-    y_test_features,
     X_train_features,
     y_train_features,
+    X_test_features,
+    y_test_features,
     selected_fields=selected_fields,
 )
 
 
 evaluator.evaluate_models()
 evaluator.plot_roc_curves()
-evaluator.compare_top_n_customers("Logistic Regression Features added", n=100)
-
-
-# Assuming X and y are defined
+predictions = evaluator.compare_top_n_customers("Logistic Regression Features added", n=100)
+predictions["account_id"] = X_test.index.values
+model_predictions["Logistic Regression Features added"] = predictions
 
 # %%
 # Usage example:
@@ -1958,13 +1964,6 @@ param_grid = {
     "AdaBoost": {},
 }
 
-
-# Fix the not converging models with LassoCV
-# for model_name, model in models.items():
-#    models[model_name] = Pipeline(
-#        [("feature_selection", SelectFromModel(LassoCV(max_iter=1500))), ("model", model)]
-#    )
-
 selected_fields = X_train_features.columns  # add the new features of df_features
 
 evaluator_models = ModelEvaluator(
@@ -1978,13 +1977,59 @@ evaluator_models = ModelEvaluator(
 )
 results = evaluator_models.evaluate_models()
 evaluator_models.plot_roc_curves()
-# evaluator_models.plot_confusion_matrices()
-# compare top n customers for all models
+
+# %% [markdown]
+# ## Vergleich der Top-N Kundenlisten
+
+# %%
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+def compare_top_customers(predictions, n):
+    top_n = {}
+    for model, pred_df in predictions.items():
+        top_customers = pred_df.nlargest(n, 'probabilities')['account_id']
+        top_n[model] = set(top_customers)
+
+    model_names = list(predictions.keys())
+    overlaps = pd.DataFrame(0, index=model_names, columns=model_names)
+
+    for i in range(len(model_names)):
+        for j in range(i, len(model_names)):
+            model1, model2 = model_names[i], model_names[j]
+            overlap = len(top_n[model1].intersection(top_n[model2])) / n
+            overlaps.loc[model1, model2] = overlap
+            overlaps.loc[model2, model1] = overlap
+
+    plt.figure(figsize=(10, 10))
+    sns.heatmap(overlaps, annot=True, cmap='viridis')
+    plt.title('Overlap of Top Customers Between Models')
+    plt.show()
+
+    return overlaps
+
 
 # %%
 # compare top n customers for all models
 for model_name in models.keys():
-    evaluator_models.compare_top_n_customers(model_name, n=100)
+    predictions = evaluator_models.compare_top_n_customers(model_name, n=100)
+    predictions["account_id"] = X_test.index.values
+    model_predictions[model_name] = predictions
+
+# %%
+compare_top_customers(model_predictions, 10)
+
+# %% [markdown]
+# Die oben gezeigte Matrix zeigt die Überlappung von der top 10 account_ids, welche von dem jeweiligen Modell als potentieller Kreditkartenkäufer identifiziert wurde.
+# Einzig die logistischen regressions Modelle zeigen eine Überlappung von mehr als 50%. Ansonsten weisen die Resultate vom AdaBoost und dem Gradient Boosting Modell eine Überlappung von 50% auf. Alle anderen Modellkombinationen überschneiden sich in der Top-N Liste kaum.
+
+# %%
+compare_top_customers(model_predictions, 20)
+
+# %% [markdown]
+# Die oben gezeigte Matrix zeigt die Überlappung von der top 20 account_ids, welche von dem jeweiligen Modell als potentieller Kreditkartenkäufer identifiziert wurde.
+# Auch hier zeigen die logistischen regressions Modelle eine Überlappung von mehr als 50%. Das Gradient Boosting Modell weist nun aber eine 55%-ige Übereinstimmung mit dem Random Forest Modell und die Resultate vom AdaBoost Modell weist eine Übereinstimmung von 65% mit den Resultaten vom Gradient Boosting Modell.  Insgesamt erhöht sich die Überlappung der Listen im Vergleich zu den Top-10 Listen.
 
 # %% [markdown]
 # ## Results Comparision
