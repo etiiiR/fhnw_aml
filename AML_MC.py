@@ -32,7 +32,6 @@
 # %pip install -r ../requirements.txt
 
 # %%
-from itables import show
 from itables import init_notebook_mode
 
 init_notebook_mode()
@@ -43,21 +42,16 @@ from datetime import datetime
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 import sklearn.metrics as metrics
 from IPython.display import display
-from itables import init_notebook_mode
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics.pairwise import cosine_similarity
 
 import pandas as pd
 from sklearn.model_selection import train_test_split, cross_validate
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.preprocessing import OneHotEncoder
 from sklearn.impute import SimpleImputer
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
-from sklearn.linear_model import LogisticRegression
-
 
 from sklearn.model_selection import (
     GridSearchCV,
@@ -70,20 +64,14 @@ from sklearn.metrics import (
     confusion_matrix,
     ConfusionMatrixDisplay,
     fbeta_score,
-    cohen_kappa_score,
-    matthews_corrcoef,
 )
 import lime.lime_tabular
-import shap
 
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import AdaBoostClassifier
-from tqdm import tqdm
-from sklearn.linear_model import LassoCV
-from sklearn.feature_selection import SelectFromModel
 
 # %%
 # %%capture
@@ -1164,10 +1152,6 @@ transactions_monthly = (
     .reset_index()
 )
 
-# # Fill missing months for each account
-# transactions_monthly = transactions_monthly.set_index(['year_month', 'account_id']).unstack(
-#     fill_value=0).stack(future_stack=True).reset_index()
-
 # Calculate cumulative sum of 'volume' for each account
 transactions_monthly["balance"] = transactions_monthly.groupby("account_id")[
     "volume"
@@ -1175,7 +1159,8 @@ transactions_monthly["balance"] = transactions_monthly.groupby("account_id")[
 
 # %%
 # count unique account_ids in transactions_monthly
-transactions_monthly["account_id"].nunique()
+print(transactions_monthly["account_id"].nunique())
+num_accounts_before = transactions_monthly["account_id"].nunique()
 
 
 # %%
@@ -1217,11 +1202,21 @@ def rollup_credit_card(trans_monthly, account_card_issue_dates):
 # %%
 buyers = static_data[static_data["has_card"]]
 
+# print number of buyers
+print(buyers["account_id"].nunique())
+
+# %%
 transactions_rolled_up_buyers = rollup_credit_card(
     transactions_monthly, buyers.loc[:, ["account_id", "issued"]]
 )
 
 transactions_rolled_up_buyers.info()
+
+# %%
+# calculate the number of buyers lost by rolling up
+lost_buyers = buyers[~buyers["account_id"].isin(transactions_rolled_up_buyers["account_id"])]
+lost_buyers = lost_buyers["account_id"].nunique()
+print(lost_buyers)
 
 # %% [markdown]
 # Und so entsteht ein Datensatz, welcher für 568 Kreditkartenkäufer die Merkmale `balance`, `credit`, `n_transactions`, `volume` und `withdrawal` für alle 13 Monate des Rollup-Fensters inklusive Lag beinhaltet. 
@@ -1242,6 +1237,9 @@ plt.xlabel("Datum")
 plt.ylabel("Anzahl")
 plt.show()
 
+# %% [markdown]
+# Hier dargestellt ist die Verteilung der Ausstellungsdaten der Kreditkarten. Zu erkennen ist ein klarer aufwärtstrend.
+
 # %%
 # from transactions_monthly plot the number of distinct account ids per month
 plt.figure(figsize=(10, 6))
@@ -1251,6 +1249,13 @@ plt.xlabel("Monat")
 plt.ylabel("Anzahl")
 plt.show()
 
+# %%
+# calculate the correlation between transactions_monthly["year_month"] and merged_data["issued"].value_counts()
+transactions_monthly["year_month"].value_counts().sort_index().corr(merged_data["issued"].value_counts().sort_index())
+
+
+# %% [markdown]
+# Hier dargestellt ist die Verteilung der Anzahl von eröffneten Konten pro Monat. Der hier beobachtete Aufwärtstrend der Anzahl erstellter Konten könnte ein maßgebender Einflussfaktor der Anzahl ausgestellter Kreditkarten pro Monat sein. Der Korrelationskoeffizient von 0.78 unterstreicht diese Beobachtung. Wir gehen davon aus, dass diese Gegebenheit von einem Klassifikationsmodell schnell overfitted wird, weshalb wir nachfolgend ein random sampling einsetzen, um das fiktive Issue-Date von Nicht-Käufern zu definieren.
 
 # %%
 def rollup_non_credit(trans_monthly, non_buyers, range):
@@ -1279,120 +1284,18 @@ def rollup_non_credit(trans_monthly, non_buyers, range):
 # %%
 # get the list of issue dates of buyers
 issue_dates_buyers = buyers["issued"].unique()
-transactions_rolled_up_non_buyers, non_buyers = rollup_non_credit(
-    transactions_monthly, static_data[~static_data["has_card"]], issue_dates_buyers
-)
+n_non_buyers = static_data[~static_data["has_card"]]["account_id"].nunique()
+transactions_rolled_up_non_buyers, non_buyers = rollup_non_credit(transactions_monthly,
+                                                                  static_data[~static_data["has_card"]],
+                                                                  issue_dates_buyers)
 transactions_rolled_up_non_buyers.info()
 
-# %%
-# # model top-n similarity of districts
-# def calculate_district_similarity():
-#     data = data_frames["district.csv"]
-#     data = data.drop(columns=["region", "district_name"])
-
-#     # Calculate the similarity matrix
-#     similarity_matrix = cosine_similarity(data)
-
-#     # Create a DataFrame from the similarity matrix
-#     similarity_df = pd.DataFrame(
-#         similarity_matrix, index=data.index, columns=data.index
-#     )
-
-#     # Create a mask to exclude the diagonal
-#     mask = np.eye(len(similarity_df), dtype=bool)
-
-#     # Apply the mask to the DataFrame
-#     similarity_df = similarity_df.mask(mask)
-
-#     return similarity_df
+# %% [markdown]
+# So finden wir 1684 aufgerollte Datensätze für Nicht-Käufer. 
 
 # %%
-# def top_n_similarity(district_id, n, similarity_df):
-#     # Get the row of the similarity matrix corresponding to the district_id
-#     similarity_row = similarity_df.loc[district_id - 1]
-
-#     # Sort the values in the row in descending order and get the top n indices
-#     top_n_indices = similarity_row.sort_values(ascending=False).head(n).index
-
-#     # append district id to top_n_indices
-#     top_n_indices = top_n_indices.append(pd.Index([district_id]))
-
-#     return top_n_indices
-
-# %%
-# # find similar non-buyers
-# def find_similar_non_buyers(buyers, non_buyers):
-#     similar_non_buyers = pd.DataFrame(
-#         columns=["account_id", "issued"]
-#     )
-#     no_similar_found = []
-#     district_similarities = calculate_district_similarity()
-
-#     for _, buyer in buyers.iterrows():
-#         # exclude already found similar_non_buyers from non_buyer's list
-#         non_buyers = non_buyers[
-#             ~non_buyers["account_id"].isin(similar_non_buyers["account_id"])
-#         ]
-#         # find top n similar districts
-#         top_n_similar = top_n_similarity(
-#             buyer["district_id_client"], 2, district_similarities
-#         )
-
-#         # Find non-buyers with similar age, sex, and district
-#         similar = non_buyers[
-#             (non_buyers["age"] >= buyer["age"] - 3)
-#             & (non_buyers["age"] <= buyer["age"] + 3)
-#             & (non_buyers["gender"] == buyer["gender"])
-#             & (non_buyers["district_id_account"].isin(top_n_similar))
-#         ]
-
-#         # join transaction data to similar
-#         similar = pd.merge(similar, transactions_monthly, on="account_id")
-
-#         similar["issued"] = buyer["issued"]
-#         similar["months_before_card_issue"] = [
-#             (issued - year_month).n
-#             for issued, year_month in zip(similar["issued"], similar["year_month"])
-#         ]
-
-#         # select only where months_before_card_issue > 0 and <= 13
-#         similar = similar[
-#             (similar["months_before_card_issue"] > 0)
-#             & (similar["months_before_card_issue"] <= 13)
-#         ]
-
-#         # make sure there's 13 rows per account_id and drop account_ids for which that's not true
-#         similar = similar.groupby("account_id").filter(lambda x: len(x) == 13)
-
-#         # next if similar is empty
-#         if similar.empty:
-#             no_similar_found.append(buyer["account_id"])
-#             continue
-
-#         # drop duplicates
-#         similar = similar.drop_duplicates(subset=["account_id"])
-
-#         # Append similar similar['account_id'] and similar['nb_issued'] to similar_non_buyers
-#         similar_non_buyers = pd.concat(
-#             [similar_non_buyers, similar[["account_id", "issued"]]]
-#         )
-
-#     return similar_non_buyers, no_similar_found
-
-# %%
-# non_buyers = static_data[~static_data["has_card"]]
-# similar_non_buyers, none_found = find_similar_non_buyers(buyers, non_buyers)
-
-# %%
-# len(none_found)
-
-# %%
-# len(non_buyers[~non_buyers["account_id"].isin(similar_non_buyers["account_id"])])
-
-# %%
-# transactions_rolled_up_non_buyers = rollup_credit_card(
-#     transactions_monthly, similar_non_buyers
-# )
+non_buyers_lost = n_non_buyers - transactions_rolled_up_non_buyers["account_id"].nunique()
+print(non_buyers_lost)
 
 # %%
 # plot the issue date distribution of the non-buyers that where rolled up
@@ -1405,6 +1308,7 @@ plt.show()
 
 # %% [markdown]
 # ## Zusammenfügen der Daten
+# Nachfolgend werden die Stammdaten mit den aufgerollten Bewegungsdaten zum Modellierungsdatensatz kombiniert.
 
 # %%
 transactions_rolled_up = pd.concat(
@@ -1415,20 +1319,20 @@ transactions_rolled_up = pd.concat(
 # merge transactions_rolled_up and static data
 X = pd.merge(static_data, transactions_rolled_up, on="account_id")
 y = X["has_card"]
-X = X.drop(
-    columns=[
-        "has_card",
-        "card_id",
-        "issued",
-        "type_card",
-        "loan_id",
-        "date_loan",
-        "disp_id",
-        "client_id",
-        "district_id_account",
-        "birth_day",
-    ]
-)
+
+X['issued'] = X['issued'].dt.to_timestamp()
+
+# Filter underage accounts
+# X = X[(X['issued'] - X['birth_day']) >= offset_timedelta]
+
+# Calculate the number of accounts after filtering
+# num_accounts_after = X['account_id'].nunique()
+
+# Calculate the number of underage accounts
+# num_underage_accounts = num_accounts_before - num_accounts_after
+
+X = X.drop(columns=["has_card", "card_id", "issued", "type_card", "loan_id", "date_loan", "disp_id", "client_id",
+                    "district_id_account", "birth_day", "type_disp"])
 # convert "date_account" to "days active"
 X["date_account"] = (X["date_account"] - X["date_account"].min()).dt.days
 
@@ -1436,17 +1340,40 @@ X["date_account"] = (X["date_account"] - X["date_account"].min()).dt.days
 # show NaNs in X
 X.isnull().sum()
 
-# %%
-X.info()
+# %% [markdown]
+# Zu sehen ist, dass der Datensatz komplett ist, also keine fehlenden Werte aufweist.
 
 # %% [markdown]
-# ## Remove Data
+# ## Explorative Datenanalyse des Modellierungssatzes
+# Nachfolgend werden diverse Askepte des zusammengefügten Datensatzes untersucht
+# ### Entfernte Konten
+# In der Vorverarbeitung werden diverse Kundenkonten aus dem Datensatz entfernt. Die folgende Darstellung zeigt auf, wie viele in welchem Schritt entfernt werden.
 
 # %%
-# print underage accounts
+waterfall_data = {
+    "step": ["Initial", "Junior Card Holders", "Lost Buyers", "Non-Buyers", "Final"],
+    "count": [num_accounts_before, -num_junior_cards, -lost_buyers, -non_buyers_lost, X.shape[0]],
+}
+
+waterfall_df = pd.DataFrame(waterfall_data)
+
+blank = waterfall_df["count"].cumsum().shift(1).fillna(0)
+step = blank.reset_index(drop=True).repeat(3).shift(-1)
+step[1::3] = np.nan
+blank[4] = 0
+
+# %%
+my_plot = waterfall_df.plot(kind='bar', stacked=True, bottom=blank, legend=False,
+                            title="Entfernte Anzahl von Konten in verschiedenen Aufbereitungsschritten")
+my_plot.plot(step.index, step.values, 'k')
+
+# %%
+display(waterfall_df)
 
 # %% [markdown]
-# ## Visualize
+# Insgesamt werden also 2248 Konten in der Vorberarbeitung entfernt. 
+# ### Verteilung Kartenbesitzer
+# Nachfolgend wird die Verteilung der Kartenbesitzer aufgezeigt.
 
 # %%
 # plot distribution of has_card
@@ -1457,14 +1384,31 @@ plt.xlabel("Kartenbesitzer")
 plt.ylabel("Anzahl")
 plt.show()
 
+# %% [markdown]
+# Klar ersichtlich ist, dass es deutlich mehr Nicht-Kartenbesitzer als Kartenbesitzer gibt. Unbalancierten Daten erschweren die Modellierung erheblich, weshalb nachfolgend SMOTE (Synthetic Minority Over-sampling Technique) eingesetzt wird, um die Daten zu balancieren.
+
 # %%
-## plot distribution of card_type
-# plt.figure(figsize=(10, 6))
-# X["type_card"].value_counts(dropna=False).plot(kind="bar")
-# plt.title("Verteilung der Kartentypen")
-# plt.xlabel("Kartentyp")
-# plt.ylabel("Anzahl")
-# plt.show()
+from imblearn.over_sampling import SMOTE
+
+# x get dummy variables for category
+X = pd.get_dummies(X, drop_first=True)
+
+sm = SMOTE(random_state=43)
+X_res, y_res = sm.fit_resample(X, y)
+
+# %%
+# plot distribution of has_card
+plt.figure(figsize=(10, 6))
+y_res.value_counts().plot(kind="bar")
+plt.title("Verteilung der Kartenbesitzer")
+plt.xlabel("Kartenbesitzer")
+plt.ylabel("Anzahl")
+plt.show()
+
+# %% [markdown]
+# Durch den Einsatz von SMOTE konnte der Datensatz ausbalanciert werden.
+# ### Konten 14 und 18
+# In der Aufgabenbeschreibung wurde explizit verlangt, die Konten 14 und 18 zu untersuchen. Nachfolgend dargestellt ist der Saldo und das Volumen der beiden Konten. 
 
 # %%
 # Filter the data for accounts 14 and 18
@@ -1507,43 +1451,6 @@ plt.title("Monthly Transaction Volumes for Accounts 14 and 18")
 plt.xlabel("Month")
 plt.ylabel("Volume")
 plt.legend()
-plt.show()
-
-# %%
-from imblearn.over_sampling import SMOTE
-
-# x get dummy variables for category
-X = pd.get_dummies(X, drop_first=True)
-
-sm = SMOTE(random_state=43)
-X_res, y_res = sm.fit_resample(X, y)
-
-# %%
-# Sample from both groups to create a balanced dataset
-# counts = X["has_card"].value_counts()
-
-# Determine the minimum count between True and False
-# min_count = counts.min()
-
-# true_sample = X[X["has_card"] == True].sample(n=min_count, random_state=42)
-# false_sample = X[X["has_card"] == False].sample(n=min_count, random_state=42)
-
-# Combine the sampled data
-# X = pd.concat([true_sample, false_sample])
-
-# Verify the counts
-# balanced_counts = X["has_card"].value_counts()
-
-# print(balanced_counts)
-
-
-# %%
-# plot distribution of has_card
-plt.figure(figsize=(10, 6))
-y_res.value_counts().plot(kind="bar")
-plt.title("Verteilung der Kartenbesitzer")
-plt.xlabel("Kartenbesitzer")
-plt.ylabel("Anzahl")
 plt.show()
 
 
@@ -1649,7 +1556,7 @@ X_feature_engineered.isnull().sum()[X_feature_engineered.isnull().sum() > 0]
 
 # %%
 # Nomalize the data and standardize the data
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import StandardScaler
 
 scaler = StandardScaler()
 X_res = pd.DataFrame(scaler.fit_transform(X_res), columns=X_res.columns)
@@ -1686,7 +1593,6 @@ X_train.dtypes
 # Für die Model Selection benutzen wir einen StratifiedKFold mit 10 Folds in dem wir nur den Train split Folden, denn später brauchen wir die Test Daten für den Error Assesment.
 
 # %%
-from lime.lime_tabular import LimeTabularExplainer
 
 
 class ModelEvaluator:
@@ -2161,11 +2067,6 @@ print(f"Matthews Correlation Coefficient: {mcc:.2f}")
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegressionCV
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, roc_curve, auc
-import matplotlib.pyplot as plt
-import lime.lime_tabular
-import shap
 import statsmodels.api as sm
 
 # Ensure all data in X_train_features are numeric
