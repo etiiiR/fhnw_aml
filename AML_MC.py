@@ -1766,7 +1766,7 @@ class ModelEvaluator:
         plt.ylabel("Frequency")
         plt.show()
 
-        dict = {'predictions': predictions, 'probabilities': probabilities} 
+        dict = {'predictions': predictions, 'probabilities': probabilities}
 
         return pd.DataFrame(dict)
 
@@ -1986,15 +1986,14 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-def compare_top_customers(predictions, percentage):
+def compare_top_customers(predictions, n):
     top_n = {}
     for model, pred_df in predictions.items():
-        n = int(len(pred_df) * percentage / 100)  # calculate the number of top customers based on the percentage
         top_customers = pred_df.nlargest(n, 'probabilities')['account_id']
         top_n[model] = set(top_customers)
 
     model_names = list(predictions.keys())
-    overlaps = pd.DataFrame(0, index=model_names, columns=model_names).astype(float)
+    overlaps = pd.DataFrame(0, index=model_names, columns=model_names)
 
     for i in range(len(model_names)):
         for j in range(i, len(model_names)):
@@ -2004,8 +2003,8 @@ def compare_top_customers(predictions, percentage):
             overlaps.loc[model2, model1] = overlap
 
     plt.figure(figsize=(10, 10))
-    sns.heatmap(overlaps, annot=True, cmap='viridis', fmt=".1f")
-    plt.title(f'Overlap of Top {percentage}% Customers Between Models')
+    sns.heatmap(overlaps, annot=True, cmap='viridis')
+    plt.title('Overlap of Top Customers Between Models')
     plt.show()
 
     return overlaps
@@ -2022,15 +2021,15 @@ for model_name in models.keys():
 compare_top_customers(model_predictions, 10)
 
 # %% [markdown]
-# Die oben gezeigte Matrix zeigt die Überlappung von der top 10% der account_ids, welche von dem jeweiligen Modell als potentieller Kreditkartenkäufer identifiziert wurde.
-# Die höchste Überschneidung haben die Resultate des Gradient Boosting und das AdaBoost Modells. Weitere Modellkombinationen mit mehr als 50% Übereinstimmung sind die logistischen regressions Modelle untereinander, wie auch im Vergleich zum SVM Modell. Andere Modellkombinationen überschneiden sich weniger als 50% in der Top-N Liste.
+# Die oben gezeigte Matrix zeigt die Überlappung von der top 10 account_ids, welche von dem jeweiligen Modell als potentieller Kreditkartenkäufer identifiziert wurde.
+# Einzig die logistischen regressions Modelle zeigen eine Überlappung von mehr als 50%. Ansonsten weisen die Resultate vom AdaBoost und dem Gradient Boosting Modell eine Überlappung von 50% auf. Alle anderen Modellkombinationen überschneiden sich in der Top-N Liste kaum.
 
 # %%
-compare_top_customers(model_predictions, 5)
+compare_top_customers(model_predictions, 20)
 
 # %% [markdown]
-# Die oben gezeigte Matrix zeigt die Überlappung von der top 5% account_ids, welche von dem jeweiligen Modell als potentieller Kreditkartenkäufer identifiziert wurde.
-# Allgemein sinkt die Übereinstimmung im Vergleich zu den top 10% deutlich. Die logistischen Regressionsmodelle weisen noch eine Übereinstimmung von 53% auf, gleich wie das AdaBoost und Gradient Boosting Modell. Die höchste Überlappung der Resultate liefert das Gradient Boosting Modell und das Random Forest Modell mit 66%. 
+# Die oben gezeigte Matrix zeigt die Überlappung von der top 20 account_ids, welche von dem jeweiligen Modell als potentieller Kreditkartenkäufer identifiziert wurde.
+# Auch hier zeigen die logistischen regressions Modelle eine Überlappung von mehr als 50%. Das Gradient Boosting Modell weist nun aber eine 55%-ige Übereinstimmung mit dem Random Forest Modell und die Resultate vom AdaBoost Modell weist eine Übereinstimmung von 65% mit den Resultaten vom Gradient Boosting Modell.  Insgesamt erhöht sich die Überlappung der Listen im Vergleich zu den Top-10 Listen.
 
 # %% [markdown]
 # ## Results Comparision
