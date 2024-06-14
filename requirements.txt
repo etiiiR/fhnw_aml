@@ -19,3 +19,5 @@ imbalanced-learn==0.12.3
 IPython==8.24.0
 scipy==1.12.0
 PyYAML==6.0.1
+joblib==1.4.2
+tqdm==4.66.4
