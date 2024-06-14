@@ -97,3 +97,48 @@ The models and cross-validation predictions are saved in the `saved_models/` dir
     - The script ensures that only models not previously trained are retrained.
 
 By following these instructions, you should be able to set up the environment, run the notebook, and understand the workflow of the project.
+
+
+
+## Chatgpt Promting Strategie: 250-500 Wörter:
+
+### Verwendung von ChatGPT in diesem Projekt
+
+Die Verwendung von ChatGPT oder vergleichbaren AI-Tools war in diesem Projekt erlaubt und wurde als Unterstützung bei der Generierung von Code-Snippets, der Erstellung von Kennzahlen und der Analyse von Metriken verwendet. Die nachfolgenden Abschnitte erläutern, für welche Aufgaben das AI-Tool eingesetzt wurde, welche Prompting-Strategien angewendet wurden und welche Strategie am erfolgreichsten war.
+
+#### Einsatzgebiete des AI-Tools
+
+1. **Generierung von Code-Snippets**:
+   - ChatGPT wurde zur Generierung von Pseudo-Code verwendet, um bestimmte Aufgaben zu automatisieren. Dies beinhaltete beispielsweise die Datenvorverarbeitung, die Erstellung von Visualisierungen und die Implementierung von Modellierungsansätzen. Durch die Bereitstellung von Code-Vorlagen konnte der Entwicklungsprozess beschleunigt werden.
+   
+2. **Analyse von Kennzahlen und Metriken**:
+   - Das Tool wurde auch zur Analyse von verschiedenen Kennzahlen und Metriken verwendet. Es half dabei, die Leistungsfähigkeit der Modelle zu bewerten und die Ergebnisse in einer strukturierten Form darzustellen. ChatGPT unterstützte bei der Berechnung und Visualisierung von Performance-Metriken wie Genauigkeit, Präzision, Recall und F1-Score.
+
+3. **Erklärung und Dokumentation**:
+   - Zusätzlich half ChatGPT bei der Erstellung von erklärenden Texten und Dokumentationen, um die durchgeführten Schritte und Ergebnisse nachvollziehbar darzustellen. Dies umfasste die Beschreibung der Daten, die durchgeführten Transformationen und die Ergebnisse der Modellierung.
+
+#### Prompting-Strategien
+
+1. **Direkte Code-Anfragen**:
+   - Bei spezifischen Aufgabenstellungen wurden direkte Anfragen an ChatGPT gestellt, um Code für bestimmte Aufgaben zu generieren. Zum Beispiel: "Erstelle eine Funktion zur Datenvorverarbeitung" oder "Generiere eine Visualisierung der Verteilung der Darlehensbeträge".
+   
+2. **Iterative Verfeinerung**:
+   - Eine iterative Strategie wurde angewendet, bei der initiale Code-Snippets von ChatGPT erstellt und dann manuell verfeinert wurden. Durch wiederholtes Feedback und Anpassungen konnte der generierte Code schrittweise verbessert und auf die spezifischen Anforderungen des Projekts zugeschnitten werden.
+
+3. **Analyse und Interpretation**:
+   - Für die Analyse und Interpretation von Ergebnissen wurden spezifische Fragen formuliert, um detaillierte Antworten zu erhalten. Zum Beispiel: "Wie hoch ist die Genauigkeit des Modells?" oder "Welche Metriken sollten zur Bewertung der Modellleistung verwendet werden?".
+
+#### Erfolgreichste Prompting-Strategie
+
+Die erfolgreichste Prompting-Strategie war die **iterative Verfeinerung**. Diese Strategie ermöglichte es, initialen Code von ChatGPT schnell zu erhalten und dann durch menschliche Expertise zu verfeinern. Diese Kombination aus AI-generierter Basis und menschlicher Anpassung führte zu effizienteren und genaueren Ergebnissen.
+
+**Vorteile dieser Strategie**:
+- **Effizienz**: Schnellere Generierung von initialem Code, der als Grundlage für weitere Anpassungen dient.
+- **Präzision**: Möglichkeit, den generierten Code schrittweise zu verbessern und auf die spezifischen Anforderungen des Projekts zuzuschneiden.
+- **Flexibilität**: Anpassungen und Verfeinerungen konnten flexibel und iterativ durchgeführt werden, was zu besseren Endergebnissen führte.
+
+**Nachteile**:
+- **Abhängigkeit von menschlicher Expertise**: Die Qualität des Endergebnisses hing stark von der Fähigkeit ab, den generierten Code effektiv zu überprüfen und anzupassen.
+- **Zeitaufwand**: Obwohl der initiale Code schnell generiert wurde, erforderte die iterative Verfeinerung dennoch einen gewissen Zeitaufwand.
+
+Insgesamt hat sich die iterative Verfeinerung als die effektivste Strategie erwiesen, um das AI-Tool in diesem Projekt als Unterstützung zu nutzen. Die Kombination aus automatisierter Generierung und menschlicher Anpassung ermöglichte es, die Aufgaben effizient und präzise zu erledigen.
